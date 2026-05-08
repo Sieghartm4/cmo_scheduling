@@ -1,8 +1,8 @@
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { Query } = require('../database/util/queries.util');
 const { Master } = require('../database/model/Master');
 const { SQLQueryBuilder } = require('../util/helper.util');
+const { CheckPassword, DecryptString } = require('../util/cryptography.util');
 const sql = new SQLQueryBuilder();
 
 require('dotenv').config();
@@ -50,7 +50,14 @@ const adminLogin = async (req, res, next) => {
       });
     }
 
-    const isPasswordValid = await bcrypt.compare(password, admin.password);
+    // Decrypt the stored password and compare with input
+    let isPasswordValid = false;
+    try {
+      const decryptedPassword = DecryptString(admin.password);
+      isPasswordValid = password === decryptedPassword;
+    } catch (error) {
+      console.error('Password decryption error:', error);
+    }
 
     if (!isPasswordValid) {
       return res.status(401).json({

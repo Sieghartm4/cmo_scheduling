@@ -40,20 +40,19 @@ export default function Layout() {
                     background: transparent;
                 }
                 .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background: #dc2626; /* red-600 */
+                    background: #10b981; /* emerald-500 */
                     border-radius: 10px;
                 }
                 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                    background: #b91c1c; /* red-700 */
+                    background: #059669; /* emerald-600 */
                 }
             `}} />
-            <div className="min-h-screen bg-gray-100">
+            <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
                 <div className="flex h-screen w-full overflow-hidden">
                 <Sidebar isCollapsed={isCollapsed} />
                 <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
                     <Header isCollapsed={isCollapsed} onToggleSidebar={toggleSidebar} />
-                    <main className="flex-1 overflow-auto bg-[#F8F9FA]">
-                        {/* Switched from gray-50 to a slightly cooler F8F9FA to make red accents pop */}
+                    <main className="flex-1 overflow-auto bg-white/80 backdrop-blur-sm">
                         <div className={`p-4  ${isMobile ? '' : 'h-[100%]'} overflow-auto custom-scrollbar`}>
                             <Outlet />
                         </div>

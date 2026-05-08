@@ -34,7 +34,7 @@ const useAdminLogin = () => {
         localStorage.setItem('adminToken', result.data.token);
         localStorage.setItem('admin', JSON.stringify(result.data.admin));
         localStorage.setItem('sessionType', 'admin');
-        navigate('/dashboard');
+        navigate('/admin/dashboard');
       } else {
         setError(result.message || 'Admin login failed');
       }

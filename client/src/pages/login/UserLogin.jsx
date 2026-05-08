@@ -1,12 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Lock, Mail, ArrowRight, Loader2, Calendar, Clock, Phone, User, Eye, EyeOff, Star } from 'lucide-react';
 import useUserLogin from './useUserLogin';
 
 export default function UserLogin() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const { login, loading, error } = useUserLogin();
+
+  // Check if user is already authenticated
+  useEffect(() => {
+    const adminToken = localStorage.getItem('adminToken');
+    const userToken = localStorage.getItem('token');
+    
+    if (adminToken) {
+      // Admin is already logged in, redirect to admin dashboard
+      navigate('/admin/dashboard');
+      return;
+    }
+    
+    if (userToken) {
+      // Regular user is already logged in, redirect to user dashboard
+      navigate('/dashboard');
+      return;
+    }
+  }, [navigate]);
 
   // F1 key navigation to admin login
   useEffect(() => {

@@ -1,12 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Lock, Mail, ArrowRight, Loader2, Calendar, Eye, EyeOff, Settings } from 'lucide-react';
 import useAdminLogin from './useAdminLogin';
 
 export default function AdminLogin() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const { login, loading, error } = useAdminLogin();
+
+  useEffect(() => {
+    // Check if user is already authenticated
+    const adminToken = localStorage.getItem('adminToken');
+    const userToken = localStorage.getItem('token');
+    
+    if (adminToken) {
+      // Admin is already logged in, redirect to admin dashboard
+      navigate('/admin/dashboard');
+      return;
+    }
+    
+    if (userToken) {
+      // Regular user is logged in, redirect to user dashboard
+      navigate('/dashboard');
+      return;
+    }
+  }, [navigate]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

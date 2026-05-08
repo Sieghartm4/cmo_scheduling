@@ -1,9 +1,35 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { hasRouteAccess, getAccessibleRoutes } from '../utils/routeProtection';
+import { isAdmin, isRegularUser, getRoleBasedRedirect } from '../utils/authProtection';
 
 const ProtectedRoute = ({ children, routeName }) => {
-  // Get user from localStorage
+  // Check if this is an admin route
+  const isAdminRoute = routeName === 'admin-dashboard';
+  
+  console.log('ProtectedRoute - Route:', routeName);
+  console.log('ProtectedRoute - isAdminRoute:', isAdminRoute);
+  console.log('ProtectedRoute - isAdmin():', isAdmin());
+  console.log('ProtectedRoute - isRegularUser():', isRegularUser());
+  
+  if (isAdminRoute) {
+    // Check admin authentication and role
+    if (!isAdmin()) {
+      console.log('ProtectedRoute - Admin access denied, redirecting to admin login');
+      // If user is logged in but not admin, redirect to admin login
+      if (isRegularUser()) {
+        return <Navigate to="/admin/login" replace />;
+      }
+      // If not logged in at all, redirect to admin login
+      return <Navigate to="/admin/login" replace />;
+    }
+    
+    console.log('ProtectedRoute - Admin access granted');
+    // Admin has access to all routes
+    return children;
+  }
+  
+  // Regular user authentication
   const user = JSON.parse(localStorage.getItem('user'));
   
   // Check if user is logged in

@@ -16,7 +16,7 @@ module.exports = {
       {
         mu_fullname: 'Admin',
         mu_email: 'admin@example.com',
-        mu_password: '21232f297a57a5a743894a0e4a801fc3',
+        mu_password: 'e10adc3949ba59abbe56e057f20f883e',
         mu_role: 'admin',
         mu_profile: null,
         mu_status: 1
@@ -24,7 +24,7 @@ module.exports = {
       {
         mu_fullname: 'Test User',
         mu_email: 'user@example.com',
-        mu_password: '21232f297a57a5a743894a0e4a801fc3',
+        mu_password: 'e10adc3949ba59abbe56e057f20f883e',
         mu_role: 'user',
         mu_profile: null,
         mu_status: 1
