@@ -1,0 +1,1074 @@
+const Master = {
+ 	master_access: {
+  tablename: "master_access",
+  prefix: "ma",
+  prefix_: "ma_",
+  insertColumns: [
+      "access_name",
+      "status"
+    ],
+  selectColumns: [
+      "ma_access_id",
+      "ma_access_name",
+      "ma_status"
+    ],
+  selectOptionColumns: {
+    access_id: "ma_access_id",
+    access_name: "ma_access_name",
+    status: "ma_status"
+  },
+  updateOptionColumns: {
+    access_id: "access_id",
+    access_name: "access_name",
+    status: "status"
+  },
+  selectDateFormatColumns: {
+
+  },
+  selectMiscColumns: {
+
+  },
+  columnDataTypes: {
+    access_id: "INTEGER",
+    access_name: "STRING",
+    status: "ENUM"
+  }
+},
+ 	master_user: {
+  tablename: "master_user",
+  prefix: "mu",
+  prefix_: "mu_",
+  insertColumns: [
+      "fullname",
+      "email",
+      "password",
+      "role",
+      "profile",
+      "status"
+    ],
+  selectColumns: [
+      "mu_id",
+      "mu_fullname",
+      "mu_email",
+      "mu_password",
+      "mu_role",
+      "mu_profile",
+      "mu_status",
+      "mu_created_at"
+    ],
+  selectOptionColumns: {
+    id: "mu_id",
+    fullname: "mu_fullname",
+    email: "mu_email",
+    password: "mu_password",
+    role: "mu_role",
+    profile: "mu_profile",
+    status: "mu_status",
+    created_at: "mu_created_at"
+  },
+  updateOptionColumns: {
+    id: "id",
+    fullname: "fullname",
+    email: "email",
+    password: "password",
+    role: "role",
+    profile: "profile",
+    status: "status"
+  },
+  selectDateFormatColumns: {
+    created_at: "mu_created_at"
+  },
+  selectMiscColumns: {
+
+  },
+  columnDataTypes: {
+    id: "BIGINT",
+    fullname: "STRING",
+    email: "STRING",
+    password: "STRING",
+    role: "ENUM",
+    profile: "STRING",
+    status: "TINYINT",
+    created_at: "DATETIME"
+  }
+},
+ 	master_company: {
+  tablename: "master_company",
+  prefix: "mc",
+  prefix_: "mc_",
+  insertColumns: [
+      "company_name",
+      "owner_name",
+      "logo",
+      "address",
+      "status"
+    ],
+  selectColumns: [
+      "mc_company_id",
+      "mc_company_name",
+      "mc_owner_name",
+      "mc_logo",
+      "mc_address",
+      "mc_status"
+    ],
+  selectOptionColumns: {
+    company_id: "mc_company_id",
+    company_name: "mc_company_name",
+    owner_name: "mc_owner_name",
+    logo: "mc_logo",
+    address: "mc_address",
+    status: "mc_status"
+  },
+  updateOptionColumns: {
+    company_id: "company_id",
+    company_name: "company_name",
+    owner_name: "owner_name",
+    logo: "logo",
+    address: "address",
+    status: "status"
+  },
+  selectDateFormatColumns: {
+
+  },
+  selectMiscColumns: {
+
+  },
+  columnDataTypes: {
+    company_id: "INTEGER",
+    company_name: "STRING",
+    owner_name: "STRING",
+    logo: "TEXT",
+    address: "TEXT",
+    status: "ENUM"
+  }
+},
+ 	master_route_access: {
+  tablename: "master_route_access",
+  prefix: "mra",
+  prefix_: "mra_",
+  insertColumns: [
+      "access_id",
+      "name",
+      "status"
+    ],
+  selectColumns: [
+      "mra_id",
+      "mra_access_id",
+      "mra_name",
+      "mra_status"
+    ],
+  selectOptionColumns: {
+    id: "mra_id",
+    access_id: "mra_access_id",
+    name: "mra_name",
+    status: "mra_status"
+  },
+  updateOptionColumns: {
+    id: "id",
+    access_id: "access_id",
+    name: "name",
+    status: "status"
+  },
+  selectDateFormatColumns: {
+
+  },
+  selectMiscColumns: {
+
+  },
+  columnDataTypes: {
+    id: "INTEGER",
+    access_id: "INTEGER",
+    name: "STRING",
+    status: "STRING"
+  }
+},
+  charts_of_accounts: {
+    tablename: "charts_of_accounts",
+    prefix: "coa",
+    prefix_: "coa_",
+    insertColumns: [
+      "code",
+      "name",
+      "type",
+      "description",
+      "status"
+    ],
+    selectColumns: [
+      "coa_id",
+      "coa_code",
+      "coa_name",
+      "coa_type",
+      "coa_description",
+      "coa_status"
+    ],
+    selectOptionColumns: {
+      id: "coa_id",
+      code: "coa_code",
+      name: "coa_name",
+      type: "coa_type",
+      description: "coa_description",
+      status: "coa_status"
+    },
+    updateOptionColumns: {
+      id: "id",
+      code: "code",
+      name: "name",
+      type: "type",
+      description: "description",
+      status: "status"
+    },
+    selectDateFormatColumns: {
+
+    },
+    selectMiscColumns: {
+
+    },
+    columnDataTypes: {
+      id: "INTEGER",
+      code: "STRING",
+      name: "STRING",
+      type: "ENUM",
+      description: "TEXT",
+      status: "ENUM"
+    }
+  },
+  customers: {
+    tablename: "customers",
+    prefix: "c",
+    prefix_: "c_",
+    insertColumns: [
+      "code",
+      "name",
+      "category",
+      "type",
+      "status"
+    ],
+    selectColumns: [
+      "c_id",
+      "c_code",
+      "c_name",
+      "c_category",
+      "c_type",
+      "c_status"
+    ],
+    selectOptionColumns: {
+      id: "c_id",
+      code: "c_code",
+      name: "c_name",
+      category: "c_category",
+      type: "c_type",
+      status: "c_status"
+    },
+    updateOptionColumns: {
+      id: "id",
+      code: "code",
+      name: "name",
+      category: "category",
+      type: "type",
+      status: "status"
+    },
+    selectDateFormatColumns: {
+
+    },
+    selectMiscColumns: {
+
+    },
+    columnDataTypes: {
+      id: "INTEGER",
+      code: "STRING",
+      name: "STRING",
+      category: "STRING",
+      type: "STRING",
+      status: "ENUM"
+    }
+  },
+  customers_information: {
+    tablename: "customers_information",
+    prefix: "ci",
+    prefix_: "ci_",
+    insertColumns: [
+      "customer_code",
+      "customer_name",
+      "address",
+      "tin",
+      "details",
+      "contact"
+    ],
+    selectColumns: [
+      "ci_id",
+      "ci_customer_code",
+      "ci_customer_name",
+      "ci_address",
+      "ci_tin",
+      "ci_details",
+      "ci_contact"
+    ],
+    selectOptionColumns: {
+      id: "ci_id",
+      customer_code: "ci_customer_code",
+      customer_name: "ci_customer_name",
+      address: "ci_address",
+      tin: "ci_tin",
+      details: "ci_details",
+      contact: "ci_contact"
+    },
+    updateOptionColumns: {
+      id: "id",
+      customer_code: "customer_code",
+      customer_name: "customer_name",
+      address: "address",
+      tin: "tin",
+      details: "details",
+      contact: "contact"
+    },
+    selectDateFormatColumns: {
+
+    },
+    selectMiscColumns: {
+
+    },
+    columnDataTypes: {
+      id: "INTEGER",
+      customer_code: "STRING",
+      customer_name: "STRING",
+      address: "TEXT",
+      tin: "STRING",
+      details: "TEXT",
+      contact: "STRING"
+    }
+  },
+  proforma_entries: {
+    tablename: "proforma_entries",
+    prefix: "pe",
+    prefix_: "pe_",
+    insertColumns: [
+      "module",
+      "name",
+      "coa_id",
+      "t_account"
+    ],
+    selectColumns: [
+      "pe_id",
+      "pe_module",
+      "pe_name",
+      "pe_coa_id",
+      "pe_t_account"
+    ],
+    selectOptionColumns: {
+      id: "pe_id",
+      module: "pe_module",
+      name: "pe_name",
+      coa_id: "pe_coa_id",
+      t_account: "pe_t_account"
+    },
+    updateOptionColumns: {
+      id: "id",
+      module: "module",
+      name: "name",
+      coa_id: "coa_id",
+      t_account: "t_account"
+    },
+    selectDateFormatColumns: {
+
+    },
+    selectMiscColumns: {
+
+    },
+    columnDataTypes: {
+      id: "INTEGER",
+      module: "STRING",
+      name: "STRING",
+      coa_id: "INTEGER",
+      t_account: "STRING"
+    }
+  },
+  vendors: {
+    tablename: "vendors",
+    prefix: "v",
+    prefix_: "v_",
+    insertColumns: [
+      "code",
+      "name",
+      "category",
+      "type",
+      "status"
+    ],
+    selectColumns: [
+      "v_id",
+      "v_code",
+      "v_name",
+      "v_category",
+      "v_type",
+      "v_status"
+    ],
+    selectOptionColumns: {
+      id: "v_id",
+      code: "v_code",
+      name: "v_name",
+      category: "v_category",
+      type: "v_type",
+      status: "v_status"
+    },
+    updateOptionColumns: {
+      id: "id",
+      code: "code",
+      name: "name",
+      category: "category",
+      type: "type",
+      status: "status"
+    },
+    selectDateFormatColumns: {
+
+    },
+    selectMiscColumns: {
+
+    },
+    columnDataTypes: {
+      id: "INTEGER",
+      code: "STRING",
+      name: "STRING",
+      category: "STRING",
+      type: "STRING",
+      status: "ENUM"
+    }
+  },
+  vendors_information: {
+    tablename: "vendors_information",
+    prefix: "vi",
+    prefix_: "vi_",
+    insertColumns: [
+      "vendor_code",
+      "vendor_name",
+      "address",
+      "tin",
+      "details",
+      "contact"
+    ],
+    selectColumns: [
+      "vi_id",
+      "vi_vendor_code",
+      "vi_vendor_name",
+      "vi_address",
+      "vi_tin",
+      "vi_details",
+      "vi_contact"
+    ],
+    selectOptionColumns: {
+      id: "vi_id",
+      vendor_code: "vi_vendor_code",
+      vendor_name: "vi_vendor_name",
+      address: "vi_address",
+      tin: "vi_tin",
+      details: "vi_details",
+      contact: "vi_contact"
+    },
+    updateOptionColumns: {
+      id: "id",
+      vendor_code: "vendor_code",
+      vendor_name: "vendor_name",
+      address: "address",
+      tin: "tin",
+      details: "details",
+      contact: "contact"
+    },
+    selectDateFormatColumns: {
+
+    },
+    selectMiscColumns: {
+
+    },
+    columnDataTypes: {
+      id: "INTEGER",
+      vendor_code: "STRING",
+      vendor_name: "STRING",
+      address: "TEXT",
+      tin: "STRING",
+      details: "TEXT",
+      contact: "STRING"
+    }
+  },
+  products_service: {
+    tablename: "products_service",
+    prefix: "ps",
+    prefix_: "ps_",
+    insertColumns: [
+      "code",
+      "name",
+      "type",
+      "category",
+      "sales_price",
+      "purchase_price",
+      "unit"
+    ],
+    selectColumns: [
+      "ps_id",
+      "ps_code",
+      "ps_name",
+      "ps_type",
+      "ps_category",
+      "ps_sales_price",
+      "ps_purchase_price",
+      "ps_unit"
+    ],
+    selectOptionColumns: {
+      id: "ps_id",
+      code: "ps_code",
+      name: "ps_name",
+      type: "ps_type",
+      category: "ps_category",
+      sales_price: "ps_sales_price",
+      purchase_price: "ps_purchase_price",
+      unit: "ps_unit"
+    },
+    updateOptionColumns: {
+      id: "id",
+      code: "code",
+      name: "name",
+      type: "type",
+      category: "category",
+      sales_price: "sales_price",
+      purchase_price: "purchase_price",
+      unit: "unit"
+    },
+    selectDateFormatColumns: {
+
+    },
+    selectMiscColumns: {
+
+    },
+    columnDataTypes: {
+      id: "INTEGER",
+      code: "STRING",
+      name: "STRING",
+      type: "ENUM",
+      category: "STRING",
+      sales_price: "INTEGER",
+      purchase_price: "INTEGER",
+      unit: "STRING"
+    }
+  },
+  vat: {
+    tablename: "vat",
+    prefix: "vat",
+    prefix_: "vat_",
+    insertColumns: [
+      "code",
+      "name",
+      "rate",
+      "type",
+      "sub_type",
+      "description",
+      "status"
+    ],
+    selectColumns: [
+      "vat_id",
+      "vat_code",
+      "vat_name",
+      "vat_rate",
+      "vat_type",
+      "vat_sub_type",
+      "vat_description",
+      "vat_status"
+    ],
+    selectOptionColumns: {
+      id: "vat_id",
+      code: "vat_code",
+      name: "vat_name",
+      rate: "vat_rate",
+      type: "vat_type",
+      sub_type: "vat_sub_type",
+      description: "vat_description",
+      status: "vat_status"
+    },
+    updateOptionColumns: {
+      id: "id",
+      code: "code",
+      name: "name",
+      rate: "rate",
+      type: "type",
+      sub_type: "sub_type",
+      description: "description",
+      status: "status"
+    },
+    selectDateFormatColumns: {
+
+    },
+    selectMiscColumns: {
+
+    },
+    columnDataTypes: {
+      id: "INTEGER",
+      code: "STRING",
+      name: "STRING",
+      rate: "DECIMAL",
+      type: "ENUM",
+      sub_type: "ENUM",
+      description: "TEXT",
+      status: "ENUM"
+    }
+  },
+  withholding_tax: {
+    tablename: "withholding_tax",
+    prefix: "wt",
+    prefix_: "wt_",
+    insertColumns: [
+      "code",
+      "name",
+      "rate",
+      "tax_account",
+      "description",
+      "status"
+    ],
+    selectColumns: [
+      "wt_id",
+      "wt_code",
+      "wt_name",
+      "wt_rate",
+      "wt_tax_account",
+      "wt_description",
+      "wt_status"
+    ],
+    selectOptionColumns: {
+      id: "wt_id",
+      code: "wt_code",
+      name: "wt_name",
+      rate: "wt_rate",
+      tax_account: "wt_tax_account",
+      description: "wt_description",
+      status: "wt_status"
+    },
+    updateOptionColumns: {
+      id: "id",
+      code: "code",
+      name: "name",
+      rate: "rate",
+      tax_account: "tax_account",
+      description: "description",
+      status: "status"
+    },
+    selectDateFormatColumns: {
+
+    },
+    selectMiscColumns: {
+
+    },
+    columnDataTypes: {
+      id: "INTEGER",
+      code: "STRING",
+      name: "STRING",
+      rate: "DECIMAL",
+      tax_account: "STRING",
+      description: "TEXT",
+      status: "ENUM"
+    }
+  },
+  appointment: {
+    tablename: "appointment",
+    prefix: "app",
+    prefix_: "app_",
+    insertColumns: [
+      "mu_id",
+      "date",
+      "start_time",
+      "end_time",
+      "reason",
+      "status",
+      "notes"
+    ],
+    selectColumns: [
+      "app_id",
+      "app_mu_id",
+      "app_date",
+      "app_start_time",
+      "app_end_time",
+      "app_reason",
+      "app_status",
+      "app_notes",
+      "app_created_at"
+    ],
+    selectOptionColumns: {
+      id: "app_id",
+      mu_id: "app_mu_id",
+      date: "app_date",
+      start_time: "app_start_time",
+      end_time: "app_end_time",
+      reason: "app_reason",
+      status: "app_status",
+      notes: "app_notes",
+      created_at: "app_created_at"
+    },
+    updateOptionColumns: {
+      id: "id",
+      mu_id: "mu_id",
+      date: "date",
+      start_time: "start_time",
+      end_time: "end_time",
+      reason: "reason",
+      status: "status",
+      notes: "notes"
+    },
+    selectDateFormatColumns: {
+      date: "app_date",
+      start_time: "app_start_time",
+      end_time: "app_end_time",
+      created_at: "app_created_at"
+    },
+    selectMiscColumns: {
+
+    },
+    columnDataTypes: {
+      id: "BIGINT",
+      mu_id: "BIGINT",
+      date: "DATEONLY",
+      start_time: "TIME",
+      end_time: "TIME",
+      reason: "TEXT",
+      status: "ENUM",
+      notes: "TEXT",
+      created_at: "DATETIME"
+    }
+  },
+  post: {
+    tablename: "post",
+    prefix: "post",
+    prefix_: "post_",
+    insertColumns: [
+      "mu_id",
+      "content",
+      "type",
+      "embed_url",
+      "status"
+    ],
+    selectColumns: [
+      "post_id",
+      "post_mu_id",
+      "post_content",
+      "post_type",
+      "post_embed_url",
+      "post_status",
+      "post_created_at",
+      "post_updated_at"
+    ],
+    selectOptionColumns: {
+      id: "post_id",
+      mu_id: "post_mu_id",
+      content: "post_content",
+      type: "post_type",
+      embed_url: "post_embed_url",
+      status: "post_status",
+      created_at: "post_created_at",
+      updated_at: "post_updated_at"
+    },
+    updateOptionColumns: {
+      id: "id",
+      mu_id: "mu_id",
+      content: "content",
+      type: "type",
+      embed_url: "embed_url",
+      status: "status"
+    },
+    selectDateFormatColumns: {
+      created_at: "post_created_at",
+      updated_at: "post_updated_at"
+    },
+    selectMiscColumns: {
+
+    },
+    columnDataTypes: {
+      id: "BIGINT",
+      mu_id: "BIGINT",
+      content: "TEXT",
+      type: "ENUM",
+      embed_url: "STRING",
+      status: "ENUM",
+      created_at: "DATETIME",
+      updated_at: "DATETIME"
+    }
+  },
+  post_media: {
+    tablename: "post_media",
+    prefix: "pm",
+    prefix_: "pm_",
+    insertColumns: [
+      "post_id",
+      "type",
+      "path",
+      "sort"
+    ],
+    selectColumns: [
+      "pm_id",
+      "pm_post_id",
+      "pm_type",
+      "pm_path",
+      "pm_sort"
+    ],
+    selectOptionColumns: {
+      id: "pm_id",
+      post_id: "pm_post_id",
+      type: "pm_type",
+      path: "pm_path",
+      sort: "pm_sort"
+    },
+    updateOptionColumns: {
+      id: "id",
+      post_id: "post_id",
+      type: "type",
+      path: "path",
+      sort: "sort"
+    },
+    selectDateFormatColumns: {
+
+    },
+    selectMiscColumns: {
+
+    },
+    columnDataTypes: {
+      id: "BIGINT",
+      post_id: "BIGINT",
+      type: "ENUM",
+      path: "STRING",
+      sort: "INTEGER"
+    }
+  },
+  post_like: {
+    tablename: "post_like",
+    prefix: "pl",
+    prefix_: "pl_",
+    insertColumns: [
+      "post_id",
+      "mu_id"
+    ],
+    selectColumns: [
+      "pl_id",
+      "pl_post_id",
+      "pl_mu_id",
+      "pl_created_at"
+    ],
+    selectOptionColumns: {
+      id: "pl_id",
+      post_id: "pl_post_id",
+      mu_id: "pl_mu_id",
+      created_at: "pl_created_at"
+    },
+    updateOptionColumns: {
+      id: "id",
+      post_id: "post_id",
+      mu_id: "mu_id"
+    },
+    selectDateFormatColumns: {
+      created_at: "pl_created_at"
+    },
+    selectMiscColumns: {
+
+    },
+    columnDataTypes: {
+      id: "BIGINT",
+      post_id: "BIGINT",
+      mu_id: "BIGINT",
+      created_at: "DATETIME"
+    }
+  },
+  post_comment: {
+    tablename: "post_comment",
+    prefix: "pc",
+    prefix_: "pc_",
+    insertColumns: [
+      "post_id",
+      "mu_id",
+      "parent_id",
+      "comment"
+    ],
+    selectColumns: [
+      "pc_id",
+      "pc_post_id",
+      "pc_mu_id",
+      "pc_parent_id",
+      "pc_comment",
+      "pc_created_at"
+    ],
+    selectOptionColumns: {
+      id: "pc_id",
+      post_id: "pc_post_id",
+      mu_id: "pc_mu_id",
+      parent_id: "pc_parent_id",
+      comment: "pc_comment",
+      created_at: "pc_created_at"
+    },
+    updateOptionColumns: {
+      id: "id",
+      post_id: "post_id",
+      mu_id: "mu_id",
+      parent_id: "parent_id",
+      comment: "comment"
+    },
+    selectDateFormatColumns: {
+      created_at: "pc_created_at"
+    },
+    selectMiscColumns: {
+
+    },
+    columnDataTypes: {
+      id: "BIGINT",
+      post_id: "BIGINT",
+      mu_id: "BIGINT",
+      parent_id: "BIGINT",
+      comment: "TEXT",
+      created_at: "DATETIME"
+    }
+  },
+  post_view: {
+    tablename: "post_view",
+    prefix: "pv",
+    prefix_: "pv_",
+    insertColumns: [
+      "post_id",
+      "mu_id",
+      "guest_token",
+      "view_seconds",
+      "video_seconds"
+    ],
+    selectColumns: [
+      "pv_id",
+      "pv_post_id",
+      "pv_mu_id",
+      "pv_guest_token",
+      "pv_view_seconds",
+      "pv_video_seconds",
+      "pv_created_at"
+    ],
+    selectOptionColumns: {
+      id: "pv_id",
+      post_id: "pv_post_id",
+      mu_id: "pv_mu_id",
+      guest_token: "pv_guest_token",
+      view_seconds: "pv_view_seconds",
+      video_seconds: "pv_video_seconds",
+      created_at: "pv_created_at"
+    },
+    updateOptionColumns: {
+      id: "id",
+      post_id: "post_id",
+      mu_id: "mu_id",
+      guest_token: "guest_token",
+      view_seconds: "view_seconds",
+      video_seconds: "video_seconds"
+    },
+    selectDateFormatColumns: {
+      created_at: "pv_created_at"
+    },
+    selectMiscColumns: {
+
+    },
+    columnDataTypes: {
+      id: "BIGINT",
+      post_id: "BIGINT",
+      mu_id: "BIGINT",
+      guest_token: "STRING",
+      view_seconds: "INTEGER",
+      video_seconds: "INTEGER",
+      created_at: "DATETIME"
+    }
+  },
+  conversation: {
+    tablename: "conversation",
+    prefix: "con",
+    prefix_: "con_",
+    insertColumns: [
+      "user_id",
+      "admin_id"
+    ],
+    selectColumns: [
+      "con_id",
+      "con_user_id",
+      "con_admin_id",
+      "con_created_at",
+      "con_last_message_at"
+    ],
+    selectOptionColumns: {
+      id: "con_id",
+      user_id: "con_user_id",
+      admin_id: "con_admin_id",
+      created_at: "con_created_at",
+      last_message_at: "con_last_message_at"
+    },
+    updateOptionColumns: {
+      id: "id",
+      user_id: "user_id",
+      admin_id: "admin_id"
+    },
+    selectDateFormatColumns: {
+      created_at: "con_created_at",
+      last_message_at: "con_last_message_at"
+    },
+    selectMiscColumns: {
+
+    },
+    columnDataTypes: {
+      id: "BIGINT",
+      user_id: "BIGINT",
+      admin_id: "BIGINT",
+      created_at: "DATETIME",
+      last_message_at: "DATETIME"
+    }
+  },
+  conversation_message: {
+    tablename: "conversation_message",
+    prefix: "cm",
+    prefix_: "cm_",
+    insertColumns: [
+      "con_id",
+      "sender_id",
+      "message",
+      "type",
+      "file",
+      "seen"
+    ],
+    selectColumns: [
+      "cm_id",
+      "cm_con_id",
+      "cm_sender_id",
+      "cm_message",
+      "cm_type",
+      "cm_file",
+      "cm_seen",
+      "cm_created_at"
+    ],
+    selectOptionColumns: {
+      id: "cm_id",
+      con_id: "cm_con_id",
+      sender_id: "cm_sender_id",
+      message: "cm_message",
+      type: "cm_type",
+      file: "cm_file",
+      seen: "cm_seen",
+      created_at: "cm_created_at"
+    },
+    updateOptionColumns: {
+      id: "id",
+      con_id: "con_id",
+      sender_id: "sender_id",
+      message: "message",
+      type: "type",
+      file: "file",
+      seen: "seen"
+    },
+    selectDateFormatColumns: {
+      created_at: "cm_created_at"
+    },
+    selectMiscColumns: {
+
+    },
+    columnDataTypes: {
+      id: "BIGINT",
+      con_id: "BIGINT",
+      sender_id: "BIGINT",
+      message: "TEXT",
+      type: "ENUM",
+      file: "STRING",
+      seen: "TINYINT",
+      created_at: "DATETIME"
+    }
+  }
+};
+
+exports.Master = Master;
