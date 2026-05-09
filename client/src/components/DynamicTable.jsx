@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Search, Filter, Columns, Plus, X, Maximize2, Eye, Edit } from 'lucide-react';
 import { getAccessLevel } from '../utils/routeProtection';
 
-const DynamicTable = ({
+function DynamicTable({
   data,
   title = "Records",
   enableRowClick = false,
@@ -29,7 +29,9 @@ const DynamicTable = ({
   badgeColumns = [],             // array of { column: 'status', values: { 'PAID': 'green', 'UNPAID': 'red' } } for dynamic badges
   // --- HIGHLIGHT PROPS ---
   highlightRow = null,          // { column: 'id', value: 123 } - highlight row where column matches value
-}) => {
+  // --- EXCLUDE COLUMNS PROPS ---
+  excludeColumns = [],          // array of column names to exclude from the table
+}) {
   const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterColumn, setFilterColumn] = useState('');
@@ -89,31 +91,9 @@ const DynamicTable = ({
     return rowValue === highlightValue;
   };
 
-  // Filter action buttons based on user access level
+  // Return action buttons without any filtering
   const getFilteredActionButtons = () => {
-    if (!actionButtons || actionButtons.length === 0) return actionButtons;
-    
-    // Get current user and access level for this route
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    const routeName = window.location.pathname.split('/')[1]; // Extract route from URL
-    const accessLevel = getAccessLevel(routeName, user);
-    
-    return actionButtons.filter(button => {
-      const label = button.label.toLowerCase();
-      
-      // Show View button for Check Access, View Access, Edit Access, Approve Access, or Full Access
-      if (label === 'view') {
-        return accessLevel === 'Check Access' || accessLevel === 'View Access' || accessLevel === 'Edit Access' || accessLevel === 'Approve Access' || accessLevel === 'Full Access';
-      }
-      
-      // Show Edit button for Approve Access, Edit Access, or Full Access (but NOT for Check Access)
-      if (label === 'edit') {
-        return accessLevel === 'Approve Access' || accessLevel === 'Edit Access' || accessLevel === 'Full Access';
-      }
-      
-      // For other custom buttons, show them for Approve Access, Edit Access, or Full Access
-      return accessLevel === 'Approve Access' || accessLevel === 'Edit Access' || accessLevel === 'Full Access';
-    });
+    return actionButtons || [];
   };
 
   const handleRowClick = (row) => {
@@ -159,7 +139,7 @@ const DynamicTable = ({
             onClick={() => setImageModal({ isOpen: true, imageSrc: value })}
           />
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none">
-            <Maximize2 size={12} className="text-white bg-black/50 rounded-full p-0.5" />
+            <Maximize2 size={12} className="text-white bg-emerald-600/50 rounded-full p-0.5" />
           </div>
         </div>
       );
@@ -213,7 +193,14 @@ const DynamicTable = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const headers = useMemo(() => (data && data.length > 0 ? Object.keys(data[0]) : []), [data]);
+  const headers = useMemo(() => {
+    if (!data || data.length === 0) return [];
+    const allKeys = Object.keys(data[0]);
+    // Filter out excluded columns
+    return excludeColumns.length > 0
+      ? allKeys.filter(key => !excludeColumns.includes(key))
+      : allKeys;
+  }, [data, excludeColumns]);
 
   useEffect(() => {
     if (headers.length > 0 && visibleColumns.size === 0) {
@@ -306,7 +293,7 @@ const DynamicTable = ({
     <div className="h-full flex flex-col bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
 
       {/* --- INTEGRATED CONTROL BAR --- */}
-      <div className="bg-black p-4 flex-shrink-0">
+      <div className="bg-emerald-600 p-4 flex-shrink-0">
         <div className="flex items-center justify-between gap-4">
 
           {/* LEFT SIDE: Title & Search */}
@@ -344,10 +331,10 @@ const DynamicTable = ({
               <select
                 value={filterColumn}
                 onChange={(e) => { setFilterColumn(e.target.value); setFilterValue(''); }}
-                className="bg-transparent text-[10px] font-bold text-gray-700 uppercase tracking-widest outline-none cursor-pointer hover:text-black"
+                className="bg-transparent text-[10px] font-bold text-gray-700 uppercase tracking-widest outline-none cursor-pointer hover:text-emerald-600"
               >
                 <option value="" className="bg-white text-gray-500">Filter By</option>
-                {headers.map(h => <option key={h} value={h} className="bg-white text-black">{h.toUpperCase()}</option>)}
+                {headers.map(h => <option key={h} value={h} className="bg-white text-emerald-600">{h.toUpperCase()}</option>)}
               </select>
             </div>
 
@@ -367,7 +354,7 @@ const DynamicTable = ({
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setShowColumnDropdown(!showColumnDropdown)}
-                className="p-2 bg-white border border-gray-300 text-gray-600 hover:text-black hover:bg-gray-50 rounded-lg transition-all"
+                className="p-2 bg-white border border-gray-300 text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
                 title="Visible Columns"
               >
                 <Columns size={16} />
@@ -392,7 +379,7 @@ const DynamicTable = ({
                           }}
                           className="w-3.5 h-3.5 rounded border-gray-300 text-red-600 focus:ring-red-500"
                         />
-                        <span className="text-[10px] font-bold text-gray-700 group-hover:text-black uppercase">{header}</span>
+                        <span className="text-[10px] font-bold text-gray-700 group-hover:text-emerald-600 uppercase">{header}</span>
                       </label>
                     ))}
                   </div>
@@ -424,7 +411,7 @@ const DynamicTable = ({
           {checkboxActions.map((action, i) => (
             action.type === 'dropdown' ? (
               <div key={i} className="flex items-center gap-1.5">
-                {action.icon && <span className="w-3 h-3">{action.icon}</span>}
+                {action.icon && <span className="w-3 h-3">{React.createElement(action.icon, { size: 12 })}</span>}
                 <select
                   onChange={(e) => {
                     if (e.target.value && action.onChange) {
@@ -450,7 +437,7 @@ const DynamicTable = ({
                 onClick={() => action.onClick(selectedRows)}
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 border border-green-600 text-white text-[10px] font-black rounded-lg hover:bg-green-200 hover:text-green-700 hover:border-green-300 hover:cursor-pointer transition-all uppercase tracking-widest"
               >
-                {action.icon && <span className="w-3 h-3">{action.icon}</span>}
+                {action.icon && <span className="w-3 h-3">{React.createElement(action.icon, { size: 12 })}</span>}
                 {action.label}
               </button>
             )
@@ -470,9 +457,9 @@ const DynamicTable = ({
           __html: `
             .custom-scrollbar::-webkit-scrollbar { width: 5px; }
             .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-            .custom-scrollbar::-webkit-scrollbar-thumb { background: #dc2626; border-radius: 10px; }
-            .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #b91c1c; }
-            .row-checkbox { width: 15px; height: 15px; accent-color: #dc2626; cursor: pointer; }
+            .custom-scrollbar::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
+            .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #059669; }
+            .row-checkbox { width: 15px; height: 15px; accent-color: #10b981; cursor: pointer; }
           `}} />
         <table className="w-full border-collapse">
           <thead className="sticky top-0 z-10 bg-gray-50 border-b border-gray-200">
@@ -504,7 +491,7 @@ const DynamicTable = ({
                   className="px-6 py-4 text-left group cursor-pointer hover:bg-gray-100/50 transition-all select-none"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-[12px] font-black text-black uppercase tracking-[2px] transition-colors">
+                    <span className="text-[12px] font-black text-emerald-600 uppercase tracking-[2px] transition-colors">
                       {formatHeader(header)}
                     </span>
                     {sortColumn === header && (
@@ -516,7 +503,7 @@ const DynamicTable = ({
               {/* ACTION COLUMN HEADER */}
               {enableActionColumn && (
                 <th className="px-6 py-4 text-center">
-                  <span className="text-[12px] font-black text-black uppercase tracking-[2px]">Actions</span>
+                  <span className="text-[12px] font-black text-emerald-600 uppercase tracking-[2px]">Actions</span>
                 </th>
               )}
             </tr>
@@ -566,7 +553,7 @@ const DynamicTable = ({
                           >
                             {button.label.toLowerCase() === 'view' && <Eye size={16} />}
                             {button.label.toLowerCase() === 'edit' && <Edit size={16} />}
-                            {button.label.toLowerCase() !== 'view' && button.label.toLowerCase() !== 'edit' && button.icon && <span className="w-3 h-3">{button.icon}</span>}
+                            {button.label.toLowerCase() !== 'view' && button.label.toLowerCase() !== 'edit' && button.icon && <span className="w-3 h-3">{React.createElement(button.icon, { size: 16 })}</span>}
                           </button>
                         ))}
                       </div>
@@ -585,7 +572,7 @@ const DynamicTable = ({
           {/* Row Metrics */}
           <div className="flex items-center gap-2">
             <span className="text-[9px] font-black text-gray-400 uppercase tracking-[1.5px]">Total Rows:</span>
-            <span className="text-[10px] font-black text-black">{data.length}</span>
+            <span className="text-[10px] font-black text-emerald-600">{data.length}</span>
             {filteredAndSortedData.length !== data.length && (
               <span className="text-[9px] font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded">
                 Showing {filteredAndSortedData.length}
@@ -598,7 +585,7 @@ const DynamicTable = ({
           {/* Column Metrics */}
           <div className="flex items-center gap-2">
             <span className="text-[9px] font-black text-gray-400 uppercase tracking-[1.5px]">Columns:</span>
-            <span className="text-[10px] font-black text-black">{visibleColumns.size} <span className="text-gray-300 mx-1">/</span> {headers.length}</span>
+            <span className="text-[10px] font-black text-emerald-600">{visibleColumns.size} <span className="text-gray-300 mx-1">/</span> {headers.length}</span>
           </div>
 
           <div className="w-1 h-1 bg-gray-200 rounded-full" />

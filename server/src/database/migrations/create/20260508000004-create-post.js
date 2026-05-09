@@ -19,15 +19,21 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
       },
+      post_mc_id: {
+        type: Sequelize.BIGINT,
+        allowNull: true,
+        references: {
+          model: 'master_category',
+          key: 'mc_id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'SET NULL'
+      },
       post_content: {
         type: Sequelize.TEXT('long'),
         allowNull: true
       },
-      post_type: {
-        type: Sequelize.ENUM('text', 'image', 'video', 'embed'),
-        allowNull: false
-      },
-      post_embed_url: {
+            post_embed_url: {
         type: Sequelize.STRING(500),
         allowNull: true
       },

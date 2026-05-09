@@ -734,16 +734,16 @@ const Master = {
     prefix_: "post_",
     insertColumns: [
       "mu_id",
+      "mc_id",
       "content",
-      "type",
       "embed_url",
       "status"
     ],
     selectColumns: [
       "post_id",
       "post_mu_id",
+      "post_mc_id",
       "post_content",
-      "post_type",
       "post_embed_url",
       "post_status",
       "post_created_at",
@@ -752,8 +752,8 @@ const Master = {
     selectOptionColumns: {
       id: "post_id",
       mu_id: "post_mu_id",
+      mc_id: "post_mc_id",
       content: "post_content",
-      type: "post_type",
       embed_url: "post_embed_url",
       status: "post_status",
       created_at: "post_created_at",
@@ -762,8 +762,8 @@ const Master = {
     updateOptionColumns: {
       id: "id",
       mu_id: "mu_id",
+      mc_id: "mc_id",
       content: "content",
-      type: "type",
       embed_url: "embed_url",
       status: "status"
     },
@@ -777,6 +777,7 @@ const Master = {
     columnDataTypes: {
       id: "BIGINT",
       mu_id: "BIGINT",
+      mc_id: "BIGINT",
       content: "TEXT",
       type: "ENUM",
       embed_url: "STRING",
@@ -791,29 +792,25 @@ const Master = {
     prefix_: "pm_",
     insertColumns: [
       "post_id",
-      "type",
-      "path",
+      "media",
       "sort"
     ],
     selectColumns: [
       "pm_id",
       "pm_post_id",
-      "pm_type",
-      "pm_path",
+      "pm_media",
       "pm_sort"
     ],
     selectOptionColumns: {
       id: "pm_id",
       post_id: "pm_post_id",
-      type: "pm_type",
-      path: "pm_path",
+      media: "pm_media",
       sort: "pm_sort"
     },
     updateOptionColumns: {
       id: "id",
       post_id: "post_id",
-      type: "type",
-      path: "path",
+      media: "media",
       sort: "sort"
     },
     selectDateFormatColumns: {
@@ -825,8 +822,7 @@ const Master = {
     columnDataTypes: {
       id: "BIGINT",
       post_id: "BIGINT",
-      type: "ENUM",
-      path: "STRING",
+      media: "LONGTEXT",
       sort: "INTEGER"
     }
   },
@@ -967,6 +963,54 @@ const Master = {
       view_seconds: "INTEGER",
       video_seconds: "INTEGER",
       created_at: "DATETIME"
+    }
+  },
+  master_category: {
+    tablename: "master_category",
+    prefix: "mc",
+    prefix_: "mc_",
+    insertColumns: [
+      "mc_name",
+      "mc_details",
+      "mc_status"
+    ],
+    selectColumns: [
+      "mc_id",
+      "mc_name",
+      "mc_details",
+      "mc_status",
+      "mc_created_at",
+      "mc_updated_at"
+    ],
+    selectOptionColumns: {
+      id: "mc_id",
+      name: "mc_name",
+      details: "mc_details",
+      status: "mc_status",
+      created_at: "mc_created_at",
+      updated_at: "mc_updated_at"
+    },
+    updateOptionColumns: {
+      id: "id",
+      name: "name",
+      details: "details",
+      status: "status"
+    },
+    selectDateFormatColumns: {
+      created_at: "mc_created_at",
+      updated_at: "mc_updated_at"
+    },
+    selectMiscColumns: {
+
+    },
+    columnDataTypes: {
+      id: "BIGINT",
+      mc_id: "BIGINT",
+      mc_name: "STRING",
+      mc_details: "TEXT",
+      mc_status: "ENUM",
+      mc_created_at: "DATETIME",
+      mc_updated_at: "DATETIME"
     }
   },
   conversation: {

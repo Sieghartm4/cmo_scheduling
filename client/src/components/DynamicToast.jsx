@@ -28,7 +28,7 @@ const toastTypes = {
   }
 };
 
-const DynamicToast = ({ type = 'success', message, onClose, duration = 4000 }) => {
+function DynamicToast({ type = 'success', message, onClose, duration = 4000 }) {
   const config = toastTypes[type] || toastTypes.info;
 
   useEffect(() => {

@@ -23,6 +23,19 @@ const serverStart = async () => {
     app.use(express.json({ limit: '50mb' }))
     app.use(express.urlencoded({ limit: '50mb', extended: true }))
 
+    // Add JSON parsing error handling
+    app.use((err, req, res, next) => {
+      if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+        console.error('JSON parsing error:', err);
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid JSON format in request body',
+          error: 'Malformed JSON data'
+        });
+      }
+      next(err);
+    });
+
     logger.info('Adding logger middleware')
     app.use(httpLogger)
 

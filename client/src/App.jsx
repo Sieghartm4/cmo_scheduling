@@ -3,15 +3,20 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { useEffect } from 'react'
 import AdminLogin from './pages/login/AdminLogin'
 import UserLogin from './pages/login/UserLogin'
+import Home from './pages/home/Home'
+import PostsFeed from './pages/postsFeed/PostsFeed'
 import Layout from './components/layout/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 import StrictRouteGuard from './components/StrictRouteGuard'
 import Dashboard from './pages/dashboard/Dashboard'
 import AdminDashboard from './pages/dashboard/AdminDashboard'
 import Users from './pages/users/Users'
-import Appointments from './pages/admin/Appointments'
-import UserManagement from './pages/admin/UserManagement'
+import Appointments from './pages/admin/appointments/Appointments'
+import UserManagement from './pages/admin/users/UserManagement'
+import Posts from './pages/admin/posts/Posts'
+import Category from './pages/admin/category/Category'
 import { preventCaching, forceReloadOnBack } from './utils/cacheControl'
+import { ModalProvider } from './contexts/ModalContext'
 
 function App() {
   useEffect(() => {
@@ -49,12 +54,15 @@ function App() {
 
   return (
     <BrowserRouter>
-      <StrictRouteGuard>
+      <ModalProvider>
+        <StrictRouteGuard>
         <Routes>
-          <Route path="/" element={<UserLogin />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<UserLogin />} />
+          <Route path="/posts" element={<PostsFeed />} />
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/" element={<Layout />}>
+          <Route element={<Layout />}>
             <Route path="dashboard" element={
               <ProtectedRoute routeName="dashboard">
                 <Dashboard />
@@ -80,9 +88,20 @@ function App() {
                 <Appointments />
               </ProtectedRoute>
             } />
+            <Route path="admin/posts" element={
+              <ProtectedRoute routeName="admin-dashboard">
+                <Posts />
+              </ProtectedRoute>
+            } />
+            <Route path="admin/categories" element={
+              <ProtectedRoute routeName="admin-dashboard">
+                <Category />
+              </ProtectedRoute>
+            } />
           </Route>
         </Routes>
       </StrictRouteGuard>
+    </ModalProvider>
     </BrowserRouter>
   );
 }

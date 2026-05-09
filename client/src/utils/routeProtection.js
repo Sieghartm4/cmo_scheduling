@@ -208,6 +208,7 @@ export const ROUTE_CONFIG = {
   collections: { name: 'collections', label: 'Collections', icon: 'HandCoins' },
   purchase: { name: 'purchase', label: 'Purchase', icon: 'ShoppingCart' },
   payments: { name: 'payments', label: 'Payments', icon: 'PaymentCard' },
+  posts: { name: 'posts', label: 'Posts', icon: 'MessageSquare' },
   adjustments: { name: 'adjustments', label: 'Adjustments', icon: 'FileSpreadsheet' },
   trial_balance: { name: 'trial_balance', label: 'Trial Balance', icon: 'Scale' },
   income_statement: { name: 'income_statement', label: 'Income Statement', icon: 'FileText' },
@@ -239,7 +240,7 @@ export const getSidebarItems = (user) => {
   }
 
   // Masters section
-  const masterRoutes = ['access', 'users', 'customers', 'vendors', 'charts', 'proforma_entries', 'product_service', 'company', 'vat', 'witholding_tax'];
+  const masterRoutes = ['access', 'users', 'customers', 'vendors', 'charts', 'proforma_entries', 'product_service', 'company', 'vat', 'witholding_tax', 'posts'];
   masterRoutes.forEach(route => {
     if (hasRouteAccess(route, user)) {
       items.masters.push(ROUTE_CONFIG[route]);

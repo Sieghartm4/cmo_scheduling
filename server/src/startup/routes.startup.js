@@ -4,11 +4,11 @@ const { credentialsRouter } = require('../routes/credentials.routes')
 const { authRouter } = require('../routes/auth.routes')
 const { adminRouter } = require('../routes/admin.routes')
 const { dashboardRouter } = require('../routes/dashboard.routes')
-const { accessRouter } = require('../routes/access.routes')
-const { routeAccessRouter } = require('../routes/route_access.routes')
+const { postRouter } = require('../routes/post.routes')
 const appointmentRouter = require('../routes/appointment.routes')
 const userManagementRouter = require('../routes/userManagement.routes')
 const adminDashboardRouter = require('../routes/adminDashboard.routes')
+const { categoryRouter } = require('../routes/category.routes')
 
 const initRoutes = (app) => {
   app.use('/credentials', credentialsRouter)
@@ -16,12 +16,12 @@ const initRoutes = (app) => {
   app.use('/auth', authRouter)
   app.use('/admin', adminRouter)
   app.use('/dashboard', dashboardRouter)
+  app.use('/posts', postRouter)
   app.use('/users', usersRouter)
-  app.use('/access', accessRouter)
-  app.use('/route_access', routeAccessRouter)
   app.use('/api/appointments', appointmentRouter)
   app.use('/api/users', userManagementRouter)
   app.use('/api/admin', adminDashboardRouter)
+  app.use('/api/categories', categoryRouter)
 }
 
 module.exports = { initRoutes }

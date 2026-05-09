@@ -19,12 +19,8 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
       },
-      pm_type: {
-        type: Sequelize.ENUM('image', 'video'),
-        allowNull: false
-      },
-      pm_path: {
-        type: Sequelize.STRING(255),
+      pm_media: {
+        type: Sequelize.TEXT('long'),
         allowNull: false
       },
       pm_sort: {

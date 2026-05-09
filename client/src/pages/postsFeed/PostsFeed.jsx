@@ -1,0 +1,1127 @@
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import PublicHeader from '../../components/layout/PublicHeader';
+import { 
+  Heart, 
+  MessageCircle, 
+  Share2, 
+  MoreHorizontal,
+  Send,
+  Calendar,
+  User,
+  Users,
+  Lock,
+  X,
+  ChevronLeft,
+  Clock,
+  ThumbsUp,
+  Bookmark,
+  Loader2,
+  Search,
+  Filter,
+  TrendingUp,
+  Hash,
+  ChevronRight,
+  Flame,
+  Bell,
+  BarChart3,
+} from 'lucide-react';
+
+// Post Card Component
+function PostCard({ post, onLike, onComment, isLoggedIn, currentUser }) {
+  const [showComments, setShowComments] = useState(false);
+  const [commentText, setCommentText] = useState('');
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(post.likes || 0);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [fullscreenMedia, setFullscreenMedia] = useState(null);
+
+  const handleMediaClick = (item) => {
+    setFullscreenMedia(item);
+  };
+
+  const closeFullscreen = () => {
+    setFullscreenMedia(null);
+  };
+
+  const handleLike = () => {
+    if (!isLoggedIn) {
+      onLike?.(post.id, false); // Trigger login prompt
+      return;
+    }
+    setIsLiked(!isLiked);
+    setLikeCount(isLiked ? likeCount - 1 : likeCount + 1);
+    onLike?.(post.id, !isLiked);
+  };
+
+  const handleSubmitComment = (e) => {
+    e.preventDefault();
+    if (!isLoggedIn) {
+      onComment?.(post.id, ''); // Trigger login prompt
+      return;
+    }
+    if (!commentText.trim()) return;
+    onComment?.(post.id, commentText);
+    setCommentText('');
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = Math.floor((now - date) / 1000);
+    
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+
+  const isVideo = (url) => {
+    return url && (url.includes('youtube') || url.includes('youtu.be') || url.includes('vimeo') || url.includes('.mp4'));
+  };
+
+  const isImage = (url) => {
+    return url && (url.includes('.jpg') || url.includes('.jpeg') || url.includes('.png') || url.includes('.gif') || url.includes('.webp') || url.startsWith('data:image'));
+  };
+
+  const isEmbed = (url) => {
+    // Check if it's an iframe HTML string (Facebook embed, etc.)
+    return url && (url.includes('<iframe') || url.includes('</iframe>') || url.includes('facebook.com/plugins'));
+  };
+
+  // Media Item Component
+  function MediaItem({ item, onClick, clickable = true }) {
+    const handleClick = () => {
+      if (clickable && onClick) onClick(item);
+    };
+
+    if (isImage(item)) {
+      return (
+        <img 
+          src={item} 
+          alt="Post media"
+          onClick={handleClick}
+          className={`w-full h-full object-cover hover:scale-105 transition-transform duration-300 ${clickable ? 'cursor-pointer' : ''}`}
+        />
+      );
+    }
+    if (isEmbed(item)) {
+      return (
+        <div 
+          className="w-full h-full"
+          onClick={handleClick}
+          dangerouslySetInnerHTML={{ 
+            __html: item.replace(/width="\d+"/g, 'width="100%"').replace(/height="\d+"/g, 'height="100%"') 
+          }}
+        />
+      );
+    }
+    if (isVideo(item)) {
+      // Check if it's a YouTube URL and convert to embed
+      let embedUrl = item;
+      let isYouTube = false;
+      
+      if (item.includes('youtube.com/watch?v=')) {
+        const videoId = item.split('v=')[1]?.split('&')[0];
+        if (videoId) {
+          embedUrl = `https://www.youtube.com/embed/${videoId}`;
+          isYouTube = true;
+        }
+      } else if (item.includes('youtu.be/')) {
+        const videoId = item.split('youtu.be/')[1]?.split('?')[0];
+        if (videoId) {
+          embedUrl = `https://www.youtube.com/embed/${videoId}`;
+          isYouTube = true;
+        }
+      }
+      
+      if (isYouTube) {
+        return (
+          <div 
+            onClick={handleClick}
+            className={`w-full h-full ${clickable ? 'cursor-pointer' : ''}`}
+          >
+            <iframe
+              src={embedUrl}
+              className="w-full h-full"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              title="YouTube video"
+            />
+          </div>
+        );
+      }
+      
+      return (
+        <div 
+          onClick={handleClick}
+          className={`w-full h-full bg-gray-900 flex items-center justify-center ${clickable ? 'cursor-pointer' : ''}`}
+        >
+          <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+            <div className="w-0 h-0 border-t-8 border-t-transparent border-l-12 border-l-white border-b-8 border-b-transparent ml-1" />
+          </div>
+        </div>
+      );
+    }
+    return (
+      <div 
+        onClick={handleClick}
+        className={`w-full h-full bg-gray-100 flex items-center justify-center p-4 ${clickable ? 'cursor-pointer' : ''}`}
+      >
+        <a 
+          href={item} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="text-emerald-600 text-sm text-center break-all hover:underline"
+        >
+          {item.substring(0, 50)}...
+        </a>
+      </div>
+    );
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow"
+    >
+      {/* Post Header */}
+      <div className="p-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full flex items-center justify-center">
+            <span className="text-white font-bold text-lg">
+              {post.title?.charAt(0) || 'C'}
+            </span>
+          </div>
+          <div>
+            <h4 className="font-semibold text-gray-900 text-lg">
+              {post.title || 'CMO Scheduling Team'}
+            </h4>
+            <div className="flex items-center gap-1.5 text-xs text-gray-400">
+              <Clock size={11} />
+              <span>{formatDate(post.created_at)}</span>
+              {post.category_name && (
+                <>
+                  <span className="text-gray-300">·</span>
+                  <span className="text-emerald-600 font-medium">{post.category_name}</span>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+        <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+          <MoreHorizontal size={20} className="text-gray-500" />
+        </button>
+      </div>
+
+      {/* Post Content */}
+      <div className="px-4 pb-3">
+        {/* Category Badge */}
+        {post.category_name && (
+          <div className="mb-2">
+            <span className="inline-block px-2 py-1 bg-emerald-100 text-emerald-700 text-xs rounded-full font-medium">
+              {post.category_name}
+            </span>
+          </div>
+        )}
+        <p className={`text-gray-700 text-sm leading-relaxed ${!isExpanded && 'line-clamp-3'}`}>
+          {post.content}
+        </p>
+        {post.content?.length > 200 && (
+          <button 
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="text-emerald-600 text-sm font-medium mt-1 hover:underline"
+          >
+            {isExpanded ? 'Show less' : 'Read more'}
+          </button>
+        )}
+      </div>
+
+      {/* Media Gallery - Facebook Style */}
+      {post.media && post.media.length > 0 && (
+        <div className="mt-3 mx-4 rounded-xl overflow-hidden border border-gray-100">
+          {/* Single Media - Full width video ratio */}
+          {post.media.length === 1 && (
+            <div className="relative aspect-video overflow-hidden">
+              <MediaItem item={post.media[0]} onClick={handleMediaClick} />
+            </div>
+          )}
+
+          {/* Two Media - Side by side, equal height */}
+          {post.media.length === 2 && (
+            <div className="grid grid-cols-2 gap-1">
+              {post.media.map((item, idx) => (
+                <div key={idx} className="relative aspect-video overflow-hidden">
+                  <MediaItem item={item} onClick={handleMediaClick} />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Three Media - First large on left, two stacked on right */}
+          {post.media.length === 3 && (
+            <div className="grid grid-cols-2 gap-1">
+              <div className="relative aspect-[4/3] overflow-hidden row-span-2">
+                <MediaItem item={post.media[0]} onClick={handleMediaClick} />
+              </div>
+              <div className="relative aspect-video overflow-hidden">
+                <MediaItem item={post.media[1]} onClick={handleMediaClick} />
+              </div>
+              <div className="relative aspect-video overflow-hidden">
+                <MediaItem item={post.media[2]} onClick={handleMediaClick} />
+              </div>
+            </div>
+          )}
+
+          {/* Four or More Media - 2x2 grid with overlay on last */}
+          {post.media.length >= 4 && (
+            <div className="grid grid-cols-2 gap-1">
+              {post.media.slice(0, 4).map((item, idx) => (
+                <div key={idx} className="relative aspect-video overflow-hidden">
+                  <MediaItem 
+                    item={item} 
+                    onClick={idx === 3 && post.media.length > 4 ? null : handleMediaClick}
+                    clickable={!(idx === 3 && post.media.length > 4)}
+                  />
+                  {idx === 3 && post.media.length > 4 && (
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center cursor-pointer">
+                      <span className="text-white text-2xl font-bold">+{post.media.length - 4}</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Post Stats */}
+      <div className="px-4 py-3 flex items-center justify-between border-b border-gray-100 mt-3">
+        <div className="flex items-center gap-1 text-sm text-gray-500">
+          <div className="flex items-center -space-x-1">
+            <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+              <ThumbsUp size={10} className="text-white" />
+            </div>
+          </div>
+          <span className="ml-1">{likeCount} likes</span>
+        </div>
+        <div className="flex items-center gap-4 text-sm text-gray-500">
+          <span>{post.comments?.length || 0} comments</span>
+          <span>{post.shares || 0} shares</span>
+        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="px-2 py-1 flex items-center justify-between">
+        <button 
+          onClick={handleLike}
+          className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg transition-all ${isLiked ? 'text-red-500' : 'text-gray-600 hover:bg-gray-100'}`}
+        >
+          <Heart size={20} className={isLiked ? 'fill-current' : ''} />
+          <span className="text-sm font-medium">Like</span>
+        </button>
+        <button 
+          onClick={() => {
+            if (!isLoggedIn) {
+              onComment?.(post.id, ''); // Trigger login prompt
+              return;
+            }
+            setShowComments(!showComments);
+          }}
+          className="flex-1 flex items-center justify-center gap-2 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-all"
+        >
+          <MessageCircle size={20} />
+          <span className="text-sm font-medium">Comment</span>
+        </button>
+        <button className="flex-1 flex items-center justify-center gap-2 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-all">
+          <Share2 size={20} />
+          <span className="text-sm font-medium">Share</span>
+        </button>
+        <button 
+          onClick={() => setSaved(!saved)}
+          className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg transition-all ${saved ? 'text-emerald-600' : 'text-gray-600 hover:bg-gray-100'}`}
+        >
+          <Bookmark size={20} className={saved ? 'fill-current' : ''} />
+        </button>
+      </div>
+
+      {/* Comments Section */}
+      <AnimatePresence>
+        {showComments && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="border-t border-gray-100 bg-gray-50"
+          >
+            {/* Existing Comments */}
+            <div className="p-4 space-y-3 max-h-60 overflow-y-auto">
+              {post.comments?.map((comment, index) => (
+                <div key={index} className="flex gap-3">
+                  <div className="w-8 h-8 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-white text-xs font-bold">
+                      {comment.author?.charAt(0) || 'U'}
+                    </span>
+                  </div>
+                  <div className="flex-1 bg-white rounded-2xl px-4 py-2 shadow-sm">
+                    <p className="text-xs font-semibold text-gray-900">{comment.author || 'User'}</p>
+                    <p className="text-sm text-gray-700">{comment.text}</p>
+                  </div>
+                </div>
+              ))}
+              {!post.comments?.length && (
+                <p className="text-center text-gray-500 text-sm py-4">No comments yet. Be the first to comment!</p>
+              )}
+            </div>
+
+            {/* Comment Input */}
+            {isLoggedIn ? (
+              <form onSubmit={handleSubmitComment} className="p-4 border-t border-gray-200">
+                <div className="flex gap-3">
+                  <div className="w-8 h-8 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full flex items-center justify-center flex-shrink-0">
+                    <User size={14} className="text-white" />
+                  </div>
+                  <div className="flex-1 relative">
+                    <input
+                      type="text"
+                      value={commentText}
+                      onChange={(e) => setCommentText(e.target.value)}
+                      placeholder="Write a comment..."
+                      className="w-full pl-4 pr-12 py-2 bg-white border border-gray-200 rounded-full text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+                    />
+                    <button 
+                      type="submit"
+                      disabled={!commentText.trim()}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-emerald-500 text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-emerald-600 transition-colors"
+                    >
+                      <Send size={14} />
+                    </button>
+                  </div>
+                </div>
+              </form>
+            ) : null}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Full-Screen Media Viewer */}
+      {fullscreenMedia && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
+          onClick={closeFullscreen}
+        >
+          {/* Close Button */}
+          <button
+            onClick={closeFullscreen}
+            className="absolute top-4 right-4 z-50 p-2 text-white hover:bg-white/20 rounded-full transition-colors"
+          >
+            <X size={32} />
+          </button>
+
+          {/* Media Display */}
+          <div 
+            className="max-w-[90vw] max-h-[90vh] w-full h-full flex items-center justify-center p-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {isImage(fullscreenMedia) ? (
+              <img
+                src={fullscreenMedia}
+                alt="Full screen media"
+                className="max-w-full max-h-full object-contain rounded-lg"
+              />
+            ) : isEmbed(fullscreenMedia) ? (
+              <div 
+                className="w-full h-full max-w-4xl aspect-video"
+                dangerouslySetInnerHTML={{ 
+                  __html: fullscreenMedia.replace(/width="\d+"/g, 'width="100%"').replace(/height="\d+"/g, 'height="100%"') 
+                }}
+              />
+            ) : isVideo(fullscreenMedia) ? (
+              <div className="w-full max-w-4xl aspect-video bg-gray-900 rounded-lg flex items-center justify-center">
+                <p className="text-white text-lg">Video Player</p>
+              </div>
+            ) : (
+              <div className="bg-white rounded-lg p-8 max-w-2xl">
+                <p className="text-gray-800 break-all">{fullscreenMedia}</p>
+                <a 
+                  href={fullscreenMedia}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 inline-block px-6 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors"
+                >
+                  Open Link
+                </a>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </motion.div>
+  );
+}
+
+// Login Prompt Modal
+function LoginPrompt({ isOpen, onClose, onLogin }) {
+  if (!isOpen) return null;
+  
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        className="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl"
+      >
+        <div className="w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-4">
+          <Lock size={28} className="text-white" />
+        </div>
+        <h3 className="text-xl font-bold text-gray-900 mb-2">Sign In Required</h3>
+        <p className="text-gray-600 mb-6">
+          Please sign in to like posts, leave comments, and engage with the community.
+        </p>
+        <div className="space-y-3">
+          <button 
+            onClick={onLogin}
+            className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
+          >
+            Sign In
+          </button>
+          <button 
+            onClick={onClose}
+            className="w-full py-3 text-gray-600 font-medium hover:bg-gray-100 rounded-xl transition-colors"
+          >
+            Continue Browsing
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+// Main Posts Feed Component
+export default function PostsFeed() {
+  const navigate = useNavigate();
+  const [posts, setPosts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [suggestedPosts, setSuggestedPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [activeTab, setActiveTab] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredPosts, setFilteredPosts] = useState([]);
+
+  // Check authentication
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const adminToken = localStorage.getItem('adminToken');
+    const userData = localStorage.getItem('user');
+    
+    if (token || adminToken) {
+      setIsLoggedIn(true);
+      if (userData) {
+        setCurrentUser(JSON.parse(userData));
+      }
+    }
+  }, []);
+
+  // Fetch categories and posts
+  useEffect(() => {
+    fetchCategories();
+    fetchPosts();
+    fetchSuggestedPosts();
+  }, []);
+
+  // Filter posts when search or category changes
+  useEffect(() => {
+    filterPosts();
+  }, [posts, selectedCategory, searchQuery]);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_SERVER_LINK}/api/categories`);
+      if (response.ok) {
+        const result = await response.json();
+        setCategories(result.data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
+
+  const fetchSuggestedPosts = async () => {
+    try {
+      // For now, use a subset of posts as suggested posts
+      const response = await fetch(`${import.meta.env.VITE_SERVER_LINK}/posts/feed`);
+      if (response.ok) {
+        const result = await response.json();
+        // Take top 3 posts with most likes as suggested
+        const suggested = result.data
+          .sort((a, b) => (b.likes || 0) - (a.likes || 0))
+          .slice(0, 3);
+        setSuggestedPosts(suggested);
+      }
+    } catch (error) {
+      console.error('Error fetching suggested posts:', error);
+    }
+  };
+
+  const filterPosts = () => {
+    let filtered = [...posts];
+    
+    // Filter by category
+    if (selectedCategory) {
+      filtered = filtered.filter(post => post.category_name === selectedCategory);
+    }
+    
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(post => 
+        post.title?.toLowerCase().includes(query) ||
+        post.content?.toLowerCase().includes(query) ||
+        post.category_name?.toLowerCase().includes(query)
+      );
+    }
+    
+    setFilteredPosts(filtered);
+  };
+
+  const fetchPosts = async () => {
+    try {
+      setLoading(true);
+      // Use new /feed endpoint with proper engagement data
+      const response = await fetch(`${import.meta.env.VITE_SERVER_LINK}/posts/feed`);
+      
+      if (!response.ok) throw new Error('Failed to fetch posts');
+      
+      const result = await response.json();
+      if (result.success) {
+        // Add sample comments since API only returns counts
+        const enhancedPosts = result.data.map(post => ({
+          ...post,
+          comments: post.comments > 0 ? [
+            {
+              author: 'John Doe',
+              text: 'Great post! Thanks for sharing.',
+              time: '2h ago'
+            },
+            {
+              author: 'Jane Smith',
+              text: 'This is very helpful information.',
+              time: '5h ago'
+            }
+          ] : []
+        }));
+        setPosts(enhancedPosts);
+      }
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+      // Use sample data if API fails
+      setPosts(getSamplePosts());
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getSamplePosts = () => [
+    {
+      id: 1,
+      title: 'Welcome to Our Community! 🎉',
+      content: 'We are excited to announce the launch of our new community features. Connect with fellow users, share your experiences, and stay updated with the latest news and announcements. Thank you for being part of our journey!',
+      media: [],
+      likes: 234,
+      shares: 45,
+      comments: [
+        { author: 'Alice Johnson', text: 'So excited to be here!', time: '1h ago' },
+        { author: 'Bob Wilson', text: 'Great initiative!', time: '2h ago' }
+      ],
+      author: 'CMO Scheduling Team',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 2,
+      title: 'New Appointment Slots Available 📅',
+      content: 'We have just opened new appointment slots for next week. Book your appointment now to secure your preferred time. Limited slots available!',
+      media: [
+        'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800',
+        'https://images.unsplash.com/photo-1511578314322-379afb476865?w=800'
+      ],
+      likes: 156,
+      shares: 23,
+      comments: [
+        { author: 'Carol Davis', text: 'Just booked mine!', time: '30m ago' }
+      ],
+      author: 'Appointment Manager',
+      created_at: new Date(Date.now() - 86400000).toISOString()
+    },
+    {
+      id: 3,
+      title: 'Holiday Schedule Update 🎄',
+      content: 'Please note our updated schedule for the upcoming holiday season. We will be closed on December 25th and January 1st. Regular hours will resume on January 2nd.',
+      media: [
+        'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800'
+      ],
+      likes: 89,
+      shares: 67,
+      comments: [],
+      author: 'Admin Team',
+      created_at: new Date(Date.now() - 172800000).toISOString()
+    }
+  ];
+
+  const handleLike = (postId, liked) => {
+    if (!isLoggedIn) {
+      setShowLoginPrompt(true);
+      return;
+    }
+    // API call to update like
+    console.log(`Post ${postId} ${liked ? 'liked' : 'unliked'}`);
+  };
+
+  const handleComment = (postId, text) => {
+    if (!isLoggedIn) {
+      setShowLoginPrompt(true);
+      return;
+    }
+    // API call to add comment
+    console.log(`Comment on post ${postId}: ${text}`);
+  };
+
+  const handleLogin = () => {
+    navigate('/login');
+  };
+
+  const totalLikes = posts.reduce((sum, p) => sum + (p.likes || 0), 0);
+
+  return (
+    <div className="min-h-screen bg-[#f0f2f5]">
+      {/* Top accent stripe */}
+      <div className="h-1 bg-gradient-to-r from-emerald-400 via-teal-500 to-emerald-600" />
+      <PublicHeader />
+
+      {/* ── 3-column layout ─────────────────────────────────────── */}
+      <main className="max-w-[1800px] mx-auto px-4 sm:px-6 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[350px_1fr_350px] gap-10 items-start">
+
+          {/* ══ LEFT SIDEBAR — Search & Categories ══════════════ */}
+          <aside className="space-y-5 lg:sticky lg:top-6">
+
+            {/* Search widget */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
+              <div className="px-4 pt-4 pb-3 border-b border-gray-50 flex items-center gap-2">
+                <div className="w-7 h-7 bg-emerald-100 rounded-lg flex items-center justify-center">
+                  <Search size={14} className="text-emerald-600" />
+                </div>
+                <span className="text-sm font-bold text-gray-800">Search Posts</span>
+              </div>
+              <div className="p-4">
+                {/* Search input */}
+                <div className="relative mb-3">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
+                  <input
+                    type="text"
+                    placeholder="Search posts, categories..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-9 pr-9 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 focus:bg-white transition-all"
+                  />
+                  {searchQuery && (
+                    <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                      <X size={13} />
+                    </button>
+                  )}
+                </div>
+
+                {/* Result count */}
+                {searchQuery && (
+                  <p className="text-xs text-gray-500 mb-3">
+                    {filteredPosts.length} result{filteredPosts.length !== 1 ? 's' : ''} for &ldquo;{searchQuery}&rdquo;
+                  </p>
+                )}
+
+                {/* Category dropdown (original) */}
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:bg-white transition-all mb-3"
+                >
+                  <option value="">All Categories</option>
+                  {categories.map(cat => (
+                    <option key={cat.id} value={cat.name}>{cat.name}</option>
+                  ))}
+                </select>
+
+                {/* Quick filters */}
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Quick Filters</p>
+                <div className="space-y-1">
+                  {['Most Recent', 'Most Liked', 'Most Commented'].map((f) => (
+                    <button key={f} className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 transition-colors group">
+                      <span>{f}</span>
+                      <ChevronRight size={14} className="text-gray-300 group-hover:text-emerald-500 transition-colors" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Categories pills widget */}
+            {categories.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
+                <div className="px-4 pt-4 pb-3 border-b border-gray-50 flex items-center gap-2">
+                  <div className="w-7 h-7 bg-emerald-100 rounded-lg flex items-center justify-center">
+                    <Hash size={14} className="text-emerald-600" />
+                  </div>
+                  <span className="text-sm font-bold text-gray-800">Categories</span>
+                </div>
+                <div className="p-4 space-y-1">
+                  <button
+                    onClick={() => setSelectedCategory('')}
+                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                      !selectedCategory ? 'bg-emerald-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    <span>All Posts</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${!selectedCategory ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'}`}>
+                      {posts.length}
+                    </span>
+                  </button>
+                  {categories.map((cat) => {
+                    const count = posts.filter((p) => p.category_name === cat.name).length;
+                    return (
+                      <button
+                        key={cat.id}
+                        onClick={() => setSelectedCategory(cat.name)}
+                        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                          selectedCategory === cat.name ? 'bg-emerald-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-50'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className={`w-2 h-2 rounded-full ${selectedCategory === cat.name ? 'bg-white' : 'bg-emerald-400'}`} />
+                          <span>{cat.name}</span>
+                        </div>
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${selectedCategory === cat.name ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'}`}>
+                          {count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Community Stats */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
+              <div className="px-4 pt-4 pb-3 border-b border-gray-50 flex items-center gap-2">
+                <div className="w-7 h-7 bg-emerald-100 rounded-lg flex items-center justify-center">
+                  <BarChart3 size={14} className="text-emerald-600" />
+                </div>
+                <span className="text-sm font-bold text-gray-800">Community Stats</span>
+              </div>
+              <div className="p-4 space-y-3">
+                {[
+                  { label: 'Total Posts', value: posts.length, icon: '📝', color: 'text-blue-600 bg-blue-50' },
+                  { label: 'Total Likes', value: totalLikes.toLocaleString(), icon: '❤️', color: 'text-red-600 bg-red-50' },
+                  { label: 'Categories', value: categories.length, icon: '🏷️', color: 'text-purple-600 bg-purple-50' },
+                  { label: 'Active Filters', value: (searchQuery ? 1 : 0) + (selectedCategory ? 1 : 0), icon: '🔍', color: 'text-emerald-600 bg-emerald-50' },
+                ].map(({ label, value, icon, color }) => (
+                  <div key={label} className="flex items-center gap-3">
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-base ${color}`}>{icon}</div>
+                    <div>
+                      <p className="text-base font-bold text-gray-900 leading-none">{value}</p>
+                      <p className="text-xs text-gray-400 mt-0.5">{label}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+          </aside>
+
+          {/* ══ CENTER — Posts feed ══════════════════════════════ */}
+          <div className="min-w-0">
+
+            {/* Feed header */}
+            <div className="flex items-center justify-between">
+              <div>
+              </div>
+              {(searchQuery || selectedCategory) && (
+                <button
+                  onClick={() => { setSearchQuery(''); setSelectedCategory(''); }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-xs font-medium text-gray-600 transition-colors"
+                >
+                  <X size={12} /> Clear filters
+                </button>
+              )}
+            </div>
+
+            {/* Create Post Input */}
+            {isLoggedIn && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-5"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full flex items-center justify-center">
+                    <User size={18} className="text-white" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="What's on your mind?"
+                    onClick={() => navigate('/admin/posts')}
+                    className="flex-1 px-4 py-3 bg-gray-50 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 cursor-pointer hover:bg-gray-100 transition-colors"
+                    readOnly
+                  />
+                </div>
+              </motion.div>
+            )}
+
+            {/* Posts */}
+            <AnimatePresence>
+              {loading ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="text-center">
+                    <Loader2 className="animate-spin text-emerald-600 mx-auto mb-3" size={32} />
+                    <p className="text-gray-500">Loading posts...</p>
+                  </div>
+                </div>
+              ) : filteredPosts.length === 0 ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center"
+                >
+                  <div className="w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <MessageCircle size={28} className="text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">
+                    {searchQuery || selectedCategory ? 'No posts found' : 'No posts yet'}
+                  </h3>
+                  <p className="text-gray-500">
+                    {searchQuery || selectedCategory 
+                      ? 'Try adjusting your search or filters' 
+                      : 'Start the conversation by sharing your first post!'
+                    }
+                  </p>
+                  {isLoggedIn && !searchQuery && !selectedCategory && (
+                    <button
+                      onClick={() => navigate('/admin/posts')}
+                      className="mt-4 px-6 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-medium hover:shadow-lg transition-all"
+                    >
+                      Create Post
+                    </button>
+                  )}
+                </motion.div>
+              ) : (
+                <div className="space-y-5">
+                  {filteredPosts.map((post, index) => (
+                    <motion.div
+                      key={post.id}
+                      id={`post-${post.id}`}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <PostCard
+                        post={post}
+                        onLike={handleLike}
+                        onComment={handleComment}
+                        isLoggedIn={isLoggedIn}
+                        currentUser={currentUser}
+                      />
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </AnimatePresence>
+
+            {/* End of Feed */}
+            {!loading && filteredPosts.length > 0 && (
+              <div className="mt-8 text-center">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full border border-gray-100 shadow-sm text-xs text-gray-400">
+                  <span>You've reached the end of the feed</span>
+                  <span>·</span>
+                  <button
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                    className="text-emerald-600 font-medium hover:underline"
+                  >
+                    Back to top
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ══ RIGHT SIDEBAR — Suggestions & More ══════════════ */}
+          <aside className="space-y-5 lg:sticky lg:top-6">
+
+            {/* Trending Posts */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
+              <div className="px-4 pt-4 pb-3 border-b border-gray-50 flex items-center gap-2">
+                <div className="w-7 h-7 bg-orange-100 rounded-lg flex items-center justify-center">
+                  <Flame size={14} className="text-orange-500" />
+                </div>
+                <span className="text-sm font-bold text-gray-800">Trending Posts</span>
+              </div>
+              <div className="p-4 space-y-2">
+                {(suggestedPosts.length ? suggestedPosts : getSamplePosts().slice(0, 3)).map((post, i) => (
+                  <button
+                    key={post.id}
+                    onClick={() => {
+                      const postElement = document.getElementById(`post-${post.id}`);
+                      if (postElement) postElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }}
+                    className="w-full text-left group"
+                  >
+                    <div className="flex gap-3 p-2.5 rounded-xl hover:bg-gray-50 transition-colors">
+                      <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-gradient-to-br from-orange-100 to-amber-100 flex items-center justify-center">
+                        <span className="text-xs font-bold text-orange-500">#{i + 1}</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-800 line-clamp-2 group-hover:text-emerald-700 transition-colors leading-snug">
+                          {post.title || 'Untitled Post'}
+                        </p>
+                        <div className="flex items-center gap-2 mt-1 text-xs text-gray-400">
+                          <Heart size={10} className="text-red-400" />
+                          <span>{post.likes || 0}</span>
+                          <MessageCircle size={10} className="text-blue-400" />
+                          <span>{post.comments?.length || 0}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Suggested Posts (original logic) */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
+              <div className="px-4 pt-4 pb-3 border-b border-gray-50 flex items-center gap-2">
+                <div className="w-7 h-7 bg-emerald-100 rounded-lg flex items-center justify-center">
+                  <TrendingUp size={14} className="text-emerald-600" />
+                </div>
+                <span className="text-sm font-bold text-gray-800">Suggested Posts</span>
+              </div>
+              <div className="p-4 space-y-3">
+                {suggestedPosts.map((post, index) => (
+                  <div
+                    key={post.id}
+                    className="cursor-pointer group"
+                    onClick={() => {
+                      const postElement = document.getElementById(`post-${post.id}`);
+                      if (postElement) postElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }}
+                  >
+                    <div className="p-3 rounded-xl border border-gray-100 group-hover:border-emerald-200 group-hover:bg-emerald-50 transition-all">
+                      <h4 className="text-sm font-medium text-gray-900 line-clamp-2 mb-1">
+                        {post.title || 'Untitled Post'}
+                      </h4>
+                      <p className="text-xs text-gray-600 line-clamp-2 mb-2">{post.content}</p>
+                      <div className="flex items-center justify-between text-xs text-gray-500">
+                        <span>{post.likes || 0} likes</span>
+                        <span>{post.comments?.length || 0} comments</span>
+                      </div>
+                      {post.category_name && (
+                        <div className="mt-2">
+                          <span className="inline-block px-2 py-1 bg-emerald-100 text-emerald-700 text-xs rounded-full">
+                            {post.category_name}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {suggestedPosts.length === 0 && (
+                  <p className="text-center text-gray-500 text-sm py-4">No suggested posts yet</p>
+                )}
+              </div>
+            </div>
+
+            {/* Stay Updated CTA */}
+            <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-5 text-white shadow-sm">
+              <div className="flex items-center gap-2 mb-3">
+                <Bell size={16} className="text-white/80" />
+                <span className="text-sm font-bold">Stay Updated</span>
+              </div>
+              <p className="text-xs text-white/80 mb-4 leading-relaxed">
+                Sign in to get notified about new posts, replies, and community updates.
+              </p>
+              {isLoggedIn ? (
+                <div className="flex items-center gap-2 bg-white/20 rounded-xl px-3 py-2">
+                  <div className="w-6 h-6 bg-white/30 rounded-full flex items-center justify-center">
+                    <User size={12} className="text-white" />
+                  </div>
+                  <span className="text-xs font-medium text-white">
+                    {currentUser?.name || "You're signed in"}
+                  </span>
+                </div>
+              ) : (
+                <button
+                  onClick={handleLogin}
+                  className="w-full py-2.5 bg-white text-emerald-700 rounded-xl text-sm font-bold hover:bg-emerald-50 transition-colors shadow-sm"
+                >
+                  Sign In
+                </button>
+              )}
+            </div>
+
+            {/* Quick Stats (original widget) */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
+              <div className="px-4 pt-4 pb-3 border-b border-gray-50 flex items-center gap-2">
+                <div className="w-7 h-7 bg-emerald-100 rounded-lg flex items-center justify-center">
+                  <Hash size={14} className="text-emerald-600" />
+                </div>
+                <span className="text-sm font-bold text-gray-800">Quick Stats</span>
+              </div>
+              <div className="p-4 space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Total Posts</span>
+                  <span className="text-sm font-semibold text-gray-900">{posts.length}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Categories</span>
+                  <span className="text-sm font-semibold text-gray-900">{categories.length}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Active Filters</span>
+                  <span className="text-sm font-semibold text-emerald-600">
+                    {(searchQuery ? 1 : 0) + (selectedCategory ? 1 : 0)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+          </aside>
+        </div>
+      </main>
+
+      {/* Floating Action Button */}
+      {isLoggedIn && (
+        <motion.button
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => navigate('/admin/posts')}
+          className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-full shadow-lg flex items-center justify-center z-30"
+        >
+          <Send size={20} className="rotate-45" />
+        </motion.button>
+      )}
+
+      {/* Login Prompt Modal */}
+      <LoginPrompt 
+        isOpen={showLoginPrompt} 
+        onClose={() => setShowLoginPrompt(false)}
+        onLogin={handleLogin}
+      />
+    </div>
+  );
+}

@@ -13,13 +13,9 @@ const PostMediaSchema = Joi.object({
         'any.required': 'postId is required.',
         'number.base': 'postId must be a valid bigint.',
       }),
- 	type: Joi.string().trim().required().messages({
-        'any.required': 'type is required.',
-        'string.empty': 'type must be a valid enum.',
-      }),
- 	path: Joi.string().trim().required().messages({
-        'any.required': 'path is required.',
-        'string.empty': 'path must be a valid string.',
+ 	media: Joi.string().trim().required().messages({
+        'any.required': 'media is required.',
+        'string.empty': 'media must be a valid longtext.',
       }),
  	sort: Joi.number().integer().required().messages({
         'any.required': 'sort is required.',
@@ -32,10 +28,9 @@ const PostMediaSchema = Joi.object({
 const PostMediaField = {
     Id: 'id',
     PostId: 'post_id',
-    Type: 'type',
-    Path: 'path',
+    Media: 'media',
     Sort: 'sort',
-    All: ['id', 'post_id', 'type', 'path', 'sort'],
+    All: ['id', 'post_id', 'media', 'sort'],
 };
 
 

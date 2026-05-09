@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Calendar, Users, Settings, Activity, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Calendar, Users, Settings, Activity, ChevronRight, MessageSquare, Tag } from 'lucide-react';
 
 export default function Sidebar({ isCollapsed }) {
     const [isDashboardOpen, setIsDashboardOpen] = useState(false);
@@ -46,7 +46,7 @@ export default function Sidebar({ isCollapsed }) {
         }
     }, [location.pathname]);
 
-    const NavLink = ({ to, icon: Icon, children }) => {
+    function NavLink({ to, icon: Icon, children }) {
         const isActive = location.pathname === to || location.pathname.startsWith(to);
         return (
             <Link
@@ -125,6 +125,12 @@ export default function Sidebar({ isCollapsed }) {
                             </NavLink>
                             <NavLink to="/admin/appointments" icon={Calendar}>
                                 Appointments
+                            </NavLink>
+                            <NavLink to="/admin/posts" icon={MessageSquare}>
+                                Post Management
+                            </NavLink>
+                            <NavLink to="/admin/categories" icon={Tag}>
+                                Category Management
                             </NavLink>
                         </div>
                     )}

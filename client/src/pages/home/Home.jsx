@@ -1,0 +1,487 @@
+import React from 'react';
+import { motion } from 'framer-motion';
+import PublicHeader from '../../components/layout/PublicHeader';
+import { 
+  Calendar,
+  Clock, 
+  MessageCircle, 
+  Heart, 
+  Share2, 
+  Users, 
+  Star,
+  ArrowRight,
+  Play,
+  Shield,
+  Zap,
+  Globe
+} from 'lucide-react';
+
+export default function Home() {
+
+  const fadeInUp = {
+    hidden: { opacity: 0, y: 30 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
+  };
+
+  const staggerContainer = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15
+      }
+    }
+  };
+
+  const features = [
+    {
+      icon: <Calendar className="w-6 h-6" />,
+      title: "Easy Scheduling",
+      description: "Book appointments seamlessly with our intuitive calendar interface"
+    },
+    {
+      icon: <MessageCircle className="w-6 h-6" />,
+      title: "Community Posts",
+      description: "Stay updated with announcements, news, and community discussions"
+    },
+    {
+      icon: <Clock className="w-6 h-6" />,
+      title: "Real-time Updates",
+      description: "Get instant notifications about your appointments and posts"
+    },
+    {
+      icon: <Users className="w-6 h-6" />,
+      title: "Connect with Others",
+      description: "Join a community of users and share your experiences"
+    }
+  ];
+
+  const stats = [
+    { number: "10K+", label: "Active Users" },
+    { number: "50K+", label: "Appointments" },
+    { number: "1K+", label: "Community Posts" },
+    { number: "99%", label: "Satisfaction" }
+  ];
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
+      <PublicHeader />
+
+      {/* Hero Section */}
+      <section className="relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left Content */}
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={staggerContainer}
+              className="space-y-8"
+            >
+              <motion.div variants={fadeInUp}>
+                <span className="inline-block px-4 py-2 bg-emerald-100 text-emerald-700 rounded-full text-sm font-semibold mb-6">
+                  🚀 Welcome to the Future of Scheduling
+                </span>
+              </motion.div>
+
+              <motion.h1 
+                variants={fadeInUp}
+                className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight"
+              >
+                Connect, Schedule, and{' '}
+                <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                  Stay Informed
+                </span>
+              </motion.h1>
+
+              <motion.p 
+                variants={fadeInUp}
+                className="text-xl text-gray-600 leading-relaxed"
+              >
+                Your all-in-one platform for appointment scheduling and community engagement. 
+                Book appointments effortlessly and stay connected with our vibrant community.
+              </motion.p>
+
+              <motion.div 
+                variants={fadeInUp}
+                className="flex flex-wrap gap-4"
+              >
+                <button 
+                  onClick={() => navigate('/posts')}
+                  className="px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
+                >
+                  View Community Posts
+                  <ArrowRight size={20} />
+                </button>
+                <button 
+                  onClick={() => navigate('/login')}
+                  className="px-8 py-4 bg-white text-gray-700 border-2 border-gray-200 rounded-xl font-semibold hover:border-emerald-500 hover:text-emerald-600 transition-all"
+                >
+                  Get Started
+                </button>
+              </motion.div>
+
+              {/* Trust Indicators */}
+              <motion.div variants={fadeInUp} className="flex items-center gap-6 pt-4">
+                <div className="flex -space-x-3">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-xs font-bold">
+                      {String.fromCharCode(64 + i)}
+                    </div>
+                  ))}
+                </div>
+                <p className="text-sm text-gray-600">
+                  <span className="font-semibold text-gray-900">10,000+</span> users trust us
+                </p>
+              </motion.div>
+            </motion.div>
+
+            {/* Right Content - Hero Image/Illustration */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="relative"
+            >
+              <div className="relative bg-white rounded-3xl shadow-2xl p-6 border border-gray-100">
+                {/* Sample Post Card */}
+                <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-6 mb-4">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full flex items-center justify-center">
+                      <span className="text-white font-bold">C</span>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900">CMO Scheduling Team</h4>
+                      <p className="text-sm text-gray-500">2 hours ago</p>
+                    </div>
+                  </div>
+                  <p className="text-gray-700 mb-4">
+                    🎉 Exciting news! Our new community feature is now live. 
+                    Connect with fellow users and stay updated!
+                  </p>
+                  <div className="flex items-center gap-6 text-gray-500 text-sm">
+                    <span className="flex items-center gap-1">
+                      <Heart size={16} className="text-red-500" /> 234 likes
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <MessageCircle size={16} /> 45 comments
+                    </span>
+                  </div>
+                </div>
+
+                {/* Floating Elements */}
+                <motion.div 
+                  animate={{ y: [0, -10, 0] }}
+                  transition={{ repeat: Infinity, duration: 3 }}
+                  className="absolute -top-4 -right-4 bg-white rounded-xl shadow-lg p-4 border border-gray-100"
+                >
+                  <div className="flex items-center gap-2 text-emerald-600">
+                    <Calendar size={20} />
+                    <span className="font-semibold text-sm">Easy Booking</span>
+                  </div>
+                </motion.div>
+
+                <motion.div 
+                  animate={{ y: [0, 10, 0] }}
+                  transition={{ repeat: Infinity, duration: 3, delay: 1 }}
+                  className="absolute -bottom-4 -left-4 bg-white rounded-xl shadow-lg p-4 border border-gray-100"
+                >
+                  <div className="flex items-center gap-2 text-teal-600">
+                    <Users size={20} />
+                    <span className="font-semibold text-sm">10K+ Community</span>
+                  </div>
+                </motion.div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Background Decorations */}
+        <div className="absolute top-20 left-10 w-72 h-72 bg-emerald-200/30 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-teal-200/30 rounded-full blur-3xl" />
+      </section>
+
+      {/* Stats Section */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {stats.map((stat, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                className="text-center"
+              >
+                <div className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-2">
+                  {stat.number}
+                </div>
+                <p className="text-gray-600 font-medium">{stat.label}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section id="features" className="py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Everything You Need
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Powerful features designed to make your experience seamless and enjoyable
+            </p>
+          </motion.div>
+
+          <motion.div 
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="grid md:grid-cols-2 lg:grid-cols-4 gap-8"
+          >
+            {features.map((feature, index) => (
+              <motion.div
+                key={index}
+                variants={fadeInUp}
+                className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-all hover:-translate-y-1"
+              >
+                <div className="w-14 h-14 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center text-white mb-6">
+                  {feature.icon}
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
+                <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* About Section */}
+      <section id="about" className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+            >
+              <h2 className="text-4xl font-bold text-gray-900 mb-6">
+                Why Choose{' '}
+                <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                  CMO Connect?
+                </span>
+              </h2>
+              <p className="text-lg text-gray-600 mb-8 leading-relaxed">
+                We're more than just a scheduling platform. We're a community-driven 
+                ecosystem that connects people, simplifies appointments, and keeps everyone 
+                informed with the latest updates and announcements.
+              </p>
+
+              <div className="space-y-6">
+                {[
+                  { icon: <Shield size={24} />, title: "Secure & Reliable", desc: "Your data is protected with enterprise-grade security" },
+                  { icon: <Zap size={24} />, title: "Lightning Fast", desc: "Optimized performance for the best user experience" },
+                  { icon: <Globe size={24} />, title: "Always Available", desc: "24/7 access from anywhere in the world" }
+                ].map((item, index) => (
+                  <div key={index} className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600 flex-shrink-0">
+                      {item.icon}
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-1">{item.title}</h4>
+                      <p className="text-gray-600">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
+              <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-3xl p-8 text-white">
+                <h3 className="text-2xl font-bold mb-4">Join Our Community Today</h3>
+                <p className="mb-6 text-emerald-100">
+                  Be part of a growing community of users who trust CMO Connect for their 
+                  scheduling and communication needs.
+                </p>
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="flex -space-x-3">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <div key={i} className="w-10 h-10 rounded-full border-2 border-white bg-white/20 flex items-center justify-center text-white text-xs font-bold">
+                        {String.fromCharCode(64 + i)}
+                      </div>
+                    ))}
+                  </div>
+                  <span className="text-sm">+10,000 members</span>
+                </div>
+                <button 
+                  onClick={() => navigate('/posts')}
+                  className="w-full py-3 bg-white text-emerald-600 rounded-xl font-semibold hover:bg-emerald-50 transition-all flex items-center justify-center gap-2"
+                >
+                  <Play size={18} />
+                  Explore Posts
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section id="testimonials" className="py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              What Our Users Say
+            </h2>
+            <p className="text-xl text-gray-600">
+              Don't just take our word for it
+            </p>
+          </motion.div>
+
+          <motion.div 
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="grid md:grid-cols-3 gap-8"
+          >
+            {[
+              {
+                name: "Sarah Johnson",
+                role: "Regular Client",
+                content: "The easiest appointment booking system I've ever used. The community posts keep me informed about everything!",
+                rating: 5
+              },
+              {
+                name: "Michael Chen",
+                role: "Business Owner",
+                content: "CMO Connect has streamlined our scheduling process. Our clients love the community engagement features.",
+                rating: 5
+              },
+              {
+                name: "Emily Davis",
+                role: "Healthcare Professional",
+                content: "Fantastic platform! The combination of scheduling and community features is exactly what we needed.",
+                rating: 5
+              }
+            ].map((testimonial, index) => (
+              <motion.div
+                key={index}
+                variants={fadeInUp}
+                className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100"
+              >
+                <div className="flex items-center gap-1 mb-4">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <Star key={i} size={16} className="text-yellow-400 fill-current" />
+                  ))}
+                </div>
+                <p className="text-gray-700 mb-6 leading-relaxed italic">
+                  "{testimonial.content}"
+                </p>
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full flex items-center justify-center text-white font-bold">
+                    {testimonial.name.charAt(0)}
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900">{testimonial.name}</h4>
+                    <p className="text-sm text-gray-500">{testimonial.role}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 bg-gradient-to-r from-emerald-500 to-teal-600">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-4xl font-bold text-white mb-6">
+            Ready to Get Started?
+          </h2>
+          <p className="text-xl text-emerald-100 mb-8">
+            Join our community today and experience the future of scheduling and engagement
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <button 
+              onClick={() => navigate('/posts')}
+              className="px-8 py-4 bg-white text-emerald-600 rounded-xl font-semibold hover:bg-emerald-50 transition-all shadow-lg"
+            >
+              View Community Posts
+            </button>
+            <button 
+              onClick={() => navigate('/login')}
+              className="px-8 py-4 bg-emerald-700 text-white border-2 border-emerald-400 rounded-xl font-semibold hover:bg-emerald-800 transition-all"
+            >
+              Sign In Now
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-gray-400 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-4 gap-8 mb-8">
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
+                  <Calendar size={24} className="text-white" />
+                </div>
+                <span className="text-xl font-bold text-white">CMO Connect</span>
+              </div>
+              <p className="text-sm">
+                Your all-in-one platform for scheduling and community engagement.
+              </p>
+            </div>
+            <div>
+              <h4 className="text-white font-semibold mb-4">Quick Links</h4>
+              <ul className="space-y-2 text-sm">
+                <li><a href="#features" className="hover:text-emerald-400 transition-colors">Features</a></li>
+                <li><a href="#about" className="hover:text-emerald-400 transition-colors">About</a></li>
+                <li><a href="#testimonials" className="hover:text-emerald-400 transition-colors">Testimonials</a></li>
+                <li><button onClick={() => navigate('/posts')} className="hover:text-emerald-400 transition-colors">Posts</button></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-white font-semibold mb-4">Account</h4>
+              <ul className="space-y-2 text-sm">
+                <li><button onClick={() => navigate('/login')} className="hover:text-emerald-400 transition-colors">Sign In</button></li>
+                <li><button onClick={() => navigate('/dashboard')} className="hover:text-emerald-400 transition-colors">Dashboard</button></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-white font-semibold mb-4">Contact</h4>
+              <ul className="space-y-2 text-sm">
+                <li>support@cmoconnect.com</li>
+                <li>+1 (555) 123-4567</li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-gray-800 pt-8 text-center text-sm">
+            <p>&copy; 2026 CMO Connect. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}

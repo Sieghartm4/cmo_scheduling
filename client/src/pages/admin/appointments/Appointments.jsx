@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, Clock, User, Plus, Edit2, Trash2, Eye, CheckCircle, XCircle, AlertCircle, RefreshCw } from 'lucide-react';
+import DynamicTable from '../../../components/DynamicTable';
+import DynamicToast from '../../../components/DynamicToast';
+import RouteProtection from '../../../components/RouteProtection';
+import ProtectedAction from '../../../components/ProtectedAction';
+import RightSideModal from '../../../components/RightSideModal';
 
 export default function Appointments() {
   const [appointments, setAppointments] = useState([]);

@@ -13,13 +13,13 @@ const PostSchema = Joi.object({
         'any.required': 'muId is required.',
         'number.base': 'muId must be a valid bigint.',
       }),
+ 	mcId: Joi.number().integer().required().messages({
+        'any.required': 'mcId is required.',
+        'number.base': 'mcId must be a valid bigint.',
+      }),
  	content: Joi.string().trim().required().messages({
         'any.required': 'content is required.',
         'string.empty': 'content must be a valid text.',
-      }),
- 	type: Joi.string().trim().required().messages({
-        'any.required': 'type is required.',
-        'string.empty': 'type must be a valid enum.',
       }),
  	embedUrl: Joi.string().trim().required().messages({
         'any.required': 'embedUrl is required.',
@@ -44,13 +44,13 @@ const PostSchema = Joi.object({
 const PostField = {
     Id: 'id',
     MuId: 'mu_id',
+    McId: 'mc_id',
     Content: 'content',
-    Type: 'type',
     EmbedUrl: 'embed_url',
     Status: 'status',
     CreatedAt: 'created_at',
     UpdatedAt: 'updated_at',
-    All: ['id', 'mu_id', 'content', 'type', 'embed_url', 'status', 'created_at', 'updated_at'],
+    All: ['id', 'mu_id', 'mc_id', 'content', 'embed_url', 'status', 'created_at', 'updated_at'],
 };
 
 
