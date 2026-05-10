@@ -28,15 +28,142 @@ import {
   BarChart3,
 } from 'lucide-react';
 
-// Post Card Component
-function PostCard({ post, onLike, onComment, isLoggedIn, currentUser }) {
+// Recursive Comment Item Component with Reply Support
+const CommentItem = React.memo(function CommentItem({ comment, postId, onReply, isLoggedIn, depth = 0 }) {
+  const [replyText, setReplyText] = useState('');
+  const [showReplyInput, setShowReplyInput] = useState(false);
+  const [showReplies, setShowReplies] = useState(true);
+  const maxDepth = 10; // Prevent excessive nesting visually
+
+  const handleReplySubmit = (e) => {
+    e.preventDefault();
+    if (!replyText.trim()) return;
+    onReply?.(postId, replyText, comment.id); // comment.id is parentId
+    setReplyText('');
+    setShowReplyInput(false);
+    setShowReplies(true);
+  };
+
+  const formatTime = (dateString) => {
+    if (!dateString) return 'Just now';
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = Math.floor((now - date) / 1000);
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return `${Math.floor(diff / 60)}m`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
+    if (diff < 604800) return `${Math.floor(diff / 86400)}d`;
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+
+  const hasReplies = comment.replies && comment.replies.length > 0;
+  const replyCount = comment.replies?.length || 0;
+
+  return (
+    <div className={`${depth > 0 ? 'ml-8 border-l-2 border-emerald-100 pl-3' : ''}`}>
+      <div className="flex gap-3">
+        <div className="w-8 h-8 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full flex items-center justify-center flex-shrink-0">
+          <span className="text-white text-xs font-bold">
+            {comment.author?.charAt(0) || 'U'}
+          </span>
+        </div>
+        <div className="flex-1">
+          <div className="bg-white rounded-2xl px-4 py-2 shadow-sm">
+            <div className="flex items-center gap-2">
+              <p className="text-xs font-semibold text-gray-900">{comment.author || 'User'}</p>
+              <span className="text-xs text-gray-400">· {formatTime(comment.created_at || comment.time)}</span>
+            </div>
+            <p className="text-sm text-gray-700 mt-0.5">{comment.text || comment.comment}</p>
+          </div>
+          
+          {/* Comment Actions */}
+          <div className="flex items-center gap-4 mt-1 ml-2">
+            <button 
+              onClick={() => {
+                if (!isLoggedIn) {
+                  onReply?.(postId, '', null); // Trigger login prompt
+                  return;
+                }
+                setShowReplyInput(!showReplyInput);
+              }}
+              className="text-xs text-gray-500 hover:text-emerald-600 font-medium transition-colors"
+            >
+              Reply
+            </button>
+            {hasReplies && (
+              <button 
+                onClick={() => setShowReplies(!showReplies)}
+                className="text-xs text-emerald-600 hover:text-emerald-700 font-medium transition-colors"
+              >
+                {showReplies ? 'Hide' : 'Show'} {replyCount} {replyCount === 1 ? 'reply' : 'replies'}
+              </button>
+            )}
+          </div>
+
+          {/* Reply Input */}
+          {showReplyInput && isLoggedIn && (
+            <form onSubmit={handleReplySubmit} className="flex gap-2 mt-2">
+              <input
+                type="text"
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                placeholder="Write a reply..."
+                autoFocus
+                className="flex-1 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+              />
+              <button 
+                type="submit"
+                disabled={!replyText.trim()}
+                className="p-1.5 bg-emerald-500 text-white rounded-full disabled:opacity-50 text-xs hover:bg-emerald-600 transition-colors"
+              >
+                <Send size={12} />
+              </button>
+              <button 
+                type="button"
+                onClick={() => setShowReplyInput(false)}
+                className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X size={12} />
+              </button>
+            </form>
+          )}
+        </div>
+      </div>
+
+      {/* Nested Replies - Recursive */}
+      {hasReplies && showReplies && (
+        <div className="mt-2 space-y-3">
+          {comment.replies.map((reply, idx) => (
+            <CommentItem 
+              key={reply.id || idx} 
+              comment={reply} 
+              postId={postId}
+              onReply={onReply}
+              isLoggedIn={isLoggedIn}
+              depth={depth + 1}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+});
+
+// Post Card Component - memoized to prevent re-renders during auth polling
+const PostCard = React.memo(function PostCard({ post, onLike, onComment, onReply, isLoggedIn, currentUser }) {
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState('');
-  const [isLiked, setIsLiked] = useState(false);
+  const [isLiked, setIsLiked] = useState(post.userLiked || false);
   const [likeCount, setLikeCount] = useState(post.likes || 0);
   const [isExpanded, setIsExpanded] = useState(false);
   const [saved, setSaved] = useState(false);
   const [fullscreenMedia, setFullscreenMedia] = useState(null);
+
+  // Sync with post data when it changes (e.g., on refresh)
+  useEffect(() => {
+    setIsLiked(post.userLiked || false);
+    setLikeCount(post.likes || 0);
+  }, [post.userLiked, post.likes]);
 
   const handleMediaClick = (item) => {
     setFullscreenMedia(item);
@@ -63,7 +190,7 @@ function PostCard({ post, onLike, onComment, isLoggedIn, currentUser }) {
       return;
     }
     if (!commentText.trim()) return;
-    onComment?.(post.id, commentText);
+    onComment?.(post.id, commentText, null); // null = top-level comment (no parent)
     setCommentText('');
   };
 
@@ -92,8 +219,9 @@ function PostCard({ post, onLike, onComment, isLoggedIn, currentUser }) {
     return url && (url.includes('<iframe') || url.includes('</iframe>') || url.includes('facebook.com/plugins'));
   };
 
-  // Media Item Component
-  function MediaItem({ item, onClick, clickable = true }) {
+  // Media Item Component - memoized to prevent re-renders during auth polling
+  const MediaItem = React.memo((props) => {
+    const { item, onClick, clickable = true } = props;
     const handleClick = () => {
       if (clickable && onClick) onClick(item);
     };
@@ -182,7 +310,7 @@ function PostCard({ post, onLike, onComment, isLoggedIn, currentUser }) {
         </a>
       </div>
     );
-  };
+  });
 
   return (
     <motion.div
@@ -326,13 +454,7 @@ function PostCard({ post, onLike, onComment, isLoggedIn, currentUser }) {
           <span className="text-sm font-medium">Like</span>
         </button>
         <button 
-          onClick={() => {
-            if (!isLoggedIn) {
-              onComment?.(post.id, ''); // Trigger login prompt
-              return;
-            }
-            setShowComments(!showComments);
-          }}
+          onClick={() => setShowComments(!showComments)}
           className="flex-1 flex items-center justify-center gap-2 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-all"
         >
           <MessageCircle size={20} />
@@ -357,22 +479,27 @@ function PostCard({ post, onLike, onComment, isLoggedIn, currentUser }) {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="border-t border-gray-100 bg-gray-50"
+            className="border-t border-gray-100 bg-gray-50 custom-scrollbar"
           >
-            {/* Existing Comments */}
-            <div className="p-4 space-y-3 max-h-60 overflow-y-auto">
+            <style dangerouslySetInnerHTML={{
+              __html: `
+                .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+                .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+                .custom-scrollbar::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #059669; }
+              `}} />
+
+            {/* Existing Comments - Recursive */}
+            <div className="p-4 space-y-3 max-h-96 overflow-y-auto custom-scrollbar">
               {post.comments?.map((comment, index) => (
-                <div key={index} className="flex gap-3">
-                  <div className="w-8 h-8 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-white text-xs font-bold">
-                      {comment.author?.charAt(0) || 'U'}
-                    </span>
-                  </div>
-                  <div className="flex-1 bg-white rounded-2xl px-4 py-2 shadow-sm">
-                    <p className="text-xs font-semibold text-gray-900">{comment.author || 'User'}</p>
-                    <p className="text-sm text-gray-700">{comment.text}</p>
-                  </div>
-                </div>
+                <CommentItem 
+                  key={comment.id || index}
+                  comment={comment}
+                  postId={post.id}
+                  onReply={onReply || onComment}
+                  isLoggedIn={isLoggedIn}
+                  depth={0}
+                />
               ))}
               {!post.comments?.length && (
                 <p className="text-center text-gray-500 text-sm py-4">No comments yet. Be the first to comment!</p>
@@ -404,7 +531,17 @@ function PostCard({ post, onLike, onComment, isLoggedIn, currentUser }) {
                   </div>
                 </div>
               </form>
-            ) : null}
+            ) : (
+              <div className="p-4 border-t border-gray-200">
+                <button
+                  onClick={() => onComment?.(post.id, '', null)}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full text-sm font-medium transition-colors"
+                >
+                  <Lock size={14} />
+                  <span>Sign in to comment</span>
+                </button>
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
@@ -463,7 +600,7 @@ function PostCard({ post, onLike, onComment, isLoggedIn, currentUser }) {
       )}
     </motion.div>
   );
-}
+});
 
 // Login Prompt Modal
 function LoginPrompt({ isOpen, onClose, onLogin }) {
@@ -517,18 +654,48 @@ export default function PostsFeed() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredPosts, setFilteredPosts] = useState([]);
 
-  // Check authentication
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    const adminToken = localStorage.getItem('adminToken');
+  // Check authentication - only updates state if changed
+  const checkAuth = () => {
+    const token = localStorage.getItem('token') || localStorage.getItem('userToken') || localStorage.getItem('adminToken');
     const userData = localStorage.getItem('user');
     
-    if (token || adminToken) {
-      setIsLoggedIn(true);
-      if (userData) {
-        setCurrentUser(JSON.parse(userData));
+    const newIsLoggedIn = !!token;
+    let newCurrentUser = null;
+    
+    if (userData) {
+      try {
+        newCurrentUser = JSON.parse(userData);
+      } catch (e) {
+        newCurrentUser = null;
       }
     }
+    
+    // Only update state if actually changed (prevents re-renders)
+    setIsLoggedIn(prev => {
+      if (prev !== newIsLoggedIn) return newIsLoggedIn;
+      return prev;
+    });
+    
+    setCurrentUser(prev => {
+      if (JSON.stringify(prev) !== JSON.stringify(newCurrentUser)) return newCurrentUser;
+      return prev;
+    });
+  };
+
+  useEffect(() => {
+    checkAuth();
+    
+    // Poll for auth changes every 5 seconds (reduced from 1s to prevent video refresh)
+    const interval = setInterval(checkAuth, 5000);
+    
+    // Listen for storage events (login/logout in other tabs)
+    const handleStorage = () => checkAuth();
+    window.addEventListener('storage', handleStorage);
+    
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('storage', handleStorage);
+    };
   }, []);
 
   // Fetch categories and posts
@@ -602,24 +769,50 @@ export default function PostsFeed() {
       if (!response.ok) throw new Error('Failed to fetch posts');
       
       const result = await response.json();
+      console.log('Posts fetched:', result.data?.length || 0, 'posts');
+      
       if (result.success) {
-        // Add sample comments since API only returns counts
-        const enhancedPosts = result.data.map(post => ({
-          ...post,
-          comments: post.comments > 0 ? [
-            {
-              author: 'John Doe',
-              text: 'Great post! Thanks for sharing.',
-              time: '2h ago'
-            },
-            {
-              author: 'Jane Smith',
-              text: 'This is very helpful information.',
-              time: '5h ago'
+        // Fetch like status for each post if user is logged in
+        const token = localStorage.getItem('token') || localStorage.getItem('userToken') || localStorage.getItem('adminToken');
+        console.log('Fetch posts - token exists:', !!token);
+        
+        const postsWithDetails = await Promise.all(
+          result.data.map(async (post) => {
+            // Fetch comments for this post
+            const commentsRes = await fetch(`${import.meta.env.VITE_SERVER_LINK}/api/comments/post/${post.id}`, {
+              headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+            });
+            let comments = [];
+            if (commentsRes.ok) {
+              const commentsResult = await commentsRes.json();
+              comments = commentsResult.data || [];
             }
-          ] : []
-        }));
-        setPosts(enhancedPosts);
+
+            // Fetch like status if logged in
+            let userLiked = false;
+            let likeCount = post.likes || 0;
+            
+            if (token) {
+              const likesRes = await fetch(`${import.meta.env.VITE_SERVER_LINK}/api/likes/post/${post.id}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+              });
+              if (likesRes.ok) {
+                const likesResult = await likesRes.json();
+                userLiked = likesResult.data?.userLiked || false;
+                likeCount = likesResult.data?.likeCount || likeCount;
+                console.log(`Post ${post.id}: likes=${likeCount}, userLiked=${userLiked}`);
+              }
+            }
+
+            return {
+              ...post,
+              comments,
+              likes: likeCount,
+              userLiked
+            };
+          })
+        );
+        setPosts(postsWithDetails);
       }
     } catch (error) {
       console.error('Error fetching posts:', error);
@@ -676,22 +869,85 @@ export default function PostsFeed() {
     }
   ];
 
-  const handleLike = (postId, liked) => {
-    if (!isLoggedIn) {
+  const handleLike = async (postId, liked) => {
+    const token = localStorage.getItem('token') || localStorage.getItem('userToken') || localStorage.getItem('adminToken');
+    
+    console.log('Like clicked - token:', token ? 'exists' : 'missing');
+    
+    if (!token) {
       setShowLoginPrompt(true);
       return;
     }
-    // API call to update like
-    console.log(`Post ${postId} ${liked ? 'liked' : 'unliked'}`);
+    
+    try {
+      console.log('Sending like request for post:', postId);
+      const response = await fetch(`${import.meta.env.VITE_SERVER_LINK}/api/likes/post/${postId}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      console.log('Like response status:', response.status);
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Like result:', result);
+        // Update post in state
+        setPosts(posts.map(post => 
+          post.id === postId 
+            ? { ...post, userLiked: result.data?.liked, likes: result.data?.likeCount }
+            : post
+        ));
+      } else {
+        const errorData = await response.json();
+        console.error('Like API error:', errorData);
+      }
+    } catch (error) {
+      console.error('Error toggling like:', error);
+    }
   };
 
-  const handleComment = (postId, text) => {
-    if (!isLoggedIn) {
+  const handleComment = async (postId, text, parentId = null) => {
+    const token = localStorage.getItem('token') || localStorage.getItem('userToken') || localStorage.getItem('adminToken');
+    
+    console.log('Comment clicked - token:', token ? 'exists' : 'missing');
+    
+    if (!token) {
       setShowLoginPrompt(true);
       return;
     }
-    // API call to add comment
-    console.log(`Comment on post ${postId}: ${text}`);
+    
+    if (!text || !text.trim()) return;
+    
+    try {
+      const response = await fetch(`${import.meta.env.VITE_SERVER_LINK}/api/comments/post/${postId}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ comment: text.trim(), parentId })
+      });
+
+      if (response.ok) {
+        // Refresh comments for this post
+        const commentsRes = await fetch(`${import.meta.env.VITE_SERVER_LINK}/api/comments/post/${postId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (commentsRes.ok) {
+          const commentsResult = await commentsRes.json();
+          setPosts(posts.map(post => 
+            post.id === postId 
+              ? { ...post, comments: commentsResult.data || [] }
+              : post
+          ));
+        }
+      }
+    } catch (error) {
+      console.error('Error adding comment:', error);
+    }
   };
 
   const handleLogin = () => {
@@ -701,18 +957,17 @@ export default function PostsFeed() {
   const totalLikes = posts.reduce((sum, p) => sum + (p.likes || 0), 0);
 
   return (
-    <div className="min-h-screen bg-[#f0f2f5]">
+    <div className="h-screen bg-[#f0f2f5] overflow-hidden flex flex-col">
       {/* Top accent stripe */}
-      <div className="h-1 bg-gradient-to-r from-emerald-400 via-teal-500 to-emerald-600" />
+      <div className="h-1 bg-gradient-to-r from-emerald-400 via-teal-500 to-emerald-600 flex-shrink-0" />
       <PublicHeader />
 
       {/* ── 3-column layout ─────────────────────────────────────── */}
-      <main className="max-w-[1800px] mx-auto px-4 sm:px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-[350px_1fr_350px] gap-10 items-start">
+      <main className="flex-1 max-w-[1800px] mx-auto px-4 sm:px-6 py-4 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-[350px_1fr_350px] gap-10 h-full items-stretch">
 
           {/* ══ LEFT SIDEBAR — Search & Categories ══════════════ */}
-          <aside className="space-y-5 lg:sticky lg:top-6">
-
+          <aside className="space-y-5 h-full overflow-y-auto lg:overflow-visible">
             {/* Search widget */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
               <div className="px-4 pt-4 pb-3 border-b border-gray-50 flex items-center gap-2">
@@ -730,7 +985,7 @@ export default function PostsFeed() {
                     placeholder="Search posts, categories..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-9 pr-9 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 focus:bg-white transition-all"
+                    className="w-full pl-9 pr-9 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:bg-white transition-all"
                   />
                   {searchQuery && (
                     <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
@@ -844,11 +1099,21 @@ export default function PostsFeed() {
 
           </aside>
 
-          {/* ══ CENTER — Posts feed ══════════════════════════════ */}
-          <div className="min-w-0">
+          {/* ══ CENTER — Posts feed (SCROLLABLE) ══════════════ */}
+          <div className="min-w-0 h-full overflow-y-auto pr-2 custom-scrollbar flex flex-col items-center">
+            <style dangerouslySetInnerHTML={{
+              __html: `
+                .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+                .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+                .custom-scrollbar::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #059669; }
+              `}} />
+
+            {/* Content wrapper with max-width */}
+            <div className="w-full max-w-[600px]">
 
             {/* Feed header */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between w-full max-w-[600px]">
               <div>
               </div>
               {(searchQuery || selectedCategory) && (
@@ -866,7 +1131,7 @@ export default function PostsFeed() {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-5"
+                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-5 w-full max-w-[600px]"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full flex items-center justify-center">
@@ -896,7 +1161,7 @@ export default function PostsFeed() {
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center"
+                  className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center w-full max-w-[600px]"
                 >
                   <div className="w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-4">
                     <MessageCircle size={28} className="text-white" />
@@ -933,6 +1198,7 @@ export default function PostsFeed() {
                         post={post}
                         onLike={handleLike}
                         onComment={handleComment}
+                        onReply={handleComment}
                         isLoggedIn={isLoggedIn}
                         currentUser={currentUser}
                       />
@@ -942,9 +1208,11 @@ export default function PostsFeed() {
               )}
             </AnimatePresence>
 
+            </div>
+
             {/* End of Feed */}
             {!loading && filteredPosts.length > 0 && (
-              <div className="mt-8 text-center">
+              <div className="mt-8 text-center w-full max-w-[600px]">
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full border border-gray-100 shadow-sm text-xs text-gray-400">
                   <span>You've reached the end of the feed</span>
                   <span>·</span>
@@ -1048,10 +1316,12 @@ export default function PostsFeed() {
             <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-5 text-white shadow-sm">
               <div className="flex items-center gap-2 mb-3">
                 <Bell size={16} className="text-white/80" />
-                <span className="text-sm font-bold">Stay Updated</span>
+                <span className="text-sm font-bold">{isLoggedIn ? 'Notifications Active' : 'Stay Updated'}</span>
               </div>
               <p className="text-xs text-white/80 mb-4 leading-relaxed">
-                Sign in to get notified about new posts, replies, and community updates.
+                {isLoggedIn 
+                  ? "You're all set! Get notified about new posts, replies, and community updates." 
+                  : "Sign in to get notified about new posts, replies, and community updates."}
               </p>
               {isLoggedIn ? (
                 <div className="flex items-center gap-2 bg-white/20 rounded-xl px-3 py-2">
@@ -1059,7 +1329,7 @@ export default function PostsFeed() {
                     <User size={12} className="text-white" />
                   </div>
                   <span className="text-xs font-medium text-white">
-                    {currentUser?.name || "You're signed in"}
+                    {currentUser?.fullname || currentUser?.mu_fullname || currentUser?.email || "You're signed in"}
                   </span>
                 </div>
               ) : (

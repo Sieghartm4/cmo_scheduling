@@ -32,8 +32,8 @@ const useUserLogin = () => {
         setLoginData(result.data);
         localStorage.setItem('userToken', result.data.token);
         localStorage.setItem('user', JSON.stringify(result.data.user));
-        // Redirect user to appointment booking page
-        navigate('/book-appointment');
+        // Redirect user to home page
+        navigate('/');
       } else {
         setError(result.message || 'Login failed');
       }

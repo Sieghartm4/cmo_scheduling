@@ -1,8 +1,8 @@
 
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { useEffect } from 'react'
-import AdminLogin from './pages/login/AdminLogin'
-import UserLogin from './pages/login/UserLogin'
+import AdminLogin from './pages/login/admin/AdminLogin'
+import UserLogin from './pages/login/user/UserLogin'
 import Home from './pages/home/Home'
 import PostsFeed from './pages/postsFeed/PostsFeed'
 import Layout from './components/layout/Layout'
