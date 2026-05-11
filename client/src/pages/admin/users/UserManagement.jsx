@@ -1,59 +1,184 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { User, Plus, Edit2, Trash2, Eye, Mail, Shield, ToggleLeft, ToggleRight, RefreshCw, Search } from 'lucide-react';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { 
+  User, 
+  Plus, 
+  ShieldCheck, 
+  Search, 
+  ArrowRight, 
+  Download, 
+  Edit2,
+  MessageSquare,
+  Eye,
+  Trash2,
+  Mail,
+  Shield,
+  ToggleLeft,
+  ToggleRight
+} from 'lucide-react';
 import DynamicTable from '../../../components/DynamicTable';
 import DynamicToast from '../../../components/DynamicToast';
 import RouteProtection from '../../../components/RouteProtection';
 import ProtectedAction from '../../../components/ProtectedAction';
 import RightSideModal from '../../../components/RightSideModal';
 
-export default function UserManagement() {
+function UserManagementContent() {
   const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [viewingUser, setViewingUser] = useState(null);
   const [formData, setFormData] = useState({
-    mu_fullname: '',
-    mu_email: '',
-    mu_password: '',
-    mu_role: 'user',
-    mu_profile: '',
-    mu_status: 1
+    fullname: '',
+    email: '',
+    password: '',
+    role: 'user',
+    profile: '',
+    status: 'active'
   });
+  const [toast, setToast] = useState(null);
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  const fadeInUp = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+  };
 
+  // Fetch users
   const fetchUsers = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      const token = localStorage.getItem('adminToken');
+      const adminToken = localStorage.getItem('adminToken');
       const response = await fetch(`${import.meta.env.VITE_SERVER_LINK}/api/users`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (response.ok) {
-        const result = await response.json();
-        if (result.success) {
-          setUsers(result.data);
+        headers: {
+          'Authorization': `Bearer ${adminToken}` 
         }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch users');
       }
-    } catch (error) {
-      setError('Failed to fetch users');
+
+      const result = await response.json();
+      setUsers(result.data || []);
+    } catch (err) {
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
+  React.useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const handleAddUserClick = () => {
+    setEditingUser(null);
+    setFormData({ fullname: '', email: '', password: '', role: 'user', profile: '', status: 'active' });
+    setIsModalOpen(true);
+  };
+
+  const handleViewUserClick = (row) => {
+    setViewingUser(row);
+    setIsViewModalOpen(true);
+  };
+
+  const handleEditUserClick = (row) => {
+    setEditingUser(row);
+    setFormData({
+      fullname: row.fullname || '',
+      email: row.email || '',
+      password: '',
+      role: row.role || 'user',
+      profile: row.profile || '',
+      status: row.status || 'active'
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteUserClick = async (row) => {
+    if (window.confirm(`Are you sure you want to delete user "${row.fullname}"?`)) {
+      try {
+        const adminToken = localStorage.getItem('adminToken');
+        const response = await fetch(`${import.meta.env.VITE_SERVER_LINK}/api/users/${row.id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${adminToken}` 
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to delete user');
+        }
+
+        setToast({ type: 'success', message: 'User deleted successfully' });
+        fetchUsers();
+      } catch (err) {
+        setToast({ type: 'error', message: err.message });
+      }
+    }
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingUser(null);
+    setFormData({ fullname: '', email: '', password: '', role: 'user', profile: '', status: 'active' });
+  };
+
+  const handleViewModalClose = () => {
+    setIsViewModalOpen(false);
+    setViewingUser(null);
+  };
+
+  const handleEditFromView = () => {
+    if (viewingUser) {
+      setEditingUser(viewingUser);
+      setFormData({
+        fullname: viewingUser.fullname || '',
+        email: viewingUser.email || '',
+        password: '',
+        role: viewingUser.role || 'user',
+        profile: viewingUser.profile || '',
+        status: viewingUser.status || 'active'
+      });
+      setIsViewModalOpen(false);
+      setIsModalOpen(true);
+    }
+  };
+
+  const handleToastClose = () => {
+    setToast(null);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Validate form data
+    if (!formData.fullname.trim()) {
+      setToast({
+        type: 'error',
+        message: 'Full name is required'
+      });
+      return;
+    }
+    
+    if (!formData.email.trim()) {
+      setToast({
+        type: 'error',
+        message: 'Email is required'
+      });
+      return;
+    }
+    
     try {
-      const token = localStorage.getItem('adminToken');
+      console.log('Submitting form data:', formData);
+      
+      const adminToken = localStorage.getItem('adminToken');
       const url = editingUser 
-        ? `${import.meta.env.VITE_SERVER_LINK}/api/users/${editingUser.mu_id}`
+        ? `${import.meta.env.VITE_SERVER_LINK}/api/users/${editingUser.id}` 
         : `${import.meta.env.VITE_SERVER_LINK}/api/users`;
       
       const method = editingUser ? 'PUT' : 'POST';
@@ -61,352 +186,429 @@ export default function UserManagement() {
       const response = await fetch(url, {
         method,
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminToken}` 
         },
         body: JSON.stringify(formData)
       });
-      
-      if (response.ok) {
-        setShowModal(false);
-        setEditingUser(null);
-        setFormData({
-          mu_fullname: '',
-          mu_email: '',
-          mu_password: '',
-          mu_role: 'user',
-          mu_profile: '',
-          mu_status: 1
-        });
-        fetchUsers();
-      } else {
-        setError('Failed to save user');
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to save user');
       }
-    } catch (error) {
-      setError('Failed to save user');
-    }
-  };
 
-  const handleEdit = (user) => {
-    setEditingUser(user);
-    setFormData({
-      mu_fullname: user.mu_fullname,
-      mu_email: user.mu_email,
-      mu_password: '',
-      mu_role: user.mu_role,
-      mu_profile: user.mu_profile || '',
-      mu_status: user.mu_status
-    });
-    setShowModal(true);
-  };
-
-  const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to delete this user?')) return;
-    
-    try {
-      const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${import.meta.env.VITE_SERVER_LINK}/api/users/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+      setToast({
+        type: 'success',
+        message: `User "${formData.fullname}" ${editingUser ? 'updated' : 'created'} successfully!` 
       });
-      
-      if (response.ok) {
-        fetchUsers();
-      } else {
-        setError('Failed to delete user');
-      }
-    } catch (error) {
-      setError('Failed to delete user');
-    }
-  };
-
-  const toggleUserStatus = async (id, currentStatus) => {
-    try {
-      const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${import.meta.env.VITE_SERVER_LINK}/api/users/${id}/status`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ mu_status: currentStatus === 1 ? 0 : 1 })
+      setIsModalOpen(false);
+      setEditingUser(null);
+      // Reset form data
+      setFormData({
+        fullname: '',
+        email: '',
+        password: '',
+        role: 'user',
+        profile: '',
+        status: 'active'
       });
-      
-      if (response.ok) {
-        fetchUsers();
-      } else {
-        setError('Failed to update user status');
-      }
+      fetchUsers();
     } catch (error) {
-      setError('Failed to update user status');
+      console.error('Submit error:', error);
+      setToast({
+        type: 'error',
+        message: `Network error occurred while ${editingUser ? 'updating' : 'creating'} user` 
+      });
     }
-  };
-
-  const filteredUsers = users.filter(user => 
-    user.mu_fullname.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (user.mu_email && user.mu_email.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
-
-  const getRoleColor = (role) => {
-    return role === 'admin' ? 'text-emerald-600 bg-emerald-50' : 'text-blue-600 bg-blue-50';
-  };
-
-  const getRoleIcon = (role) => {
-    return role === 'admin' ? <Shield size={16} /> : <User size={16} />;
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <RefreshCw className="animate-spin text-emerald-600" size={24} />
+      <div className="h-full w-full flex flex-col items-center justify-center space-y-4">
+        <div className="w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-xs font-black uppercase tracking-[3px] text-gray-400">Syncing User Database...</p>
       </div>
     );
   }
 
-  return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
-          <p className="text-gray-600">Manage all system users</p>
+  if (error) {
+    return (
+      <div className="p-10 flex items-center justify-center">
+        <div className="bg-red-50 border-l-4 border-red-600 p-6 rounded-r-xl shadow-sm">
+          <h3 className="text-red-800 font-bold uppercase text-sm">System Error</h3>
+          <p className="text-red-600 text-sm mt-1">{error}</p>
         </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
-        >
-          <Plus size={20} />
-          New User
-        </button>
       </div>
+    );
+  }
 
-      <div className="mb-6">
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-          <input
-            type="text"
-            placeholder="Search users..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+  const columns = [
+    { key: 'id', label: 'ID' },
+    { key: 'fullname', label: 'Name' },
+    { key: 'email', label: 'Email' },
+    { key: 'role', label: 'Role' },
+    { 
+      key: 'status', 
+      label: 'Status',
+      render: (value) => (
+        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+          value === 'active' 
+            ? 'bg-green-100 text-green-800' 
+            : 'bg-red-100 text-red-800'
+        }`}>
+          {value === 'active' ? 'Active' : 'Inactive'}
+        </span>
+      )
+    },
+    { 
+      key: 'created_at', 
+      label: 'Created',
+      render: (value) => new Date(value).toLocaleDateString()
+    }
+  ];
+
+  const actions = [
+    {
+      icon: Edit2,
+      label: 'Edit',
+      onClick: handleEditUserClick,
+      className: 'text-emerald-600 hover:bg-emerald-50'
+    }
+  ];
+
+  return (
+    <div className="h-full flex flex-col bg-transparent overflow-hidden">
+
+      {/* --- HEADER SECTION --- */}
+      <div className="flex-shrink-0">
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={fadeInUp}
+          className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-4"
+        >
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 bg-black rounded-lg text-emerald-500 shadow-lg shadow-black/20">
+                <User size={24} />
+              </div>
+              <h1 className="text-4xl font-black text-black tracking-tighter">
+                User <span className="text-emerald-600 italic">Management</span>
+              </h1>
+            </div>
+          </div>
+
+          <div className="flex gap-3">
+            <button className="flex items-center gap-2 px-5 py-3 bg-white border border-gray-200 text-xs font-bold text-black rounded-xl hover:bg-gray-50 transition-all shadow-sm">
+              <Download size={14} />
+              EXPORT LIST
+            </button>
+            <ProtectedAction routeName="users">
+              <button onClick={handleAddUserClick} className="flex items-center gap-2 px-6 py-3 bg-black text-white text-xs font-bold rounded-xl hover:bg-emerald-600 transition-all uppercase tracking-widest">
+                <Plus size={14} />
+                Add User
+              </button>
+            </ProtectedAction>
+          </div>
+        </motion.div>
+
+        {/* --- SUMMARY TILES --- */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <SummaryCard
+            icon={<User className="text-emerald-600" size={20} />}
+            label="Total Users"
+            value={users?.length || 0}
+            subText="System Users"
+          />
+          <SummaryCard
+            icon={<ShieldCheck className="text-black" size={20} />}
+            label="Active"
+            value={users?.filter(u => u.status === 'active').length || 0}
+            subText="Enabled Users"
+          />
+          <SummaryCard
+            icon={<Shield className="text-gray-400" size={20} />}
+            label="Inactive"
+            value={users?.filter(u => u.status === 'inactive').length || 0}
+            subText="Disabled Users"
           />
         </div>
       </div>
 
-      {error && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">
-          {error}
-        </div>
-      )}
+      {/* --- TABLE SECTION --- */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3 }}
+        className="flex-1 min-h-0 bg-white rounded-2xl shadow-xl shadow-black/5 overflow-hidden border border-gray-100"
+      >
+        <DynamicTable
+          data={users}
+          title="User table"
+          enableAddButton={false}
+          enableActionColumn={true}
+          actionButtons={actions}
+          badgeColumns={[
+            {
+              column: 'status',
+              values: {
+                'active': 'green',
+                'inactive': 'red'
+              }
+            }
+          ]}
+        />
+      </motion.div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              <AnimatePresence>
-                {filteredUsers.map((user, index) => (
-                  <motion.tr
-                    key={user.mu_id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ delay: index * 0.05 }}
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center">
-                          <User size={16} className="text-emerald-600" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">{user.mu_fullname}</p>
-                          {user.mu_profile && (
-                            <p className="text-xs text-gray-500">{user.mu_profile}</p>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {user.mu_email ? (
-                        <div className="flex items-center gap-2 text-sm text-gray-900">
-                          <Mail size={16} className="text-gray-400" />
-                          {user.mu_email}
-                        </div>
-                      ) : (
-                        <span className="text-sm text-gray-400">No email</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full ${getRoleColor(user.mu_role)}`}>
-                        {getRoleIcon(user.mu_role)}
-                        {user.mu_role}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <button
-                        onClick={() => toggleUserStatus(user.mu_id, user.mu_status)}
-                        className="flex items-center gap-2"
-                      >
-                        {user.mu_status === 1 ? (
-                          <ToggleRight className="text-emerald-600" size={20} />
-                        ) : (
-                          <ToggleLeft className="text-gray-400" size={20} />
-                        )}
-                        <span className={`text-sm ${user.mu_status === 1 ? 'text-emerald-600' : 'text-gray-400'}`}>
-                          {user.mu_status === 1 ? 'Active' : 'Inactive'}
-                        </span>
-                      </button>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-500">
-                        {new Date(user.mu_created_at).toLocaleDateString()}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => handleEdit(user)}
-                          className="p-1 text-gray-400 hover:text-emerald-600 transition-colors"
-                        >
-                          <Edit2 size={16} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(user.mu_id)}
-                          className="p-1 text-gray-400 hover:text-red-600 transition-colors"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </motion.tr>
-                ))}
-              </AnimatePresence>
-            </tbody>
-          </table>
+      {/* Add User Modal */}
+      <RightSideModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        title={editingUser ? 'Edit User' : 'Create New User'}
+      >
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-4">
+            <div>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-700 mb-2">
+                Full Name <span className="text-red-600">*</span>
+              </label>
+              <input
+                type="text"
+                value={formData.fullname}
+                onChange={(e) => setFormData({ ...formData, fullname: e.target.value })}
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+                placeholder="Enter full name..."
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-700 mb-2">
+                Email <span className="text-red-600">*</span>
+              </label>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+                placeholder="Enter email address..."
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-700 mb-2">
+                Password {!editingUser && <span className="text-red-600">*</span>}
+              </label>
+              <input
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+                placeholder={editingUser ? "Leave blank to keep current password" : "Enter password..."}
+                required={!editingUser}
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-700 mb-2">
+                Role <span className="text-red-600">*</span>
+              </label>
+              <select
+                value={formData.role}
+                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+                required
+              >
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-700 mb-2">
+                Profile/Title
+              </label>
+              <input
+                type="text"
+                value={formData.profile}
+                onChange={(e) => setFormData({ ...formData, profile: e.target.value })}
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+                placeholder="e.g. Manager, Developer, etc."
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-700 mb-2">
+                Status <span className="text-red-600">*</span>
+              </label>
+              <select
+                value={formData.status}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+                required
+              >
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={handleCloseModal}
+              className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 text-xs font-black rounded-xl hover:bg-gray-200 transition-all uppercase tracking-widest"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="flex-1 px-4 py-3 bg-black text-white text-xs font-black rounded-xl hover:bg-emerald-600 transition-all uppercase tracking-widest flex items-center justify-center gap-2"
+            >
+              <Plus size={14} />
+              {editingUser ? 'Update User' : 'Create User'}
+            </button>
+          </div>
+        </form>
+      </RightSideModal>
+
+      {/* View User Modal */}
+      <RightSideModal
+        isOpen={isViewModalOpen}
+        onClose={handleViewModalClose}
+        title="View User Details"
+      >
+        {viewingUser && (
+          <div className="space-y-4">
+            {/* Header Section */}
+            <div className="border-b border-gray-200 pb-4">
+              <h3 className="text-lg font-black text-black uppercase tracking-tight mb-2">User Details</h3>
+              <div className="flex items-center gap-3">
+                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${
+                  viewingUser.status === 'active' 
+                    ? 'bg-green-100 text-green-800 border-green-200'
+                    : 'bg-red-100 text-red-800 border-red-200'
+                }`}>
+                  {viewingUser.status === 'active' ? 'ACTIVE' : 'INACTIVE'}
+                </span>
+                <span className="text-xs text-gray-500">
+                  ID: #{viewingUser.id}
+                </span>
+              </div>
+            </div>
+
+            {/* Name Section */}
+            <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Full Name</label>
+              <h4 className="text-base font-bold text-black leading-tight">
+                {viewingUser.fullname || 'Untitled User'}
+              </h4>
+            </div>
+
+            {/* Email Section */}
+            <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Email Address</label>
+              <div className="bg-white p-4 rounded-lg border border-gray-200 min-h-[120px]">
+                <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+                  {viewingUser.email || 'No email available'}
+                </p>
+              </div>
+            </div>
+
+            {/* Role Section */}
+            <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Role</label>
+              <div className="bg-white p-4 rounded-lg border border-gray-200">
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  {viewingUser.role || 'No role assigned'}
+                </p>
+              </div>
+            </div>
+
+            {/* Profile Section */}
+            <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Profile/Title</label>
+              <div className="bg-white p-4 rounded-lg border border-gray-200 min-h-[120px]">
+                <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+                  {viewingUser.profile || 'No profile information available'}
+                </p>
+              </div>
+            </div>
+
+            {/* Created Date Section */}
+            <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Created Date</label>
+              <p className="text-sm text-gray-600">
+                {viewingUser.created_at ? 
+                  new Date(viewingUser.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  }) : 'No date available'
+                }
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 pt-4">
+              <button
+                onClick={handleEditFromView}
+                className="flex-1 px-4 py-3 bg-black text-white text-xs font-black rounded-xl hover:bg-emerald-600 transition-all uppercase tracking-widest flex items-center justify-center gap-2"
+              >
+                <Edit2 size={14} />
+                Edit User
+              </button>
+              <button
+                onClick={handleViewModalClose}
+                className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 text-xs font-black rounded-xl hover:bg-gray-200 transition-all uppercase tracking-widest"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+      </RightSideModal>
+
+      {/* Toast */}
+      {toast && (
+        <DynamicToast
+          type={toast.type}
+          message={toast.message}
+          onClose={handleToastClose}
+        />
+      )}
+    </div>
+  );
+}
+
+// Summary Card Component
+function SummaryCard({ icon, label, value, subText }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.1 }}
+      className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow"
+    >
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{label}</p>
+          <p className="text-2xl font-bold text-gray-900 mt-1">{value}</p>
+          <p className="text-xs text-gray-600 mt-1">{subText}</p>
+        </div>
+        <div className="p-3 bg-gray-50 rounded-lg">
+          {icon}
         </div>
       </div>
+    </motion.div>
+  );
+}
 
-      <AnimatePresence>
-        {showModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-            onClick={() => setShowModal(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-xl p-6 w-full max-w-md"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <h2 className="text-xl font-bold text-gray-900 mb-4">
-                {editingUser ? 'Edit User' : 'New User'}
-              </h2>
-              
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                  <input
-                    type="text"
-                    value={formData.mu_fullname}
-                    onChange={(e) => setFormData({ ...formData, mu_fullname: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                  <input
-                    type="email"
-                    value={formData.mu_email}
-                    onChange={(e) => setFormData({ ...formData, mu_email: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Password {editingUser && <span className="text-gray-400">(leave blank to keep current)</span>}
-                  </label>
-                  <input
-                    type="password"
-                    value={formData.mu_password}
-                    onChange={(e) => setFormData({ ...formData, mu_password: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                    required={!editingUser}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                  <select
-                    value={formData.mu_role}
-                    onChange={(e) => setFormData({ ...formData, mu_role: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                    required
-                  >
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Profile/Title</label>
-                  <input
-                    type="text"
-                    value={formData.mu_profile}
-                    onChange={(e) => setFormData({ ...formData, mu_profile: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                    placeholder="e.g. Manager, Developer, etc."
-                  />
-                </div>
-
-                {editingUser && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                    <select
-                      value={formData.mu_status}
-                      onChange={(e) => setFormData({ ...formData, mu_status: parseInt(e.target.value) })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                    >
-                      <option value={1}>Active</option>
-                      <option value={0}>Inactive</option>
-                    </select>
-                  </div>
-                )}
-
-                <div className="flex gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setShowModal(false)}
-                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
-                  >
-                    {editingUser ? 'Update' : 'Create'}
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+export default function UserManagement() {
+  return (
+    <RouteProtection>
+      <UserManagementContent />
+    </RouteProtection>
   );
 }

@@ -15,6 +15,7 @@ import Appointments from './pages/admin/appointments/Appointments'
 import UserManagement from './pages/admin/users/UserManagement'
 import Posts from './pages/admin/posts/Posts'
 import Category from './pages/admin/category/Category'
+import WebsiteSettings from './pages/admin/websiteSettings/WebsiteSettings'
 import { preventCaching, forceReloadOnBack } from './utils/cacheControl'
 import { ModalProvider } from './contexts/ModalContext'
 
@@ -96,6 +97,11 @@ function App() {
             <Route path="admin/categories" element={
               <ProtectedRoute routeName="admin-dashboard">
                 <Category />
+              </ProtectedRoute>
+            } />
+            <Route path="admin/website-settings" element={
+              <ProtectedRoute routeName="admin-dashboard">
+                <WebsiteSettings />
               </ProtectedRoute>
             } />
           </Route>

@@ -31,9 +31,9 @@ module.exports = {
         allowNull: true
       },
       mu_status: {
-        type: Sequelize.TINYINT,
+        type: Sequelize.ENUM('active', 'inactive'),
         allowNull: false,
-        defaultValue: 1
+        defaultValue: 'active'
       },
       mu_created_at: {
         type: Sequelize.DATE,

@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import PublicHeader from '../../components/layout/PublicHeader';
 import { 
   Calendar,
@@ -17,6 +18,9 @@ import {
 } from 'lucide-react';
 
 export default function Home() {
+  const navigate = useNavigate();
+  const [homePageSettings, setHomePageSettings] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const fadeInUp = {
     hidden: { opacity: 0, y: 30 },
@@ -32,6 +36,35 @@ export default function Home() {
       }
     }
   };
+
+  // Fetch home page settings from API
+  useEffect(() => {
+    const fetchHomePageSettings = async () => {
+      try {
+        const timestamp = new Date().getTime();
+        const response = await fetch(`${import.meta.env.VITE_SERVER_LINK}/api/home-page-settings?t=${timestamp}`, {
+          cache: 'no-cache'
+        });
+        console.log('API Response status:', response.status);
+        if (response.ok) {
+          const result = await response.json();
+          console.log('API Response data:', result);
+          if (result.success && result.data) {
+            console.log('Setting home page settings:', result.data);
+            setHomePageSettings(result.data);
+          } else {
+            console.log('No data in response or success false');
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching home page settings:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHomePageSettings();
+  }, []);
 
   const features = [
     {
@@ -63,13 +96,63 @@ export default function Home() {
     { number: "99%", label: "Satisfaction" }
   ];
 
+  // Determine background style
+  const getBackgroundStyle = () => {
+    if (!homePageSettings || loading) {
+      return {};
+    }
+    
+    const bgValue = homePageSettings.background_value;
+    const isBase64 = bgValue?.startsWith('data:') || (bgValue?.startsWith('/') && bgValue?.includes('9j/'));
+    const isUrl = bgValue?.startsWith('http');
+    
+    if (isBase64 || isUrl) {
+      let imageSrc = bgValue;
+      if (isBase64 && !bgValue.startsWith('data:')) {
+        imageSrc = `data:image/jpeg;base64,${bgValue}`;
+      }
+      
+      return {
+        // ADDED: Dark overlay to fix readability and blur effect
+        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${imageSrc})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      };
+    }
+    return {};
+  };
+
+  const getBackgroundClass = () => {
+    if (loading) {
+      return 'bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50';
+    }
+    
+    if (!homePageSettings) {
+      return 'bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50';
+    }
+    
+    const bgValue = homePageSettings.background_value;
+    const isBase64 = bgValue?.startsWith('data:') || (bgValue?.startsWith('/') && bgValue?.includes('9j/'));
+    const isUrl = bgValue?.startsWith('http');
+    
+    if (isBase64 || isUrl) {
+      return '';
+    }
+    
+    return `bg-gradient-to-br ${bgValue || 'from-emerald-50 via-teal-50 to-cyan-50'}`;
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
+    <div className="min-h-screen">
       <PublicHeader />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
+      <section 
+        className={`relative overflow-hidden min-h-[80vh] flex items-center ${getBackgroundClass()}`} 
+        style={getBackgroundStyle()}
+      >
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left Content */}
             <motion.div
@@ -79,27 +162,27 @@ export default function Home() {
               className="space-y-8"
             >
               <motion.div variants={fadeInUp}>
-                <span className="inline-block px-4 py-2 bg-emerald-100 text-emerald-700 rounded-full text-sm font-semibold mb-6">
-                  🚀 Welcome to the Future of Scheduling
+                <span className="inline-block px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-full text-sm font-semibold mb-6">
+                  {loading ? 'Welcome to the Future of Scheduling' : homePageSettings?.welcome_badge || 'Welcome to the Future of Scheduling'}
                 </span>
               </motion.div>
 
               <motion.h1 
                 variants={fadeInUp}
-                className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight"
+                className="text-5xl lg:text-7xl font-bold text-white leading-tight"
               >
-                Connect, Schedule, and{' '}
-                <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-                  Stay Informed
+                {loading ? 'Connect, Schedule, and' : homePageSettings?.hero_title?.split(' ').slice(0, -1).join(' ') || 'Connect, Schedule, and'}{' '}
+                <span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
+                  {loading ? 'Stay Informed' : homePageSettings?.hero_title?.split(' ').slice(-1)[0] || 'Stay Informed'}
                 </span>
               </motion.h1>
 
-              <motion.p 
+              <motion.p
                 variants={fadeInUp}
-                className="text-xl text-gray-600 leading-relaxed"
+                className="text-xl text-gray-100 leading-relaxed drop-shadow-md"
               >
-                Your all-in-one platform for appointment scheduling and community engagement. 
-                Book appointments effortlessly and stay connected with our vibrant community.
+                {loading ? 'Your all-in-one platform for appointment scheduling and community engagement. Book appointments effortlessly and stay connected with your vibrant community.' : 
+                  homePageSettings?.hero_description || 'Your all-in-one platform for appointment scheduling and community engagement. Book appointments effortlessly and stay connected with your vibrant community.'}
               </motion.p>
 
               <motion.div 
@@ -115,7 +198,7 @@ export default function Home() {
                 </button>
                 <button 
                   onClick={() => navigate('/login')}
-                  className="px-8 py-4 bg-white text-gray-700 border-2 border-gray-200 rounded-xl font-semibold hover:border-emerald-500 hover:text-emerald-600 transition-all"
+                  className="px-8 py-4 bg-white/10 backdrop-blur-md text-white border border-white/20 rounded-xl font-semibold hover:bg-white/30 transition-all"
                 >
                   Get Started
                 </button>
@@ -130,8 +213,8 @@ export default function Home() {
                     </div>
                   ))}
                 </div>
-                <p className="text-sm text-gray-600">
-                  <span className="font-semibold text-gray-900">10,000+</span> users trust us
+                <p className="text-sm text-gray-200">
+                  <span className="font-semibold text-white">10,000+</span> users trust us
                 </p>
               </motion.div>
             </motion.div>
@@ -143,7 +226,7 @@ export default function Home() {
               transition={{ duration: 0.8, delay: 0.2 }}
               className="relative"
             >
-              <div className="relative bg-white rounded-3xl shadow-2xl p-6 border border-gray-100">
+              <div className="relative bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl p-6 border border-white/20">
                 {/* Sample Post Card */}
                 <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-6 mb-4">
                   <div className="flex items-center gap-3 mb-4">
@@ -196,9 +279,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Background Decorations */}
-        <div className="absolute top-20 left-10 w-72 h-72 bg-emerald-200/30 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-teal-200/30 rounded-full blur-3xl" />
+        {/* REMOVED: Background Decoration divs that were causing the blurriness */}
       </section>
 
       {/* Stats Section */}
@@ -225,7 +306,7 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20">
+      <section id="features" className="py-20 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -341,7 +422,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials Section */}
-      <section id="testimonials" className="py-20">
+      <section id="testimonials" className="py-20 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -444,10 +525,26 @@ export default function Home() {
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
-                  <Calendar size={24} className="text-white" />
-                </div>
-                <span className="text-xl font-bold text-white">CMO Connect</span>
+                {homePageSettings?.website_logo ? (
+                  // If logo exists, display it
+                  homePageSettings.website_logo.startsWith('data:') || homePageSettings.website_logo.startsWith('http') ? (
+                    <img 
+                      src={homePageSettings.website_logo.startsWith('data:') ? homePageSettings.website_logo : `data:image/jpeg;base64,${homePageSettings.website_logo}`}
+                      alt={homePageSettings.website_title || 'Logo'}
+                      className="w-25 h-25 rounded-xl object-cover"
+                    />
+                  ) : (
+                    <div className="w-25 h-25 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
+                      <Calendar size={24} className="text-white" />
+                    </div>
+                  )
+                ) : (
+                  // Default logo if none provided
+                  <div className="w-25 h-25 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
+                    <Calendar size={24} className="text-white" />
+                  </div>
+                )}
+                <span className="text-xl font-bold text-white">{homePageSettings?.website_title || 'CMO Connect'}</span>
               </div>
               <p className="text-sm">
                 Your all-in-one platform for scheduling and community engagement.
@@ -472,13 +569,14 @@ export default function Home() {
             <div>
               <h4 className="text-white font-semibold mb-4">Contact</h4>
               <ul className="space-y-2 text-sm">
-                <li>support@cmoconnect.com</li>
-                <li>+1 (555) 123-4567</li>
+                <li>{homePageSettings?.contact_email || 'support@cmoconnect.com'}</li>
+                <li>{homePageSettings?.contact_number || '+1 (555) 123-4567'}</li>
+                <li>{homePageSettings?.location || '123 Business Ave, Suite 100, San Francisco, CA 94105'}</li>
               </ul>
             </div>
           </div>
           <div className="border-t border-gray-800 pt-8 text-center text-sm">
-            <p>&copy; 2026 CMO Connect. All rights reserved.</p>
+            <p>&copy; 2026 {homePageSettings?.website_title || 'CMO Connect'}. All rights reserved.</p>
           </div>
         </div>
       </footer>

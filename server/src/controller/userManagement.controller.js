@@ -1,28 +1,40 @@
 const { checkConnection, SelectAll, SelectWithCondition, Insert, Update, Delete, Query } = require('../database/util/queries.util');
 const { DecryptString, CreateHashPassword } = require('../util/cryptography.util');
+const { Master } = require('../database/model/Master')
+const { SQLQueryBuilder } = require('../util/helper.util')
+const sql = new SQLQueryBuilder()
 
 // Get all users
 const getUsers = async (req, res, next) => {
   try {
-    const query = `SELECT mu_id, mu_fullname, mu_email, mu_role, mu_profile, mu_status, mu_created_at FROM master_user ORDER BY mu_created_at DESC`;
-    
-    const users = await Query(query);
-    
+
+    const query = sql.select([
+      { col: Master.master_user.selectOptionColumns.id, as: 'id' },
+      { col: Master.master_user.selectOptionColumns.fullname, as: 'fullname' },
+      { col: Master.master_user.selectOptionColumns.email, as: 'email' },
+      { col: Master.master_user.selectOptionColumns.role, as: 'role' },
+      { col: Master.master_user.selectOptionColumns.status, as: 'status' }
+    ])
+      .from(Master.master_user.tablename)
+      .build();
+
+    let users = await Query(query, [], [Master.master_user.prefix_, Master.master_access.prefix_]);
+
     res.status(200).json({
       success: true,
       message: 'Users retrieved successfully',
       data: users,
       count: users.length,
       timestamp: new Date().toISOString()
-    });
+    })
 
   } catch (error) {
-    console.error('Error in getUsers:', error);
-    res.status(500).json({
+    console.error('Error fetching users:', error)
+    return res.status(500).json({ 
       success: false,
-      message: 'Failed to retrieve users',
-      error: error.message
-    });
+      message: 'Server error while fetching users',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    })
   }
 };
 
@@ -31,13 +43,20 @@ const getUserById = async (req, res, next) => {
   try {
     const { id } = req.params;
     
-    const query = `
-      SELECT mu_id, mu_fullname, mu_email, mu_role, mu_profile, mu_status, mu_created_at
-      FROM master_user 
-      WHERE mu_id = ?
-    `;
+    const query = sql.select([
+      { col: Master.master_user.selectOptionColumns.id, as: 'id' },
+      { col: Master.master_user.selectOptionColumns.fullname, as: 'fullname' },
+      { col: Master.master_user.selectOptionColumns.email, as: 'email' },
+      { col: Master.master_access.selectOptionColumns.access_name, as: 'role' },
+      { col: Master.master_user.selectOptionColumns.profile, as: 'profile' },
+      { col: Master.master_user.selectOptionColumns.status, as: 'status' },
+      { col: Master.master_user.selectOptionColumns.created_at, as: 'created_at' }
+    ])
+      .from(Master.master_user.tablename)
+      .where(Master.master_user.selectOptionColumns.id, '=', id)
+      .build();
     
-    const user = await SelectWithCondition(query, [id]);
+    const user = await Query(query, [], [Master.master_user.prefix_, Master.master_access.prefix_]);
     
     if (user.length === 0) {
       return res.status(404).json({
@@ -84,8 +103,13 @@ const createUser = async (req, res, next) => {
 
     // Check if email already exists (if provided)
     if (mu_email) {
-      const checkQuery = `SELECT mu_email FROM master_user WHERE mu_email = ?`;
-      const existing = await SelectWithCondition(checkQuery, [mu_email]);
+      const checkQuery = sql.select([
+          { col: Master.master_user.selectOptionColumns.email, as: 'mu_email' }
+        ])
+          .from(Master.master_user.tablename)
+          .where(Master.master_user.selectOptionColumns.email, '=', mu_email)
+          .build();
+      const existing = await Query(checkQuery, [], [Master.master_user.prefix_]);
       
       if (existing.length > 0) {
         return res.status(400).json({
@@ -98,10 +122,12 @@ const createUser = async (req, res, next) => {
     // Hash password
     const hashedPassword = await CreateHashPassword(mu_password);
 
-    const query = `
-      INSERT INTO master_user (mu_fullname, mu_email, mu_password, mu_role, mu_profile)
-      VALUES (?, ?, ?, ?, ?)
-    `;
+    const query = sql.insert(Master.master_user.tablename, {
+        columns: Master.master_user.insertColumns,
+        prefix: Master.master_user.prefix_,
+        isTransaction: false
+      })
+        .build();
     
     const result = await Insert(query, [mu_fullname, mu_email || null, hashedPassword, mu_role, mu_profile || null]);
     
@@ -136,8 +162,13 @@ const updateUser = async (req, res, next) => {
     } = req.body;
 
     // Check if user exists
-    const checkQuery = `SELECT mu_id FROM master_user WHERE mu_id = ?`;
-    const existing = await SelectWithCondition(checkQuery, [id]);
+    const checkQuery = sql.select([
+        { col: Master.master_user.selectOptionColumns.id, as: 'mu_id' }
+      ])
+        .from(Master.master_user.tablename)
+        .where(Master.master_user.selectOptionColumns.id, '=', id)
+        .build();
+    const existing = await Query(checkQuery, [id], [Master.master_user.prefix_]);
     
     if (existing.length === 0) {
       return res.status(404).json({
@@ -148,8 +179,14 @@ const updateUser = async (req, res, next) => {
 
     // Check if email already exists for other users (if provided)
     if (mu_email) {
-      const emailCheckQuery = `SELECT mu_id FROM master_user WHERE mu_email = ? AND mu_id != ?`;
-      const emailExisting = await SelectWithCondition(emailCheckQuery, [mu_email, id]);
+      const emailCheckQuery = sql.select([
+          { col: Master.master_user.selectOptionColumns.id, as: 'mu_id' }
+        ])
+          .from(Master.master_user.tablename)
+          .where(Master.master_user.selectOptionColumns.email, '=', mu_email)
+          .andWhere(Master.master_user.selectOptionColumns.id, '!=', id)
+          .build();
+      const emailExisting = await Query(emailCheckQuery, [], [Master.master_user.prefix_]);
       
       if (emailExisting.length > 0) {
         return res.status(400).json({
@@ -159,23 +196,26 @@ const updateUser = async (req, res, next) => {
       }
     }
 
-    let query = `
-      UPDATE master_user 
-      SET mu_fullname = ?, mu_email = ?, mu_role = ?, mu_profile = ?, mu_status = ?
-    `;
-    let params = [mu_fullname, mu_email || null, mu_role, mu_profile || null, mu_status || 1];
+    let updateFields = {
+        [Master.master_user.updateOptionColumns.fullname]: mu_fullname,
+        [Master.master_user.updateOptionColumns.email]: mu_email || null,
+        [Master.master_user.updateOptionColumns.role]: mu_role,
+        [Master.master_user.updateOptionColumns.profile]: mu_profile || null,
+        [Master.master_user.updateOptionColumns.status]: mu_status || 'active'
+      };
 
     // Add password to update if provided
     if (mu_password) {
       const hashedPassword = await CreateHashPassword(mu_password);
-      query += `, mu_password = ?`;
-      params.push(hashedPassword);
+      updateFields[Master.master_user.updateOptionColumns.password] = hashedPassword;
     }
 
-    query += ` WHERE mu_id = ?`;
-    params.push(id);
+    const query = sql.update(Master.master_user.tablename)
+      .set(updateFields)
+      .where(`${Master.master_user.updateOptionColumns.id} = ?`)
+      .build();
     
-    await Update(query, params);
+    await Update(query, [id], [Master.master_user.prefix_]);
     
     res.status(200).json({
       success: true,
@@ -253,8 +293,13 @@ const updateUserStatus = async (req, res, next) => {
     }
 
     // Check if user exists
-    const checkQuery = `SELECT mu_id FROM master_user WHERE mu_id = ?`;
-    const existing = await SelectWithCondition(checkQuery, [id]);
+    const checkQuery = sql.select([
+        { col: Master.master_user.selectOptionColumns.id, as: 'mu_id' }
+      ])
+        .from(Master.master_user.tablename)
+        .where(Master.master_user.selectOptionColumns.id, '=', id)
+        .build();
+    const existing = await Query(checkQuery, [id], [Master.master_user.prefix_]);
     
     if (existing.length === 0) {
       return res.status(404).json({
@@ -263,8 +308,14 @@ const updateUserStatus = async (req, res, next) => {
       });
     }
 
-    const query = `UPDATE master_user SET mu_status = ? WHERE mu_id = ?`;
-    await Update(query, [mu_status, id]);
+    const query = sql.update(Master.master_user.tablename)
+      .set({
+        [Master.master_user.updateOptionColumns.status]: mu_status
+      })
+      .where(`${Master.master_user.updateOptionColumns.id} = ?`)
+      .build();
+    
+    await Update(query, [id], [Master.master_user.prefix_]);
     
     res.status(200).json({
       success: true,

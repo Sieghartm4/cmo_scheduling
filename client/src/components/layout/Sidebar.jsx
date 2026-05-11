@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Calendar, Users, Settings, Activity, ChevronRight, MessageSquare, Tag } from 'lucide-react';
+import { LayoutDashboard, Calendar, Users, Settings, Activity, ChevronRight, MessageSquare, Tag, Globe } from 'lucide-react';
 
 export default function Sidebar({ isCollapsed }) {
     const [isDashboardOpen, setIsDashboardOpen] = useState(false);
@@ -27,15 +27,24 @@ export default function Sidebar({ isCollapsed }) {
     useEffect(() => {
         const currentPath = location.pathname;
         
-        if (currentPath.includes('/dashboard')) {
+        // More comprehensive path checking for better navigation state management
+        const isDashboardPath = currentPath.includes('/dashboard');
+        const isUsersPath = currentPath.includes('/users') || currentPath.includes('/admin/users') || 
+                          currentPath.includes('/admin/appointments') || currentPath.includes('/admin/posts') || 
+                          currentPath.includes('/admin/categories');
+        const isSettingsPath = currentPath.includes('/settings') || currentPath.includes('/admin/website-settings') || 
+                           currentPath.includes('/settings/general') || currentPath.includes('/settings/system') || 
+                           currentPath.includes('/settings/notifications');
+        
+        if (isDashboardPath) {
             setIsDashboardOpen(true);
             setIsUsersOpen(false);
             setIsSettingsOpen(false);
-        } else if (currentPath.includes('/users')) {
+        } else if (isUsersPath) {
             setIsDashboardOpen(false);
             setIsUsersOpen(true);
             setIsSettingsOpen(false);
-        } else if (currentPath.includes('/settings')) {
+        } else if (isSettingsPath) {
             setIsDashboardOpen(false);
             setIsUsersOpen(false);
             setIsSettingsOpen(true);
@@ -155,6 +164,9 @@ export default function Sidebar({ isCollapsed }) {
 
                     {isSettingsOpen && !isCollapsed && (
                         <div className="mt-2 ml-4 space-y-1 border-l border-emerald-700 pl-4">
+                            <NavLink to="/admin/website-settings" icon={Globe}>
+                                Website Settings
+                            </NavLink>
                             <NavLink to="/settings/general" icon={Settings}>
                                 General Settings
                             </NavLink>

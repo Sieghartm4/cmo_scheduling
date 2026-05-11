@@ -11,6 +11,7 @@ const adminDashboardRouter = require('../routes/adminDashboard.routes')
 const { categoryRouter } = require('../routes/category.routes')
 const postCommentRouter = require('../routes/postComment.routes')
 const postLikeRouter = require('../routes/postLike.routes')
+const { homePageSettingsRouter } = require('../routes/homePageSettings.routes')
 
 const initRoutes = (app) => {
   app.use('/credentials', credentialsRouter)
@@ -26,6 +27,7 @@ const initRoutes = (app) => {
   app.use('/api/categories', categoryRouter)
   app.use('/api/comments', postCommentRouter)
   app.use('/api/likes', postLikeRouter)
+  app.use('/api/home-page-settings', homePageSettingsRouter)
 }
 
 module.exports = { initRoutes }

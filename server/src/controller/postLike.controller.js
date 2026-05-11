@@ -1,4 +1,10 @@
-const { Query } = require('../database/util/queries.util');
+const os = require('os')
+const { checkConnection, SelectAll, Transaction, Query, Insert, SelectWithCondition } = require('../database/util/queries.util')
+const { formatMemoryUsage, formatTime, DataModeling } = require('../util/helper.util')
+const { Master } = require('../database/model/Master')
+const { SQLQueryBuilder } = require('../util/helper.util')
+const sql = new SQLQueryBuilder()
+require('dotenv').config()
 
 // Get like count for a post and check if current user liked it
 const getPostLikes = async (req, res) => {
@@ -16,19 +22,26 @@ const getPostLikes = async (req, res) => {
     }
     
     // Get total like count
-    const countQuery = `
-      SELECT COUNT(*) as count FROM post_like WHERE pl_post_id = ?
-    `;
-    const countResult = await Query(countQuery, [postId]);
+    const countQuery = sql.select([
+      { col: 'COUNT(*)', as: 'count' }
+    ])
+      .from(Master.post_like.tablename)
+      .where(Master.post_like.selectOptionColumns.post_id, '=', postId)
+      .build();
+    const countResult = await Query(countQuery, [postId], [Master.post_like.prefix_]);
     const likeCount = countResult[0]?.count || 0;
     
     // Check if current user liked this post
     let userLiked = false;
     if (!isNaN(userId)) {
-      const userLikeQuery = `
-        SELECT pl_id FROM post_like WHERE pl_post_id = ? AND pl_mu_id = ?
-      `;
-      const userLikeResult = await Query(userLikeQuery, [postId, userId]);
+      const userLikeQuery = sql.select([
+        { col: Master.post_like.selectOptionColumns.id, as: 'pl_id' }
+      ])
+        .from(Master.post_like.tablename)
+        .where(Master.post_like.selectOptionColumns.post_id, '=', postId)
+        .andWhere(Master.post_like.selectOptionColumns.mu_id, '=', userId)
+        .build();
+      const userLikeResult = await Query(userLikeQuery, [postId, userId], [Master.post_like.prefix_]);
       userLiked = userLikeResult.length > 0;
     }
     
@@ -75,22 +88,34 @@ const toggleLike = async (req, res) => {
     }
     
     // Check if user already liked this post
-    const checkQuery = `
-      SELECT pl_id FROM post_like WHERE pl_post_id = ? AND pl_mu_id = ?
-    `;
-    const existingLike = await Query(checkQuery, [postId, userId]);
+    const checkQuery = sql.select([
+        { col: Master.post_like.selectOptionColumns.id, as: 'pl_id' }
+      ])
+        .from(Master.post_like.tablename)
+        .where(Master.post_like.selectOptionColumns.post_id, '=', postId)
+        .andWhere(Master.post_like.selectOptionColumns.mu_id, '=', userId)
+        .build();
+    const existingLike = await Query(checkQuery, [postId, userId], [Master.post_like.prefix_]);
     console.log('Existing like found:', existingLike.length > 0, existingLike);
     
     if (existingLike.length > 0) {
       // Unlike: remove the like
       console.log('Removing like for user', userId, 'on post', postId);
-      const deleteQuery = `DELETE FROM post_like WHERE pl_post_id = ? AND pl_mu_id = ?`;
-      await Query(deleteQuery, [postId, userId]);
+      const deleteQuery = sql.delete(Master.post_like.tablename)
+        .where(Master.post_like.selectOptionColumns.post_id, '=', postId)
+        .andWhere(Master.post_like.selectOptionColumns.mu_id, '=', userId)
+        .build();
+      await Query(deleteQuery, [], [Master.post_like.prefix_]);
       console.log('Like removed successfully');
       
       // Get updated count
-      const countQuery = `SELECT COUNT(*) as count FROM post_like WHERE pl_post_id = ?`;
-      const countResult = await Query(countQuery, [postId]);
+      const countQuery = sql.select([
+        { col: 'COUNT(*)', as: 'count' }
+      ])
+        .from(Master.post_like.tablename)
+        .where(Master.post_like.selectOptionColumns.post_id, '=', postId)
+        .build();
+      const countResult = await Query(countQuery, [], [Master.post_like.prefix_]);
       
       res.status(200).json({
         success: true,
@@ -105,8 +130,13 @@ const toggleLike = async (req, res) => {
       console.log('Adding like for user', userId, 'on post', postId);
       
       // Check if post exists first
-      const postCheckQuery = `SELECT post_id FROM post WHERE post_id = ?`;
-      const postExists = await Query(postCheckQuery, [postId]);
+      const postCheckQuery = sql.select([
+        { col: Master.post.selectOptionColumns.id, as: 'post_id' }
+      ])
+        .from(Master.post.tablename)
+        .where(Master.post.selectOptionColumns.id, '=', postId)
+        .build();
+      const postExists = await Query(postCheckQuery, [], [Master.post.prefix_]);
       
       if (postExists.length === 0) {
         return res.status(404).json({
@@ -115,15 +145,23 @@ const toggleLike = async (req, res) => {
         });
       }
       
-      const insertQuery = `
-        INSERT INTO post_like (pl_post_id, pl_mu_id, pl_created_at) VALUES (?, ?, NOW())
-      `;
-      await Query(insertQuery, [postId, userId]);
+      const insertQuery = sql.insert(Master.post_like.tablename, {
+        columns: Master.post_like.insertColumns,
+        prefix: Master.post_like.prefix_,
+        isTransaction: false
+      })
+        .build();
+      await Insert(insertQuery, [postId, userId, new Date()]);
       console.log('Like added successfully');
       
       // Get updated count
-      const countQuery = `SELECT COUNT(*) as count FROM post_like WHERE pl_post_id = ?`;
-      const countResult = await Query(countQuery, [postId]);
+      const countQuery = sql.select([
+        { col: 'COUNT(*)', as: 'count' }
+      ])
+        .from(Master.post_like.tablename)
+        .where(Master.post_like.selectOptionColumns.post_id, '=', postId)
+        .build();
+      const countResult = await Query(countQuery, [], [Master.post_like.prefix_]);
       
       res.status(201).json({
         success: true,

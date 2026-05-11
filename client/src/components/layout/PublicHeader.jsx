@@ -7,6 +7,7 @@ export default function PublicHeader() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
   const [showLogout, setShowLogout] = useState(false);
+  const [homePageSettings, setHomePageSettings] = useState(null);
 
   const checkLoginStatus = () => {
     const token = localStorage.getItem('token') || localStorage.getItem('userToken') || localStorage.getItem('adminToken');
@@ -39,6 +40,25 @@ export default function PublicHeader() {
     navigate('/');
   };
 
+  // Fetch home page settings from API
+  useEffect(() => {
+    const fetchHomePageSettings = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_SERVER_LINK}/api/home-page-settings`);
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success && result.data) {
+            setHomePageSettings(result.data);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching home page settings:', error);
+      }
+    };
+
+    fetchHomePageSettings();
+  }, []);
+
   useEffect(() => {
     checkLoginStatus();
     
@@ -57,15 +77,28 @@ export default function PublicHeader() {
   return (
     <nav className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
-              <Calendar size={24} className="text-white" />
-            </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-              CMO Connect
-            </span>
+            {homePageSettings?.website_logo && (
+              // If logo exists, display it
+              homePageSettings.website_logo.startsWith('data:') || homePageSettings.website_logo.startsWith('http') ? (
+                <img 
+                  src={homePageSettings.website_logo.startsWith('data:') ? homePageSettings.website_logo : `data:image/jpeg;base64,${homePageSettings.website_logo}`}
+                  alt={homePageSettings.website_title || 'Logo'}
+                  className="w-20 h-20 rounded-xl object-cover"
+                />
+              ) : (
+                <div className="w-20 h-20 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
+                  <Calendar size={40} className="text-white" />
+                </div>
+              )
+            )}
+            {homePageSettings?.website_title && (
+              <span className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                {homePageSettings.website_title}
+              </span>
+            )}
           </div>
 
           {/* Nav Links */}

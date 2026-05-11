@@ -1,4 +1,10 @@
-const { Query } = require('../database/util/queries.util');
+const os = require('os')
+const { checkConnection, SelectAll, Transaction, Query, Insert, SelectWithCondition } = require('../database/util/queries.util')
+const { formatMemoryUsage, formatTime, DataModeling } = require('../util/helper.util')
+const { Master } = require('../database/model/Master')
+const { SQLQueryBuilder } = require('../util/helper.util')
+const sql = new SQLQueryBuilder()
+require('dotenv').config()
 
 // Get comments for a post
 const getPostComments = async (req, res) => {
@@ -7,44 +13,122 @@ const getPostComments = async (req, res) => {
     
     console.log('GetPostComments - postId:', postId);
     
-    const query = `
-      SELECT pc.pc_id as id, pc.pc_post_id as post_id, pc.pc_mu_id as mu_id, 
-             pc.pc_parent_id as parent_id, pc.pc_comment as text, pc.pc_created_at as created_at,
-             mu.mu_fullname as author, mu.mu_email as email
-      FROM post_comment pc
-      LEFT JOIN master_user mu ON pc.pc_mu_id = mu.mu_id
-      WHERE pc.pc_post_id = ?
-      ORDER BY pc.pc_created_at ASC
-    `;
+    const query = sql.select([
+      { col: Master.post_comment.selectOptionColumns.id, as: 'id' },
+      { col: Master.post_comment.selectOptionColumns.post_id, as: 'post_id' },
+      { col: Master.post_comment.selectOptionColumns.mu_id, as: 'mu_id' },
+      { col: Master.post_comment.selectOptionColumns.parent_id, as: 'parent_id' },
+      { col: Master.post_comment.selectOptionColumns.comment, as: 'text' },
+      { col: Master.post_comment.selectOptionColumns.created_at, as: 'created_at' },
+      { col: Master.master_user.selectOptionColumns.fullname, as: 'author' },
+      { col: Master.master_user.selectOptionColumns.email, as: 'email' }
+    ])
+      .from(Master.post_comment.tablename)
+      .leftJoin(Master.master_user.tablename, Master.post_comment.selectOptionColumns.mu_id, Master.master_user.selectOptionColumns.id)
+      .where(Master.post_comment.selectOptionColumns.post_id, '=', postId)
+      .orderBy(Master.post_comment.selectOptionColumns.created_at, 'ASC')
+      .build();
     
-    const comments = await Query(query, [postId]);
+    const comments = await Query(query, [postId], [Master.post_comment.prefix_, Master.master_user.prefix_]);
     console.log('Comments found:', comments.length);
     
+    // Get parent comment IDs from replies
+    const parentIds = comments
+      .filter(c => c.parent_id)
+      .map(c => c.parent_id)
+      .filter((id, index, arr) => arr.indexOf(id) === index); // unique values
+    
+    console.log('Parent comment IDs needed:', parentIds);
+    
+    // Fetch parent comments if any
+    let parentComments = [];
+    if (parentIds.length > 0) {
+      const parentQuery = sql.select([
+        { col: Master.post_comment.selectOptionColumns.id, as: 'id' },
+        { col: Master.post_comment.selectOptionColumns.post_id, as: 'post_id' },
+        { col: Master.post_comment.selectOptionColumns.mu_id, as: 'mu_id' },
+        { col: Master.post_comment.selectOptionColumns.parent_id, as: 'parent_id' },
+        { col: Master.post_comment.selectOptionColumns.comment, as: 'text' },
+        { col: Master.post_comment.selectOptionColumns.created_at, as: 'created_at' },
+        { col: Master.master_user.selectOptionColumns.fullname, as: 'author' },
+        { col: Master.master_user.selectOptionColumns.email, as: 'email' }
+      ])
+        .from(Master.post_comment.tablename)
+        .leftJoin(Master.master_user.tablename, Master.post_comment.selectOptionColumns.mu_id, Master.master_user.selectOptionColumns.id)
+        .where(Master.post_comment.selectOptionColumns.id, 'IN', parentIds)
+        .build();
+      
+      parentComments = await Query(parentQuery, [parentIds], [Master.post_comment.prefix_, Master.master_user.prefix_]);
+      console.log('Parent comments found:', parentComments.length);
+    }
+    
+    // Combine all comments - keep everything including duplicates
+    const allComments = [...comments, ...parentComments];
+    console.log('Total comments (including parents):', allComments.length);
+    console.log('All comments:', allComments.map(c => ({ id: c.id, parent_id: c.parent_id, text: c.text })));
+    
     // Build comment tree structure (handle replies)
-    const commentMap = {};
+    const treeCommentMap = {};
     const rootComments = [];
     
-    comments.forEach(comment => {
-      comment.replies = [];
-      commentMap[comment.id] = comment;
-    });
-    
-    comments.forEach(comment => {
-      if (comment.parent_id) {
-        const parent = commentMap[comment.parent_id];
-        if (parent) {
-          parent.replies.push(comment);
-        }
-      } else {
-        rootComments.push(comment);
+    // First pass: add ALL comments to map, but for duplicate IDs, keep the one with null parent_id
+    // as the "canonical" parent reference
+    allComments.forEach(comment => {
+      if (!comment.replies) comment.replies = [];
+      
+      // For treeCommentMap (used for parent lookup), prefer root comments
+      if (!treeCommentMap[comment.id]) {
+        treeCommentMap[comment.id] = comment;
+      } else if (comment.parent_id === null) {
+        // Replace with root version if we found one
+        treeCommentMap[comment.id] = comment;
       }
     });
+    
+    console.log('Tree comment map keys:', Object.keys(treeCommentMap));
+    
+    // Second pass: build the tree
+    // Track which comments have been added to avoid duplicates in output
+    const addedToTree = new Set();
+    
+    allComments.forEach(comment => {
+      if (comment.parent_id) {
+        // This is a reply - attach to parent
+        const parent = treeCommentMap[comment.parent_id];
+        if (parent) {
+          // Check if already added to this parent's replies
+          const alreadyAdded = parent.replies.find(r => 
+            r.id === comment.id && r.text === comment.text
+          );
+          if (!alreadyAdded) {
+            parent.replies.push(comment);
+            addedToTree.add(`${comment.id}-${comment.parent_id}`);
+            console.log(`Added reply ${comment.id} to parent ${comment.parent_id}`);
+          }
+        } else {
+          console.log(`Parent ${comment.parent_id} not found for comment ${comment.id}`);
+        }
+      } else {
+        // This is a root comment - add to rootComments
+        const key = `${comment.id}-root`;
+        if (!addedToTree.has(key)) {
+          rootComments.push(comment);
+          addedToTree.add(key);
+          console.log(`Added root comment ${comment.id} to tree`);
+        }
+      }
+    });
+    
+    // Use rootComments which already contains the properly built tree
+    console.log('Root comments tree:', JSON.stringify(rootComments, null, 2));
+    console.log('Root comments count:', rootComments.length);
+    console.log('Root comments details:', rootComments.map(c => ({ id: c.id, text: c.text, replies: c.replies, repliesCount: c.replies.length })));
     
     res.status(200).json({
       success: true,
       message: 'Comments retrieved successfully',
-      data: rootComments,
-      count: comments.length
+      data: rootComments,  // Use rootComments instead of rebuilding
+      count: allComments.length  // Return total count including replies
     });
   } catch (error) {
     console.error('Error in getPostComments:', error);
@@ -79,22 +163,32 @@ const addComment = async (req, res) => {
       });
     }
     
-    const query = `
-      INSERT INTO post_comment (pc_post_id, pc_mu_id, pc_parent_id, pc_comment, pc_created_at)
-      VALUES (?, ?, ?, ?, NOW())
-    `;
+    const query = sql.insert(Master.post_comment.tablename, {
+        columns: Master.post_comment.insertColumns,
+        prefix: Master.post_comment.prefix_,
+        isTransaction: false
+      })
+        .build();
     
-    const result = await Query(query, [postId, userId, parentId || null, comment.trim()]);
+    const result = await Insert(query, [postId, userId, parentId || null, comment.trim(), new Date()]);
     console.log('Comment inserted with ID:', result.insertId);
     
     // Fetch the newly created comment with user info
-    const fetchQuery = `
-      SELECT pc.*, mu.mu_fullname as author, mu.mu_email 
-      FROM post_comment pc
-      LEFT JOIN master_user mu ON pc.pc_mu_id = mu.mu_id
-      WHERE pc.pc_id = ?
-    `;
-    const newComment = await Query(fetchQuery, [result.insertId]);
+    const fetchQuery = sql.select([
+      { col: Master.post_comment.selectOptionColumns.id, as: 'id' },
+      { col: Master.post_comment.selectOptionColumns.post_id, as: 'post_id' },
+      { col: Master.post_comment.selectOptionColumns.mu_id, as: 'mu_id' },
+      { col: Master.post_comment.selectOptionColumns.parent_id, as: 'parent_id' },
+      { col: Master.post_comment.selectOptionColumns.comment, as: 'comment' },
+      { col: Master.post_comment.selectOptionColumns.created_at, as: 'created_at' },
+      { col: Master.master_user.selectOptionColumns.fullname, as: 'author' },
+      { col: Master.master_user.selectOptionColumns.email, as: 'email' }
+    ])
+      .from(Master.post_comment.tablename)
+      .leftJoin(Master.master_user.tablename, Master.post_comment.selectOptionColumns.mu_id, Master.master_user.selectOptionColumns.id)
+      .where(Master.post_comment.selectOptionColumns.id, '=', result.insertId)
+      .build();
+    const newComment = await Query(fetchQuery, [], [Master.post_comment.prefix_, Master.master_user.prefix_]);
     
     res.status(201).json({
       success: true,

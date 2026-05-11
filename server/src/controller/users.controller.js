@@ -33,6 +33,7 @@ const getUsers = async (req, res, next) => {
 
     let users = await Query(query, [], [Master.master_user.prefix_, Master.master_access.prefix_]);
 
+    console.log(users)
     res.status(200).json({
       success: true,
       message: 'Users retrieved successfully',

@@ -26,6 +26,7 @@ import {
   Flame,
   Bell,
   BarChart3,
+  ArrowUp,
 } from 'lucide-react';
 
 // Recursive Comment Item Component with Reply Support
@@ -34,6 +35,8 @@ const CommentItem = React.memo(function CommentItem({ comment, postId, onReply, 
   const [showReplyInput, setShowReplyInput] = useState(false);
   const [showReplies, setShowReplies] = useState(true);
   const maxDepth = 10; // Prevent excessive nesting visually
+  
+  console.log(`CommentItem - depth:${depth}, id:${comment?.id}, text:"${comment?.text}", replies:`, comment?.replies);
 
   const handleReplySubmit = (e) => {
     e.preventDefault();
@@ -563,7 +566,6 @@ const PostCard = React.memo(function PostCard({ post, onLike, onComment, onReply
           {/* Media Display */}
           <div 
             className="max-w-[90vw] max-h-[90vh] w-full h-full flex items-center justify-center p-4"
-            onClick={(e) => e.stopPropagation()}
           >
             {isImage(fullscreenMedia) ? (
               <img
@@ -786,6 +788,12 @@ export default function PostsFeed() {
             if (commentsRes.ok) {
               const commentsResult = await commentsRes.json();
               comments = commentsResult.data || [];
+              console.log(`Post ${post.id} - Comments received:`, comments);
+              console.log(`Post ${post.id} - Comments count:`, comments.length);
+              if (comments.length > 0) {
+                console.log(`Post ${post.id} - First comment:`, comments[0]);
+                console.log(`Post ${post.id} - First comment replies:`, comments[0].replies);
+              }
             }
 
             // Fetch like status if logged in
@@ -957,17 +965,17 @@ export default function PostsFeed() {
   const totalLikes = posts.reduce((sum, p) => sum + (p.likes || 0), 0);
 
   return (
-    <div className="h-screen bg-[#f0f2f5] overflow-hidden flex flex-col">
+    <div className="h-screen bg-[#f0f2f5] flex flex-col">
       {/* Top accent stripe */}
-      <div className="h-1 bg-gradient-to-r from-emerald-400 via-teal-500 to-emerald-600 flex-shrink-0" />
+      <div className="h-1 bg-gradient-to-r from-emerald-400 via-teal-500 to-emerald-600 flex-shrink-0 " />
       <PublicHeader />
 
       {/* ── 3-column layout ─────────────────────────────────────── */}
-      <main className="flex-1 max-w-[1800px] mx-auto px-4 sm:px-6 py-4 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 overflow-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-[350px_1fr_350px] gap-10 h-full items-stretch">
+      <main className="flex-1 flex flex-col px-4 sm:px-6 py-4 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 lg:overflow-hidden overflow-y-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-[350px_1fr_350px] gap-10 lg:h-full items-stretch">
 
           {/* ══ LEFT SIDEBAR — Search & Categories ══════════════ */}
-          <aside className="space-y-5 h-full overflow-y-auto lg:overflow-visible">
+          <aside className="space-y-5 lg:h-full lg:overflow-y-auto pr-2 custom-scrollbar">
             {/* Search widget */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
               <div className="px-4 pt-4 pb-3 border-b border-gray-50 flex items-center gap-2">
@@ -1100,7 +1108,7 @@ export default function PostsFeed() {
           </aside>
 
           {/* ══ CENTER — Posts feed (SCROLLABLE) ══════════════ */}
-          <div className="min-w-0 h-full overflow-y-auto pr-2 custom-scrollbar flex flex-col items-center">
+          <div className="min-w-0 lg:h-full lg:overflow-y-auto pr-2 pb-5 custom-scrollbar flex flex-col items-center flex-1">
             <style dangerouslySetInnerHTML={{
               __html: `
                 .custom-scrollbar::-webkit-scrollbar { width: 5px; }
@@ -1110,7 +1118,7 @@ export default function PostsFeed() {
               `}} />
 
             {/* Content wrapper with max-width */}
-            <div className="w-full max-w-[600px]">
+            <div className="w-full max-w-[1000px] ">
 
             {/* Feed header */}
             <div className="flex items-center justify-between w-full max-w-[600px]">
@@ -1216,19 +1224,47 @@ export default function PostsFeed() {
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full border border-gray-100 shadow-sm text-xs text-gray-400">
                   <span>You've reached the end of the feed</span>
                   <span>·</span>
-                  <button
-                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                    className="text-emerald-600 font-medium hover:underline"
-                  >
-                    Back to top
-                  </button>
                 </div>
               </div>
             )}
           </div>
 
+          {/* Floating Back to Top Button */}
+          <button
+            onClick={() => {
+              // Always try mobile scrolling for smaller screens
+              const isMobileView = window.innerWidth < 1024;
+              console.log('Mobile view:', isMobileView, 'Window width:', window.innerWidth);
+              
+              if (isMobileView) {
+                // Mobile: scroll to entire page with all methods
+                console.log('Scrolling entire page to top');
+                
+                // Try all possible scroll methods
+                window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+                window.scrollTo(0, 0);
+                document.documentElement.scrollTop = 0;
+                document.body.scrollTop = 0;
+                document.body.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              } else {
+                // Desktop: scroll to center column (posts feed)
+                const scrollableContainer = document.querySelector('.min-w-0.lg\\:h-full.lg\\:overflow-y-auto.pr-2.pb-5.custom-scrollbar');
+                if (scrollableContainer) {
+                  console.log('Scrolling posts feed to top');
+                  scrollableContainer.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                  console.log('No scrollable container found');
+                }
+              }
+            }}
+            className="fixed bottom-8 right-8 z-50 bg-emerald-600 text-white p-3 rounded-full shadow-lg hover:bg-emerald-700 transition-all duration-200 hover:scale-110"
+            title="Back to top"
+          >
+            <ArrowUp className="w-5 h-5" />
+          </button>
+
           {/* ══ RIGHT SIDEBAR — Suggestions & More ══════════════ */}
-          <aside className="space-y-5 lg:sticky lg:top-6">
+          <aside className="space-y-5 lg:h-full lg:overflow-y-auto lg:sticky pr-2 lg:top-6 custom-scrollbar">
 
             {/* Trending Posts */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100">

@@ -1,12 +1,34 @@
-const { checkConnection, SelectAll, SelectWithCondition, Insert, Update, Delete, Query } = require('../database/util/queries.util');
-const { Master } = require('../database/model/Master');
+const os = require('os')
+const { checkConnection, SelectAll, Transaction, Query, Insert, SelectWithCondition } = require('../database/util/queries.util')
+const { formatMemoryUsage, formatTime, DataModeling } = require('../util/helper.util')
+const { Master } = require('../database/model/Master')
+const { SQLQueryBuilder } = require('../util/helper.util')
+const sql = new SQLQueryBuilder()
+require('dotenv').config()
 
 // Get all appointments
 const getAppointments = async (req, res, next) => {
   try {
-    const query = 'SELECT a.*, mu.mu_fullname, mu.mu_email FROM appointment a LEFT JOIN master_user mu ON a.app_mu_id = mu.mu_id ORDER BY a.app_date DESC, a.app_start_time ASC';
+    const query = sql.select([
+      { col: Master.appointment.selectOptionColumns.id, as: 'id' },
+      { col: Master.appointment.selectOptionColumns.mu_id, as: 'mu_id' },
+      { col: Master.appointment.selectOptionColumns.date, as: 'date' },
+      { col: Master.appointment.selectOptionColumns.start_time, as: 'start_time' },
+      { col: Master.appointment.selectOptionColumns.end_time, as: 'end_time' },
+      { col: Master.appointment.selectOptionColumns.title, as: 'title' },
+      { col: Master.appointment.selectOptionColumns.description, as: 'description' },
+      { col: Master.appointment.selectOptionColumns.status, as: 'status' },
+      { col: Master.appointment.selectOptionColumns.created_at, as: 'created_at' },
+      { col: Master.master_user.selectOptionColumns.fullname, as: 'mu_fullname' },
+      { col: Master.master_user.selectOptionColumns.email, as: 'mu_email' }
+    ])
+      .from(Master.appointment.tablename)
+      .leftJoin(Master.master_user.tablename, Master.appointment.selectOptionColumns.mu_id, Master.master_user.selectOptionColumns.id)
+      .orderBy(Master.appointment.selectOptionColumns.date, 'DESC')
+      .orderBy(Master.appointment.selectOptionColumns.start_time, 'ASC')
+      .build();
     
-    const appointments = await Query(query);
+    const appointments = await Query(query, [], [Master.appointment.prefix_, Master.master_user.prefix_]);
     
     res.status(200).json({
       success: true,
@@ -31,14 +53,25 @@ const getAppointmentById = async (req, res, next) => {
   try {
     const { id } = req.params;
     
-    const query = `
-      SELECT a.*, mu.mu_fullname, mu.mu_email 
-      FROM appointment a 
-      LEFT JOIN master_user mu ON a.app_mu_id = mu.mu_id 
-      WHERE a.app_id = ?
-    `;
+    const query = sql.select([
+      { col: Master.appointment.selectOptionColumns.id, as: 'id' },
+      { col: Master.appointment.selectOptionColumns.mu_id, as: 'mu_id' },
+      { col: Master.appointment.selectOptionColumns.date, as: 'date' },
+      { col: Master.appointment.selectOptionColumns.start_time, as: 'start_time' },
+      { col: Master.appointment.selectOptionColumns.end_time, as: 'end_time' },
+      { col: Master.appointment.selectOptionColumns.title, as: 'title' },
+      { col: Master.appointment.selectOptionColumns.description, as: 'description' },
+      { col: Master.appointment.selectOptionColumns.status, as: 'status' },
+      { col: Master.appointment.selectOptionColumns.created_at, as: 'created_at' },
+      { col: Master.master_user.selectOptionColumns.fullname, as: 'mu_fullname' },
+      { col: Master.master_user.selectOptionColumns.email, as: 'mu_email' }
+    ])
+      .from(Master.appointment.tablename)
+      .leftJoin(Master.master_user.tablename, Master.appointment.selectOptionColumns.mu_id, Master.master_user.selectOptionColumns.id)
+      .where(Master.appointment.selectOptionColumns.id, '=', id)
+      .build();
     
-    const appointment = await SelectWithCondition(query, [id]);
+    const appointment = await Query(query, [id], [Master.appointment.prefix_, Master.master_user.prefix_]);
     
     if (appointment.length === 0) {
       return res.status(404).json({
@@ -84,10 +117,12 @@ const createAppointment = async (req, res, next) => {
       });
     }
 
-    const query = `
-      INSERT INTO appointment (app_mu_id, app_date, app_start_time, app_end_time, app_reason, app_notes)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `;
+    const query = sql.insert(Master.appointment.tablename, {
+        columns: Master.appointment.insertColumns,
+        prefix: Master.appointment.prefix_,
+        isTransaction: false
+      })
+        .build();
     
     const result = await Insert(query, [app_mu_id, app_date, app_start_time, app_end_time, app_reason, app_notes || null]);
     
@@ -123,8 +158,13 @@ const updateAppointment = async (req, res, next) => {
     } = req.body;
 
     // Check if appointment exists
-    const checkQuery = `SELECT app_id FROM appointment WHERE app_id = ?`;
-    const existing = await SelectWithCondition(checkQuery, [id]);
+    const checkQuery = sql.select([
+        { col: Master.appointment.selectOptionColumns.id, as: 'app_id' }
+      ])
+        .from(Master.appointment.tablename)
+        .where(Master.appointment.selectOptionColumns.id, '=', id)
+        .build();
+    const existing = await Query(checkQuery, [id], [Master.appointment.prefix_]);
     
     if (existing.length === 0) {
       return res.status(404).json({
@@ -133,14 +173,20 @@ const updateAppointment = async (req, res, next) => {
       });
     }
 
-    const query = `
-      UPDATE appointment 
-      SET app_mu_id = ?, app_date = ?, app_start_time = ?, app_end_time = ?, 
-          app_reason = ?, app_status = ?, app_notes = ?
-      WHERE app_id = ?
-    `;
+    const query = sql.update(Master.appointment.tablename)
+      .set({
+        [Master.appointment.updateOptionColumns.mu_id]: app_mu_id,
+        [Master.appointment.updateOptionColumns.date]: app_date,
+        [Master.appointment.updateOptionColumns.start_time]: app_start_time,
+        [Master.appointment.updateOptionColumns.end_time]: app_end_time,
+        [Master.appointment.updateOptionColumns.reason]: app_reason,
+        [Master.appointment.updateOptionColumns.status]: app_status,
+        [Master.appointment.updateOptionColumns.notes]: app_notes
+      })
+      .where(Master.appointment.updateOptionColumns.id, '=', id)
+      .build();
     
-    await Update(query, [app_mu_id, app_date, app_start_time, app_end_time, app_reason, app_status, app_notes, id]);
+    await Query(query, [], [Master.appointment.prefix_]);
     
     res.status(200).json({
       success: true,
@@ -164,8 +210,13 @@ const deleteAppointment = async (req, res, next) => {
     const { id } = req.params;
 
     // Check if appointment exists
-    const checkQuery = `SELECT app_id FROM appointment WHERE app_id = ?`;
-    const existing = await SelectWithCondition(checkQuery, [id]);
+    const checkQuery = sql.select([
+        { col: Master.appointment.selectOptionColumns.id, as: 'app_id' }
+      ])
+        .from(Master.appointment.tablename)
+        .where(Master.appointment.selectOptionColumns.id, '=', id)
+        .build();
+    const existing = await Query(checkQuery, [id], [Master.appointment.prefix_]);
     
     if (existing.length === 0) {
       return res.status(404).json({
@@ -174,8 +225,10 @@ const deleteAppointment = async (req, res, next) => {
       });
     }
 
-    const query = `DELETE FROM appointment WHERE app_id = ?`;
-    await Delete(query, [id]);
+    const query = sql.delete(Master.appointment.tablename)
+      .where(Master.appointment.selectOptionColumns.id, '=', id)
+      .build();
+    await Query(query, [], [Master.appointment.prefix_]);
     
     res.status(200).json({
       success: true,
@@ -207,8 +260,13 @@ const updateAppointmentStatus = async (req, res, next) => {
     }
 
     // Check if appointment exists
-    const checkQuery = `SELECT app_id FROM appointment WHERE app_id = ?`;
-    const existing = await SelectWithCondition(checkQuery, [id]);
+    const checkQuery = sql.select([
+        { col: Master.appointment.selectOptionColumns.id, as: 'app_id' }
+      ])
+        .from(Master.appointment.tablename)
+        .where(Master.appointment.selectOptionColumns.id, '=', id)
+        .build();
+    const existing = await Query(checkQuery, [id], [Master.appointment.prefix_]);
     
     if (existing.length === 0) {
       return res.status(404).json({
@@ -217,8 +275,13 @@ const updateAppointmentStatus = async (req, res, next) => {
       });
     }
 
-    const query = `UPDATE appointment SET app_status = ? WHERE app_id = ?`;
-    await Update(query, [app_status, id]);
+    const query = sql.update(Master.appointment.tablename)
+      .set({
+        [Master.appointment.updateOptionColumns.status]: app_status
+      })
+      .where(Master.appointment.updateOptionColumns.id, '=', id)
+      .build();
+    await Query(query, [], [Master.appointment.prefix_]);
     
     res.status(200).json({
       success: true,

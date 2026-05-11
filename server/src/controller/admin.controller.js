@@ -43,7 +43,7 @@ const adminLogin = async (req, res, next) => {
 
     const admin = users[0];
 
-    if (admin.status !== 1) {
+    if (admin.status !== 'active') {
       return res.status(401).json({
         success: false,
         message: 'Admin account is inactive'

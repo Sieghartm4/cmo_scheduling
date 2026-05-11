@@ -42,14 +42,13 @@ const login = async (req, res, next) => {
 
     const user = users[0];
 
-    if (user.status !== 1) {
+    if (user.status !== 'active') {
       return res.status(401).json({
         success: false,
         message: 'Account is inactive'
       });
     }
 
-    // Decrypt stored password and compare with input
     let isPasswordValid = false;
     try {
       const decryptedPassword = DecryptString(user.password);
@@ -175,7 +174,7 @@ const userLogin = async (req, res, next) => {
 
     const user = users[0];
 
-    if (user.status !== 1) {
+    if (user.status !== 'active') {
       return res.status(401).json({
         success: false,
         message: 'Account is inactive'

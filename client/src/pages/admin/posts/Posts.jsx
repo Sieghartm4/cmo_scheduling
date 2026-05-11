@@ -310,6 +310,7 @@ function PostsContent() {
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         title={editingPost ? 'Edit Post' : 'Create New Post'}
+        size="2xl"
       >
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
@@ -509,6 +510,7 @@ function PostsContent() {
         isOpen={isViewModalOpen}
         onClose={handleViewModalClose}
         title="View Post Details"
+        size="2xl"
       >
         {viewingPost && (
           <div className="space-y-4">

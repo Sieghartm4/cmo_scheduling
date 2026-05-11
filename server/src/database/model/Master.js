@@ -1112,6 +1112,88 @@ const Master = {
       seen: "TINYINT",
       created_at: "DATETIME"
     }
+  },
+  home_page_settings: {
+    tablename: "home_page_settings",
+    prefix: "hps",
+    prefix_: "hps_",
+    insertColumns: [
+      "welcome_badge",
+      "hero_title",
+      "hero_description",
+      "background_value",
+      "contact_number",
+      "contact_email",
+      "website_title",
+      "website_logo",
+      "location",
+      "status"
+    ],
+    selectColumns: [
+      "hps_id",
+      "hps_welcome_badge",
+      "hps_hero_title",
+      "hps_hero_description",
+      "hps_background_value",
+      "hps_contact_number",
+      "hps_contact_email",
+      "hps_website_title",
+      "hps_website_logo",
+      "hps_location",
+      "hps_status",
+      "hps_created_at",
+      "hps_updated_at"
+    ],
+    selectOptionColumns: {
+      id: "hps_id",
+      welcome_badge: "hps_welcome_badge",
+      hero_title: "hps_hero_title",
+      hero_description: "hps_hero_description",
+      background_value: "hps_background_value",
+      contact_number: "hps_contact_number",
+      contact_email: "hps_contact_email",
+      website_title: "hps_website_title",
+      website_logo: "hps_website_logo",
+      location: "hps_location",
+      status: "hps_status",
+      created_at: "hps_created_at",
+      updated_at: "hps_updated_at"
+    },
+    updateOptionColumns: {
+      id: "id",
+      welcome_badge: "welcome_badge",
+      hero_title: "hero_title",
+      hero_description: "hero_description",
+      background_value: "background_value",
+      contact_number: "contact_number",
+      contact_email: "contact_email",
+      website_title: "website_title",
+      website_logo: "website_logo",
+      location: "location",
+      status: "status"
+    },
+    selectDateFormatColumns: {
+      created_at: "hps_created_at",
+      updated_at: "hps_updated_at"
+    },
+    selectMiscColumns: {
+
+    },
+    columnDataTypes: {
+      id: "BIGINT",
+      welcome_badge: "STRING",
+      hero_title: "TEXT",
+      hero_description: "TEXT",
+      background_value: "TEXT",
+      contact_number: "STRING",
+      contact_email: "STRING",
+      website_title: "STRING",
+      website_logo: "TEXT",
+      location: "STRING",
+      status: "ENUM",
+      created_at: "DATETIME",
+      updated_at: "DATETIME"
+    }
   }
 };
 

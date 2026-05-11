@@ -1,17 +1,26 @@
-const { Master } = require('../database/model/Master');
-const { Query } = require('../database/util/queries.util');
+const os = require('os')
+const { checkConnection, SelectAll, Transaction, Query, Insert, SelectWithCondition } = require('../database/util/queries.util')
+const { formatMemoryUsage, formatTime, DataModeling } = require('../util/helper.util')
+const { Master } = require('../database/model/Master')
+const { SQLQueryBuilder } = require('../util/helper.util')
+const sql = new SQLQueryBuilder()
+require('dotenv').config()
 
 // Get all categories
 const getCategories = async (req, res, next) => {
   try {
-    const categoryModel = Master.master_category;
-    const selectQuery = `SELECT
-      ${categoryModel.selectColumns.join(', ')}
-    FROM ${categoryModel.tablename}
-    WHERE ${categoryModel.prefix_}status = 'active'
-    ORDER BY ${categoryModel.prefix_}name ASC`;
+    const query = sql.select([
+      { col: Master.master_category.selectOptionColumns.id, as: 'id' },
+      { col: Master.master_category.selectOptionColumns.name, as: 'name' },
+      { col: Master.master_category.selectOptionColumns.details, as: 'details' },
+      { col: Master.master_category.selectOptionColumns.status, as: 'status' }
+    ])
+      .from(Master.master_category.tablename)
+      .where(Master.master_category.selectOptionColumns.status, '=', 'active')
+      .orderBy(Master.master_category.selectOptionColumns.name, 'ASC')
+      .build();
     
-    const results = await Query(selectQuery, [], [categoryModel.prefix_]);
+    const results = await Query(query, ['active'], [Master.master_category.prefix_]);
     
     res.json({
       success: true,
@@ -27,14 +36,19 @@ const getCategories = async (req, res, next) => {
 const getCategoryById = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const categoryModel = Master.master_category;
     
-    const selectQuery = `SELECT
-      ${categoryModel.selectColumns.join(', ')}
-    FROM ${categoryModel.tablename}
-    WHERE ${categoryModel.prefix_}id = ? AND ${categoryModel.prefix_}status = 'active'`;
+    const query = sql.select([
+      { col: Master.master_category.selectOptionColumns.id, as: 'id' },
+      { col: Master.master_category.selectOptionColumns.name, as: 'name' },
+      { col: Master.master_category.selectOptionColumns.details, as: 'details' },
+      { col: Master.master_category.selectOptionColumns.status, as: 'status' }
+    ])
+      .from(Master.master_category.tablename)
+      .where(Master.master_category.selectOptionColumns.id, '=', id)
+      .andWhere(Master.master_category.selectOptionColumns.status, '=', 'active')
+      .build();
     
-    const results = await Query(selectQuery, [id], [categoryModel.prefix_]);
+    const results = await Query(query, [id, 'active'], [Master.master_category.prefix_]);
     
     if (results.length === 0) {
       return res.status(404).json({
@@ -65,25 +79,25 @@ const createCategory = async (req, res, next) => {
       });
     }
     
-    const categoryModel = Master.master_category;
-    const insertQuery = `
-      INSERT INTO ${categoryModel.tablename} (${categoryModel.insertColumns.join(', ')})
-      VALUES (?, ?, ?)
-    `;
-    
-    const result = await Query(insertQuery, [
+    const insertQuery = `INSERT INTO master_category (mc_name, mc_details, mc_status) VALUES (?, ?, ?)`;
+    const result = await Insert(insertQuery, [
       name.trim(),
       details || null,
       'active' // Active status
-    ], [categoryModel.prefix_]);
+    ]);
     
     // Get the created category
-    const selectQuery = `SELECT
-      ${categoryModel.selectColumns.join(', ')}
-    FROM ${categoryModel.tablename}
-    WHERE ${categoryModel.prefix_}id = ?`;
+    const selectQuery = sql.select([
+      { col: Master.master_category.selectOptionColumns.id, as: 'id' },
+      { col: Master.master_category.selectOptionColumns.name, as: 'name' },
+      { col: Master.master_category.selectOptionColumns.details, as: 'details' },
+      { col: Master.master_category.selectOptionColumns.status, as: 'status' }
+    ])
+      .from(Master.master_category.tablename)
+      .where(Master.master_category.selectOptionColumns.id, '=', result.insertId)
+      .build();
     
-    const newCategory = await Query(selectQuery, [result.insertId], [categoryModel.prefix_]);
+    const newCategory = await Query(selectQuery, [result.insertId], [Master.master_category.prefix_]);
     
     res.status(201).json({
       success: true,
