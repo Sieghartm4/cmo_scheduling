@@ -23,7 +23,6 @@ const getAppointments = async (req, res, next) => {
     const query = sql
       .select([
         { col: Master.appointment.selectOptionColumns.id, as: 'id' },
-        { col: Master.appointment.selectOptionColumns.mu_id, as: 'mu_id' },
         { col: Master.appointment.selectOptionColumns.date, as: 'date' },
         { col: Master.appointment.selectOptionColumns.start_time, as: 'start_time' },
         { col: Master.appointment.selectOptionColumns.end_time, as: 'end_time' },
@@ -43,6 +42,8 @@ const getAppointments = async (req, res, next) => {
       .orderBy(Master.appointment.selectOptionColumns.date, 'DESC')
       .orderBy(Master.appointment.selectOptionColumns.start_time, 'ASC')
       .build()
+
+    console.log('Generated SQL Query:', query);
 
     const rawAppointments = await Query(
       query,
@@ -110,7 +111,7 @@ const getAppointmentById = async (req, res, next) => {
         Master.appointment.selectOptionColumns.mu_id,
         Master.master_user.selectOptionColumns.id,
       )
-      .where(Master.appointment.selectOptionColumns.id, '=', id)
+      .where(Master.appointment.selectOptionColumns.app_id, '=', id)
       .build()
 
     const appointment = await Query(
@@ -208,7 +209,7 @@ const updateAppointment = async (req, res, next) => {
     const checkQuery = sql
       .select([{ col: Master.appointment.selectOptionColumns.id, as: 'app_id' }])
       .from(Master.appointment.tablename)
-      .where(Master.appointment.selectOptionColumns.id, '=', id)
+      .where(Master.appointment.selectOptionColumns.app_id, '=', id)
       .build()
     const existing = await Query(checkQuery, [id], [Master.appointment.prefix_])
 
@@ -259,7 +260,7 @@ const deleteAppointment = async (req, res, next) => {
     const checkQuery = sql
       .select([{ col: Master.appointment.selectOptionColumns.id, as: 'app_id' }])
       .from(Master.appointment.tablename)
-      .where(Master.appointment.selectOptionColumns.id, '=', id)
+      .where(Master.appointment.selectOptionColumns.app_id, '=', id)
       .build()
     const existing = await Query(checkQuery, [id], [Master.appointment.prefix_])
 
@@ -272,7 +273,7 @@ const deleteAppointment = async (req, res, next) => {
 
     const query = sql
       .delete(Master.appointment.tablename)
-      .where(Master.appointment.selectOptionColumns.id, '=', id)
+      .where(Master.appointment.selectOptionColumns.app_id, '=', id)
       .build()
     await Query(query, [], [Master.appointment.prefix_])
 
@@ -297,6 +298,8 @@ const updateAppointmentStatus = async (req, res, next) => {
     const { id } = req.params
     const { app_status } = req.body
 
+    console.log('UpdateAppointmentStatus - ID:', id, 'Status:', app_status);
+
     if (!app_status) {
       return res.status(400).json({
         success: false,
@@ -312,6 +315,8 @@ const updateAppointmentStatus = async (req, res, next) => {
       .build()
     const existing = await Query(checkQuery, [id], [Master.appointment.prefix_])
 
+    console.log('Appointment exists check:', existing.length > 0 ? 'FOUND' : 'NOT FOUND');
+
     if (existing.length === 0) {
       return res.status(404).json({
         success: false,
@@ -319,14 +324,13 @@ const updateAppointmentStatus = async (req, res, next) => {
       })
     }
 
-    const query = sql
-      .update(Master.appointment.tablename)
-      .set({
-        [Master.appointment.updateOptionColumns.status]: app_status,
-      })
-      .where(Master.appointment.updateOptionColumns.id, '=', id)
-      .build()
-    await Query(query, [], [Master.appointment.prefix_])
+    const updateQuery = `UPDATE ${Master.appointment.tablename} SET app_status = ? WHERE app_id = ?`;
+    
+    console.log('Update query:', updateQuery);
+    
+    const result = await Query(updateQuery, [app_status, id], [Master.appointment.prefix_])
+    
+    console.log('Update result:', result);
 
     res.status(200).json({
       success: true,

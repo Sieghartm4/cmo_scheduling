@@ -12,6 +12,7 @@ import {
   CheckCircle,
   Loader2,
   Sparkles,
+  Lock,
 } from 'lucide-react'
 
 /* ─── Google Fonts ───────────────────────────────────────────────────────── */
@@ -662,6 +663,7 @@ export default function CalendarPage() {
   const [submitting, setSubmitting] = useState(false)
   const [toast, setToast] = useState(null)
   const [dayAppointments, setDayAppointments] = useState([])
+  const [showLoginModal, setShowLoginModal] = useState(false)
 
   useEffect(() => {
     if (!document.getElementById('cal-styles')) {
@@ -784,13 +786,21 @@ export default function CalendarPage() {
 
   const handleDayClick = (day) => {
     if (!isLoggedIn) {
-      setToast({ type: 'warning', message: 'Please sign in to book an appointment' })
-      setTimeout(() => navigate('/login'), 2000)
+      setShowLoginModal(true)
       return
     }
     setDayAppointments(getAppointmentsForDay(day))
     setSelectedDay(day)
     setShowDayModal(true)
+  }
+
+  const handleLogin = () => {
+    setShowLoginModal(false)
+    navigate('/login')
+  }
+
+  const closeLoginModal = () => {
+    setShowLoginModal(false)
   }
 
   const handleBookClick = () => {
@@ -1330,6 +1340,42 @@ export default function CalendarPage() {
             message={toast.message}
             onClose={() => setToast(null)}
           />
+        )}
+      </AnimatePresence>
+
+      {/* Login Modal */}
+      <AnimatePresence>
+        {showLoginModal && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl"
+            >
+              <div className="w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Lock size={28} className="text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Sign In Required</h3>
+              <p className="text-gray-600 mb-6">
+                Please sign in to book appointments and engage with the
+                community.
+              </p>
+              <div className="space-y-3">
+                <button
+                  onClick={handleLogin}
+                  className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
+                >
+                  Sign In
+                </button>
+                <button
+                  onClick={closeLoginModal}
+                  className="w-full py-3 text-gray-600 font-medium hover:bg-gray-100 rounded-xl transition-colors"
+                >
+                  Continue Browsing
+                </button>
+              </div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
 

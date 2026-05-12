@@ -435,10 +435,12 @@ function DynamicTable({
               <button
                 key={i}
                 onClick={() => action.onClick(selectedRows)}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 border border-green-600 text-white text-[10px] font-black rounded-lg hover:bg-green-200 hover:text-green-700 hover:border-green-300 hover:cursor-pointer transition-all uppercase tracking-widest"
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-white text-[10px] font-black rounded-lg hover:cursor-pointer transition-all uppercase tracking-widest ${
+                  action.className || 'bg-green-600 border-green-600 hover:bg-green-200 hover:text-green-700 hover:border-green-300'
+                }`}
               >
                 {action.icon && <span className="w-3 h-3">{React.createElement(action.icon, { size: 12 })}</span>}
-                {action.label}
+                <span>{action.label}</span>
               </button>
             )
           ))}

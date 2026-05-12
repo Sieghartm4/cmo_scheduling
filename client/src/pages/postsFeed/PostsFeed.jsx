@@ -1474,7 +1474,7 @@ export default function PostsFeed() {
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center w-full max-w-[600px]"
+                    className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center w-full max-w-[1900px]"
                   >
                     <div className="w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-4">
                       <MessageCircle size={28} className="text-white" />
@@ -1487,16 +1487,8 @@ export default function PostsFeed() {
                     <p className="text-gray-500">
                       {searchQuery || selectedCategory
                         ? 'Try adjusting your search or filters'
-                        : 'Start the conversation by sharing your first post!'}
+                        : 'Wait for the Posts by the Author!'}
                     </p>
-                    {isLoggedIn && !searchQuery && !selectedCategory && (
-                      <button
-                        onClick={() => navigate('/admin/posts')}
-                        className="mt-4 px-6 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-medium hover:shadow-lg transition-all"
-                      >
-                        Create Post
-                      </button>
-                    )}
                   </motion.div>
                 ) : (
                   <div className="space-y-5">
