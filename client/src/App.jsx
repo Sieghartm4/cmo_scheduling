@@ -5,6 +5,8 @@ import UserLogin from './pages/login/user/UserLogin'
 import Home from './pages/home/Home'
 import PostsFeed from './pages/postsFeed/PostsFeed'
 import Calendar from './pages/calendar/Calendar'
+import AboutMe from './pages/aboutMe/AboutMe'
+import Disclaimer from './pages/disclaimer/Disclaimer'
 import Layout from './components/layout/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 import StrictRouteGuard from './components/StrictRouteGuard'
@@ -62,6 +64,8 @@ function App() {
             <Route path="/login" element={<UserLogin />} />
             <Route path="/posts" element={<PostsFeed />} />
             <Route path="/calendar" element={<Calendar />} />
+            <Route path="/about-me" element={<AboutMe />} />
+            <Route path="/disclaimer" element={<Disclaimer />} />
             <Route path="/admin" element={<AdminLogin />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route element={<Layout />}>

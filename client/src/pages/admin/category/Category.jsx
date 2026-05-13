@@ -1,210 +1,218 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { 
-  Tag, 
-  Plus, 
-  ShieldCheck, 
-  Search, 
-  ArrowRight, 
-  Download, 
+import React, { useState } from 'react'
+import { motion } from 'framer-motion'
+import {
+  Tag,
+  Plus,
+  ShieldCheck,
+  Search,
+  ArrowRight,
+  Download,
   Edit2,
   MessageSquare,
   Eye,
-  Trash2
-} from 'lucide-react';
-import DynamicTable from '../../../components/DynamicTable';
-import DynamicToast from '../../../components/DynamicToast';
-import RouteProtection from '../../../components/RouteProtection';
-import ProtectedAction from '../../../components/ProtectedAction';
-import RightSideModal from '../../../components/RightSideModal';
+  Trash2,
+} from 'lucide-react'
+import DynamicTable from '../../../components/DynamicTable'
+import DynamicToast from '../../../components/DynamicToast'
+import RouteProtection from '../../../components/RouteProtection'
+import ProtectedAction from '../../../components/ProtectedAction'
+import RightSideModal from '../../../components/RightSideModal'
 
 function CategoryContent() {
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [categories, setCategories] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState(null);
-  const [viewingCategory, setViewingCategory] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false)
+  const [editingCategory, setEditingCategory] = useState(null)
+  const [viewingCategory, setViewingCategory] = useState(null)
   const [formData, setFormData] = useState({
     name: '',
     details: '',
-    status: 'active'
-  });
-  const [toast, setToast] = useState(null);
+    status: 'active',
+  })
+  const [toast, setToast] = useState(null)
 
   const fadeInUp = {
     hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
-  };
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+  }
 
   // Fetch categories
   const fetchCategories = async () => {
-    setLoading(true);
-    setError(null);
+    setLoading(true)
+    setError(null)
     try {
-      const adminToken = localStorage.getItem('adminToken');
-      const response = await fetch(`${import.meta.env.VITE_SERVER_LINK}/api/categories`, {
-        headers: {
-          'Authorization': `Bearer ${adminToken}`
-        }
-      });
+      const adminToken = localStorage.getItem('adminToken')
+      const response = await fetch(
+        `${import.meta.env.VITE_SERVER_LINK}/api/categories`,
+        {
+          headers: {
+            Authorization: `Bearer ${adminToken}`,
+          },
+        },
+      )
 
       if (!response.ok) {
-        throw new Error('Failed to fetch categories');
+        throw new Error('Failed to fetch categories')
       }
 
-      const result = await response.json();
-      setCategories(result.data || []);
+      const result = await response.json()
+      setCategories(result.data || [])
     } catch (err) {
-      setError(err.message);
+      setError(err.message)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   React.useEffect(() => {
-    fetchCategories();
-  }, []);
+    fetchCategories()
+  }, [])
 
   const handleAddCategoryClick = () => {
-    setEditingCategory(null);
-    setFormData({ name: '', details: '', status: 'active' });
-    setIsModalOpen(true);
-  };
+    setEditingCategory(null)
+    setFormData({ name: '', details: '', status: 'active' })
+    setIsModalOpen(true)
+  }
 
   const handleViewCategoryClick = (row) => {
-    setViewingCategory(row);
-    setIsViewModalOpen(true);
-  };
+    setViewingCategory(row)
+    setIsViewModalOpen(true)
+  }
 
   const handleEditCategoryClick = (row) => {
-    setEditingCategory(row);
+    setEditingCategory(row)
     setFormData({
       name: row.name || '',
       details: row.details || '',
-      status: row.status || 'active'
-    });
-    setIsModalOpen(true);
-  };
+      status: row.status || 'active',
+    })
+    setIsModalOpen(true)
+  }
 
   const handleDeleteCategoryClick = async (row) => {
     if (window.confirm(`Are you sure you want to delete category "${row.name}"?`)) {
       try {
-        const adminToken = localStorage.getItem('adminToken');
-        const response = await fetch(`${import.meta.env.VITE_SERVER_LINK}/api/categories/${row.id}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${adminToken}`
-          }
-        });
+        const adminToken = localStorage.getItem('adminToken')
+        const response = await fetch(
+          `${import.meta.env.VITE_SERVER_LINK}/api/categories/${row.id}`,
+          {
+            method: 'DELETE',
+            headers: {
+              Authorization: `Bearer ${adminToken}`,
+            },
+          },
+        )
 
         if (!response.ok) {
-          throw new Error('Failed to delete category');
+          throw new Error('Failed to delete category')
         }
 
-        setToast({ type: 'success', message: 'Category deleted successfully' });
-        fetchCategories();
+        setToast({ type: 'success', message: 'Category deleted successfully' })
+        fetchCategories()
       } catch (err) {
-        setToast({ type: 'error', message: err.message });
+        setToast({ type: 'error', message: err.message })
       }
     }
-  };
+  }
 
   const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setEditingCategory(null);
-    setFormData({ name: '', details: '', status: 'active' });
-  };
+    setIsModalOpen(false)
+    setEditingCategory(null)
+    setFormData({ name: '', details: '', status: 'active' })
+  }
 
   const handleViewModalClose = () => {
-    setIsViewModalOpen(false);
-    setViewingCategory(null);
-  };
+    setIsViewModalOpen(false)
+    setViewingCategory(null)
+  }
 
   const handleEditFromView = () => {
     if (viewingCategory) {
-      setEditingCategory(viewingCategory);
+      setEditingCategory(viewingCategory)
       setFormData({
         name: viewingCategory.name || '',
         details: viewingCategory.details || '',
-        status: viewingCategory.status || 'active'
-      });
-      setIsViewModalOpen(false);
-      setIsModalOpen(true);
+        status: viewingCategory.status || 'active',
+      })
+      setIsViewModalOpen(false)
+      setIsModalOpen(true)
     }
-  };
+  }
 
   const handleToastClose = () => {
-    setToast(null);
-  };
+    setToast(null)
+  }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    
+    e.preventDefault()
+
     // Validate form data
     if (!formData.name.trim()) {
       setToast({
         type: 'error',
-        message: 'Category name is required'
-      });
-      return;
+        message: 'Category name is required',
+      })
+      return
     }
-    
+
     try {
-      console.log('Submitting form data:', formData);
-      
-      const adminToken = localStorage.getItem('adminToken');
-      const url = editingCategory 
+      console.log('Submitting form data:', formData)
+
+      const adminToken = localStorage.getItem('adminToken')
+      const url = editingCategory
         ? `${import.meta.env.VITE_SERVER_LINK}/api/categories/${editingCategory.id}`
-        : `${import.meta.env.VITE_SERVER_LINK}/api/categories`;
-      
-      const method = editingCategory ? 'PUT' : 'POST';
-      
+        : `${import.meta.env.VITE_SERVER_LINK}/api/categories`
+
+      const method = editingCategory ? 'PUT' : 'POST'
+
       const response = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${adminToken}`
+          Authorization: `Bearer ${adminToken}`,
         },
-        body: JSON.stringify(formData)
-      });
+        body: JSON.stringify(formData),
+      })
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to save category');
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Failed to save category')
       }
 
       setToast({
         type: 'success',
-        message: `Category "${formData.name}" ${editingCategory ? 'updated' : 'created'} successfully!` 
-      });
-      setIsModalOpen(false);
-      setEditingCategory(null);
+        message: `Category "${formData.name}" ${editingCategory ? 'updated' : 'created'} successfully!`,
+      })
+      setIsModalOpen(false)
+      setEditingCategory(null)
       // Reset form data
       setFormData({
         name: '',
         details: '',
-        status: 'active'
-      });
-      fetchCategories();
+        status: 'active',
+      })
+      fetchCategories()
     } catch (error) {
-      console.error('Submit error:', error);
+      console.error('Submit error:', error)
       setToast({
         type: 'error',
-        message: `Network error occurred while ${editingCategory ? 'updating' : 'creating'} category` 
-      });
+        message: `Network error occurred while ${editingCategory ? 'updating' : 'creating'} category`,
+      })
     }
-  };
+  }
 
   if (loading) {
     return (
       <div className="h-full w-full flex flex-col items-center justify-center space-y-4">
         <div className="w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-xs font-black uppercase tracking-[3px] text-gray-400">Syncing Category Database...</p>
+        <p className="text-xs font-black uppercase tracking-[3px] text-gray-400">
+          Syncing Category Database...
+        </p>
       </div>
-    );
+    )
   }
 
   if (error) {
@@ -215,45 +223,44 @@ function CategoryContent() {
           <p className="text-red-600 text-sm mt-1">{error}</p>
         </div>
       </div>
-    );
+    )
   }
 
   const columns = [
     { key: 'id', label: 'ID' },
     { key: 'name', label: 'Name' },
     { key: 'details', label: 'Details' },
-    { 
-      key: 'status', 
+    {
+      key: 'status',
       label: 'Status',
       render: (value) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-          value === 1 
-            ? 'bg-green-100 text-green-800' 
-            : 'bg-red-100 text-red-800'
-        }`}>
+        <span
+          className={`px-2 py-1 rounded-full text-xs font-medium ${
+            value === 1 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+          }`}
+        >
           {value === 1 ? 'Active' : 'Inactive'}
         </span>
-      )
+      ),
     },
-    { 
-      key: 'created_at', 
+    {
+      key: 'created_at',
       label: 'Created',
-      render: (value) => new Date(value).toLocaleDateString()
-    }
-  ];
+      render: (value) => new Date(value).toLocaleDateString(),
+    },
+  ]
 
   const actions = [
     {
       icon: Edit2,
       label: 'Edit',
       onClick: handleEditCategoryClick,
-      className: 'text-emerald-600 hover:bg-emerald-50'
-    }
-  ];
+      className: 'text-emerald-600 hover:bg-emerald-50',
+    },
+  ]
 
   return (
     <div className="h-full flex flex-col bg-transparent overflow-hidden">
-
       {/* --- HEADER SECTION --- */}
       <div className="flex-shrink-0">
         <motion.div
@@ -279,7 +286,10 @@ function CategoryContent() {
               EXPORT LIST
             </button>
             <ProtectedAction routeName="categories">
-              <button onClick={handleAddCategoryClick} className="flex items-center gap-2 px-6 py-3 bg-black text-white text-xs font-bold rounded-xl hover:bg-emerald-600 transition-all uppercase tracking-widest">
+              <button
+                onClick={handleAddCategoryClick}
+                className="flex items-center gap-2 px-6 py-3 bg-black text-white text-xs font-bold rounded-xl hover:bg-emerald-600 transition-all uppercase tracking-widest"
+              >
                 <Plus size={14} />
                 Add Category
               </button>
@@ -298,13 +308,13 @@ function CategoryContent() {
           <SummaryCard
             icon={<ShieldCheck className="text-black" size={20} />}
             label="Active"
-            value={categories?.filter(c => c.status === 'active').length || 0}
+            value={categories?.filter((c) => c.status === 'active').length || 0}
             subText="Enabled Categories"
           />
           <SummaryCard
             icon={<Search className="text-gray-400" size={20} />}
             label="Inactive"
-            value={categories?.filter(c => c.status === 'inactive').length || 0}
+            value={categories?.filter((c) => c.status === 'inactive').length || 0}
             subText="Disabled Categories"
           />
         </div>
@@ -327,10 +337,10 @@ function CategoryContent() {
             {
               column: 'status',
               values: {
-                1: 'green',
-                0: 'red'
-              }
-            }
+                'ACTIVE': 'green',
+                'INACTIVE': 'red',
+              },
+            },
           ]}
         />
       </motion.div>
@@ -363,7 +373,9 @@ function CategoryContent() {
               </label>
               <textarea
                 value={formData.details}
-                onChange={(e) => setFormData({ ...formData, details: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, details: e.target.value })
+                }
                 rows="4"
                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
                 placeholder="Enter category details..."
@@ -376,7 +388,9 @@ function CategoryContent() {
               </label>
               <select
                 value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, status: e.target.value })
+                }
                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
               >
                 <option value="active">Active</option>
@@ -414,13 +428,17 @@ function CategoryContent() {
           <div className="space-y-4">
             {/* Header Section */}
             <div className="border-b border-gray-200 pb-4">
-              <h3 className="text-lg font-black text-black uppercase tracking-tight mb-2">Category Details</h3>
+              <h3 className="text-lg font-black text-black uppercase tracking-tight mb-2">
+                Category Details
+              </h3>
               <div className="flex items-center gap-3">
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${
-                  viewingCategory.status === 'active' 
-                    ? 'bg-green-100 text-green-800 border-green-200'
-                    : 'bg-red-100 text-red-800 border-red-200'
-                }`}>
+                <span
+                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${
+                    viewingCategory.status === 'active'
+                      ? 'bg-green-100 text-green-800 border-green-200'
+                      : 'bg-red-100 text-red-800 border-red-200'
+                  }`}
+                >
                   {viewingCategory.status === 'active' ? 'ACTIVE' : 'INACTIVE'}
                 </span>
                 <span className="text-xs text-gray-500">
@@ -431,7 +449,9 @@ function CategoryContent() {
 
             {/* Name Section */}
             <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Name</label>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">
+                Name
+              </label>
               <h4 className="text-base font-bold text-black leading-tight">
                 {viewingCategory.name || 'Untitled Category'}
               </h4>
@@ -439,7 +459,9 @@ function CategoryContent() {
 
             {/* Details Section */}
             <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Details</label>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">
+                Details
+              </label>
               <div className="bg-white p-4 rounded-lg border border-gray-200 min-h-[120px]">
                 <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
                   {viewingCategory.details || 'No details available'}
@@ -449,35 +471,43 @@ function CategoryContent() {
 
             {/* Created Date Section */}
             <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Created Date</label>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">
+                Created Date
+              </label>
               <p className="text-sm text-gray-600">
-                {viewingCategory.created_at ? 
-                  new Date(viewingCategory.created_at).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  }) : 
-                  'Unknown'
-                }
+                {viewingCategory.created_at
+                  ? new Date(viewingCategory.created_at).toLocaleDateString(
+                      'en-US',
+                      {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      },
+                    )
+                  : 'Unknown'}
               </p>
             </div>
 
             {/* Updated Date Section */}
             <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Updated Date</label>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">
+                Updated Date
+              </label>
               <p className="text-sm text-gray-600">
-                {viewingCategory.updated_at ? 
-                  new Date(viewingCategory.updated_at).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  }) : 
-                  'Unknown'
-                }
+                {viewingCategory.updated_at
+                  ? new Date(viewingCategory.updated_at).toLocaleDateString(
+                      'en-US',
+                      {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      },
+                    )
+                  : 'Unknown'}
               </p>
             </div>
 
@@ -510,7 +540,7 @@ function CategoryContent() {
         />
       )}
     </div>
-  );
+  )
 }
 
 // Summary Card Component
@@ -524,16 +554,16 @@ function SummaryCard({ icon, label, value, subText }) {
     >
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{label}</p>
+          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+            {label}
+          </p>
           <p className="text-2xl font-bold text-gray-900 mt-1">{value}</p>
           <p className="text-xs text-gray-600 mt-1">{subText}</p>
         </div>
-        <div className="p-3 bg-gray-50 rounded-lg">
-          {icon}
-        </div>
+        <div className="p-3 bg-gray-50 rounded-lg">{icon}</div>
       </div>
     </motion.div>
-  );
+  )
 }
 
 export default function Category() {
@@ -541,5 +571,5 @@ export default function Category() {
     <RouteProtection>
       <CategoryContent />
     </RouteProtection>
-  );
+  )
 }

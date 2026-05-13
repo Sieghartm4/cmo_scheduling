@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import PublicHeader from '../../components/layout/PublicHeader'
+import Footer from '../../components/layout/Footer'
 import {
   Calendar,
   Clock,
@@ -257,11 +258,11 @@ export default function Home() {
                 <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-6 mb-4">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full flex items-center justify-center">
-                      <span className="text-white font-bold">C</span>
+                      <span className="text-white font-bold">T</span>
                     </div>
                     <div>
                       <h4 className="font-semibold text-gray-900">
-                        CMO Scheduling Team
+                        TheAnxietyNurse
                       </h4>
                       <p className="text-sm text-gray-500">2 hours ago</p>
                     </div>
@@ -590,124 +591,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-gray-400 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <div className="flex items-center gap-3 mb-4">
-                {homePageSettings?.website_logo ? (
-                  // If logo exists, display it
-                  homePageSettings.website_logo.startsWith('data:') ||
-                  homePageSettings.website_logo.startsWith('http') ? (
-                    <img
-                      src={
-                        homePageSettings.website_logo.startsWith('data:')
-                          ? homePageSettings.website_logo
-                          : `data:image/jpeg;base64,${homePageSettings.website_logo}`
-                      }
-                      alt={homePageSettings.website_title || 'Logo'}
-                      className="w-25 h-25 rounded-xl object-cover"
-                    />
-                  ) : (
-                    <div className="w-25 h-25 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
-                      <Calendar size={24} className="text-white" />
-                    </div>
-                  )
-                ) : (
-                  // Default logo if none provided
-                  <div className="w-25 h-25 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
-                    <Calendar size={24} className="text-white" />
-                  </div>
-                )}
-                <span className="text-xl font-bold text-white">
-                  {homePageSettings?.website_title || 'CMO Connect'}
-                </span>
-              </div>
-              <p className="text-sm">
-                Your all-in-one platform for scheduling and community engagement.
-              </p>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4">Quick Links</h4>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <a
-                    href="#features"
-                    className="hover:text-emerald-400 transition-colors"
-                  >
-                    Features
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#about"
-                    className="hover:text-emerald-400 transition-colors"
-                  >
-                    About
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#testimonials"
-                    className="hover:text-emerald-400 transition-colors"
-                  >
-                    Testimonials
-                  </a>
-                </li>
-                <li>
-                  <button
-                    onClick={() => navigate('/posts')}
-                    className="hover:text-emerald-400 transition-colors"
-                  >
-                    Posts
-                  </button>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4">Account</h4>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <button
-                    onClick={() => navigate('/login')}
-                    className="hover:text-emerald-400 transition-colors"
-                  >
-                    Sign In
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => navigate('/dashboard')}
-                    className="hover:text-emerald-400 transition-colors"
-                  >
-                    Dashboard
-                  </button>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4">Contact</h4>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  {homePageSettings?.contact_email || 'support@cmoconnect.com'}
-                </li>
-                <li>{homePageSettings?.contact_number || '+1 (555) 123-4567'}</li>
-                <li>
-                  {homePageSettings?.location ||
-                    '123 Business Ave, Suite 100, San Francisco, CA 94105'}
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 pt-8 text-center text-sm">
-            <p>
-              &copy; 2026 {homePageSettings?.website_title || 'CMO Connect'}. All
-              rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }

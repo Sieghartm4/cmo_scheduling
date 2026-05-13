@@ -476,15 +476,13 @@ function AppointmentsContent() {
           ]}
           badgeColumns={[
             {
-              column: 'app_status',
+              column: 'status',
               values: {
-                'pending': 'yellow',
-                'approved': 'green',
-                'rejected': 'red',
-                'cancelled': 'gray',
-                'done': 'blue'
-              }
-            }
+                'APPROVED': 'green',
+                'REJECTED': 'red',
+                'PENDING': 'yellow',
+              },
+            },
           ]}
         />
       </motion.div>

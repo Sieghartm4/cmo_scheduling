@@ -20,7 +20,8 @@ require('dotenv').config()
 // Get all appointments
 const getAppointments = async (req, res, next) => {
   try {
-    const query = sql
+    const { mu_id } = req.query
+    let query = sql
       .select([
         { col: Master.appointment.selectOptionColumns.id, as: 'id' },
         { col: Master.appointment.selectOptionColumns.date, as: 'date' },
@@ -28,10 +29,10 @@ const getAppointments = async (req, res, next) => {
         { col: Master.appointment.selectOptionColumns.end_time, as: 'end_time' },
         { col: Master.appointment.selectOptionColumns.reason, as: 'reason' },
         { col: Master.appointment.selectOptionColumns.notes, as: 'notes' },
-        { col: Master.appointment.selectOptionColumns.status, as: 'status' },
         { col: Master.appointment.selectOptionColumns.created_at, as: 'created_at' },
         { col: Master.master_user.selectOptionColumns.fullname, as: 'mu_fullname' },
         { col: Master.master_user.selectOptionColumns.email, as: 'mu_email' },
+        { col: Master.appointment.selectOptionColumns.status, as: 'status' },
       ])
       .from(Master.appointment.tablename)
       .leftJoin(
@@ -39,33 +40,41 @@ const getAppointments = async (req, res, next) => {
         Master.appointment.selectOptionColumns.mu_id,
         Master.master_user.selectOptionColumns.id,
       )
+
+    if (mu_id) {
+      query = query.where(Master.appointment.selectOptionColumns.mu_id, '=', mu_id)
+    }
+
+    query = query
       .orderBy(Master.appointment.selectOptionColumns.date, 'DESC')
       .orderBy(Master.appointment.selectOptionColumns.start_time, 'ASC')
       .build()
 
-    console.log('Generated SQL Query:', query);
+    console.log('Generated SQL Query:', query)
 
-    const rawAppointments = await Query(
-      query,
-      [],
-      [Master.appointment.prefix_, Master.master_user.prefix_],
-    )
+    const rawAppointments = await Query(query, mu_id ? [mu_id] : [], [
+      Master.appointment.prefix_,
+      Master.master_user.prefix_,
+    ])
 
     // FIX: Format the date object to string to avoid timezone shifting
-    const appointments = rawAppointments.map(app => {
+    const appointments = rawAppointments.map((app) => {
       // Ensure we have a valid date object
-      const dateObj = new Date(app.date);
-      
+      const dateObj = new Date(app.date)
+
       return {
         ...app,
         // toISOString().split('T')[0] extracts 'YYYY-MM-DD' regardless of local time
-        // However, if the driver shifted it back to 16:00 the previous day, 
+        // However, if the driver shifted it back to 16:00 the previous day,
         // we use local date methods to ensure it stays as 'May 14'
-        date: dateObj.getFullYear() + '-' + 
-              String(dateObj.getMonth() + 1).padStart(2, '0') + '-' + 
-              String(dateObj.getDate()).padStart(2, '0')
-      };
-    });
+        date:
+          dateObj.getFullYear() +
+          '-' +
+          String(dateObj.getMonth() + 1).padStart(2, '0') +
+          '-' +
+          String(dateObj.getDate()).padStart(2, '0'),
+      }
+    })
 
     console.log('Appointments retrieved (Formatted):', appointments)
 
@@ -298,7 +307,7 @@ const updateAppointmentStatus = async (req, res, next) => {
     const { id } = req.params
     const { app_status } = req.body
 
-    console.log('UpdateAppointmentStatus - ID:', id, 'Status:', app_status);
+    console.log('UpdateAppointmentStatus - ID:', id, 'Status:', app_status)
 
     if (!app_status) {
       return res.status(400).json({
@@ -315,7 +324,10 @@ const updateAppointmentStatus = async (req, res, next) => {
       .build()
     const existing = await Query(checkQuery, [id], [Master.appointment.prefix_])
 
-    console.log('Appointment exists check:', existing.length > 0 ? 'FOUND' : 'NOT FOUND');
+    console.log(
+      'Appointment exists check:',
+      existing.length > 0 ? 'FOUND' : 'NOT FOUND',
+    )
 
     if (existing.length === 0) {
       return res.status(404).json({
@@ -324,13 +336,17 @@ const updateAppointmentStatus = async (req, res, next) => {
       })
     }
 
-    const updateQuery = `UPDATE ${Master.appointment.tablename} SET app_status = ? WHERE app_id = ?`;
-    
-    console.log('Update query:', updateQuery);
-    
-    const result = await Query(updateQuery, [app_status, id], [Master.appointment.prefix_])
-    
-    console.log('Update result:', result);
+    const updateQuery = `UPDATE ${Master.appointment.tablename} SET app_status = ? WHERE app_id = ?`
+
+    console.log('Update query:', updateQuery)
+
+    const result = await Query(
+      updateQuery,
+      [app_status, id],
+      [Master.appointment.prefix_],
+    )
+
+    console.log('Update result:', result)
 
     res.status(200).json({
       success: true,

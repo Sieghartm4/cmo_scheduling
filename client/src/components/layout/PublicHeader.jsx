@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Calendar, User, LogOut, ChevronDown } from 'lucide-react'
+import { Calendar, User, LogOut, ChevronDown, Menu, X, Home } from 'lucide-react'
 
 export default function PublicHeader() {
   const navigate = useNavigate()
@@ -8,6 +8,7 @@ export default function PublicHeader() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [user, setUser] = useState(null)
   const [showLogout, setShowLogout] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [homePageSettings, setHomePageSettings] = useState(null)
 
   const handleHomeClick = () => {
@@ -127,49 +128,23 @@ export default function PublicHeader() {
           {/* Nav Links */}
           <div className="hidden md:flex items-center gap-8">
             <button
-              onClick={() => {
-                navigate('/')
-                setTimeout(
-                  () =>
-                    document
-                      .getElementById('features')
-                      ?.scrollIntoView({ behavior: 'smooth' }),
-                  100,
-                )
-              }}
-              className="text-gray-600 hover:text-emerald-600 font-medium transition-colors"
+              onClick={() => navigate('/')}
+              className="text-gray-600 hover:text-emerald-600 font-medium transition-colors flex items-center gap-2"
             >
-              Features
+              <Home size={16} />
+              Home
             </button>
             <button
-              onClick={() => {
-                navigate('/')
-                setTimeout(
-                  () =>
-                    document
-                      .getElementById('about')
-                      ?.scrollIntoView({ behavior: 'smooth' }),
-                  100,
-                )
-              }}
+              onClick={() => navigate('/about-me')}
               className="text-gray-600 hover:text-emerald-600 font-medium transition-colors"
             >
-              About
+              About Me
             </button>
             <button
-              onClick={() => {
-                navigate('/')
-                setTimeout(
-                  () =>
-                    document
-                      .getElementById('testimonials')
-                      ?.scrollIntoView({ behavior: 'smooth' }),
-                  100,
-                )
-              }}
+              onClick={() => navigate('/disclaimer')}
               className="text-gray-600 hover:text-emerald-600 font-medium transition-colors"
             >
-              Testimonials
+              Disclaimer
             </button>
             <button
               onClick={() => navigate('/posts')}
@@ -185,8 +160,18 @@ export default function PublicHeader() {
             </button>
           </div>
 
+          {/* Mobile Menu Button */}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 rounded-lg text-gray-600 bg-white/90 border border-gray-200 hover:text-emerald-600 hover:shadow-md transition-all"
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+
           {/* CTA Buttons */}
-          <div className="flex items-center gap-4 relative">
+          <div className="hidden md:flex items-center gap-4 relative">
             {isLoggedIn ? (
               <div className="flex items-center gap-3">
                 {/* User Name - Clickable for logout */}
@@ -233,13 +218,19 @@ export default function PublicHeader() {
             ) : (
               <>
                 <button
-                  onClick={() => navigate('/login')}
+                  onClick={() => {
+                    navigate('/login')
+                    setMobileMenuOpen(false)
+                  }}
                   className="text-gray-600 hover:text-emerald-600 font-medium transition-colors"
                 >
                   Sign In
                 </button>
                 <button
-                  onClick={() => navigate('/login')}
+                  onClick={() => {
+                    navigate('/login')
+                    setMobileMenuOpen(false)
+                  }}
                   className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg font-medium hover:shadow-lg transition-all"
                 >
                   Get Started
@@ -249,6 +240,109 @@ export default function PublicHeader() {
           </div>
         </div>
       </div>
+
+      {mobileMenuOpen && (
+        <div className="md:hidden absolute inset-x-0 top-full bg-white border-b border-gray-100 shadow-lg z-40">
+          <div className="px-4 py-5 space-y-4">
+            <button
+              onClick={() => {
+                navigate('/')
+                setMobileMenuOpen(false)
+              }}
+              className="flex items-center gap-2 w-full text-left text-gray-700 hover:text-emerald-600 font-medium"
+            >
+              <Home size={16} />
+              Home
+            </button>
+            <button
+              onClick={() => {
+                navigate('/about-me')
+                setMobileMenuOpen(false)
+              }}
+              className="w-full text-left text-gray-700 hover:text-emerald-600 font-medium"
+            >
+              About Me
+            </button>
+            <button
+              onClick={() => {
+                navigate('/disclaimer')
+                setMobileMenuOpen(false)
+              }}
+              className="w-full text-left text-gray-700 hover:text-emerald-600 font-medium"
+            >
+              Disclaimer
+            </button>
+            <button
+              onClick={() => {
+                navigate('/posts')
+                setMobileMenuOpen(false)
+              }}
+              className="w-full text-left text-gray-700 hover:text-emerald-600 font-medium"
+            >
+              Posts
+            </button>
+            <button
+              onClick={() => {
+                navigate('/calendar')
+                setMobileMenuOpen(false)
+              }}
+              className="w-full text-left text-gray-700 hover:text-emerald-600 font-medium"
+            >
+              Schedule
+            </button>
+            <div className="border-t border-gray-200 pt-4">
+              {isLoggedIn ? (
+                <>
+                  <button
+                    onClick={() => setShowLogout(!showLogout)}
+                    className="w-full text-left text-gray-700 hover:text-emerald-600 font-medium flex items-center justify-between"
+                  >
+                    <span>
+                      {user?.fullname || user?.mu_fullname || user?.email || 'User'}
+                    </span>
+                    <ChevronDown
+                      size={16}
+                      className={`transition-transform ${showLogout ? 'rotate-180' : ''}`}
+                    />
+                  </button>
+                  {showLogout && (
+                    <button
+                      onClick={() => {
+                        handleLogout()
+                        setMobileMenuOpen(false)
+                      }}
+                      className="mt-3 w-full text-left text-red-600 hover:bg-red-50 px-3 py-2 rounded-lg"
+                    >
+                      Logout
+                    </button>
+                  )}
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => {
+                      navigate('/login')
+                      setMobileMenuOpen(false)
+                    }}
+                    className="w-full text-left text-gray-700 hover:text-emerald-600 font-medium"
+                  >
+                    Sign In
+                  </button>
+                  <button
+                    onClick={() => {
+                      navigate('/login')
+                      setMobileMenuOpen(false)
+                    }}
+                    className="mt-3 w-full px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg font-medium"
+                  >
+                    Get Started
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   )
 }

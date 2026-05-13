@@ -12,24 +12,24 @@ module.exports = {
      *   isBetaMember: false
      * }], {});
     */
-    await queryInterface.bulkInsert('master_user', [
-      {
-        mu_fullname: 'Admin',
-        mu_email: 'admin@example.com',
-        mu_password: '0956c4cb6f6ab654ae29193c9bb25262',
-        mu_role: 'admin',
-        mu_profile: null,
-        mu_status: 'active'
-      },
-      {
-        mu_fullname: 'Test User',
-        mu_email: 'user@example.com',
-        mu_password: '0956c4cb6f6ab654ae29193c9bb25262',
-        mu_role: 'user',
-        mu_profile: null,
-        mu_status: 'active'
-      }
-      ]);
+    // await queryInterface.bulkInsert('master_user', [
+    //   {
+    //     mu_fullname: 'Admin',
+    //     mu_email: 'admin@example.com',
+    //     mu_password: '0956c4cb6f6ab654ae29193c9bb25262',
+    //     mu_role: 'admin',
+    //     mu_profile: null,
+    //     mu_status: 'active'
+    //   },
+    //   {
+    //     mu_fullname: 'Test User',
+    //     mu_email: 'user@example.com',
+    //     mu_password: '0956c4cb6f6ab654ae29193c9bb25262',
+    //     mu_role: 'user',
+    //     mu_profile: null,
+    //     mu_status: 'active'
+    //   }
+    //   ]);
   },
 
   async down (queryInterface, Sequelize) {

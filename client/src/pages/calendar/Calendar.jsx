@@ -154,6 +154,126 @@ const css = `
     font-weight: 400;
   }
 
+  .cal-right-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.75rem;
+    min-height: 480px;
+  }
+
+  .cal-right-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .cal-right-panel-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--slate-900);
+    line-height: 1.2;
+  }
+
+  .cal-right-panel-sub {
+    font-size: .88rem;
+    color: var(--slate-500);
+    line-height: 1.6;
+    margin-top: .35rem;
+  }
+
+  .cal-appointment-list {
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+    overflow-y: auto;
+    min-height: 0;
+    max-height: calc(100vh - 420px);
+    padding-right: .2rem;
+  }
+
+  .cal-appointment-card {
+    background: var(--slate-50);
+    border: 1px solid var(--slate-200);
+    border-radius: var(--r-sm);
+    padding: 1rem 1rem;
+    cursor: pointer;
+    transition: all .15s;
+    text-align: left;
+    width: 100%;
+  }
+
+  .cal-appointment-card:hover {
+    background: var(--white);
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px rgba(16,185,129,.08);
+  }
+
+  .cal-appointment-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: .75rem;
+    flex-wrap: wrap;
+  }
+
+  .cal-appointment-date {
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--slate-900);
+  }
+
+  .cal-appointment-time {
+    margin-top: .25rem;
+    font-size: .82rem;
+    color: var(--slate-500);
+  }
+
+  .cal-appointment-reason {
+    margin-top: .6rem;
+    font-size: .82rem;
+    color: var(--slate-600);
+    line-height: 1.5;
+  }
+
+  .cal-appointment-status {
+    font-size: .65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: .32rem .65rem;
+    border-radius: 999px;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .cal-appointment-status.pending {
+    background: rgba(250,204,21,.15);
+    color: #92400e;
+  }
+
+  .cal-appointment-status.approved {
+    background: rgba(16,185,129,.15);
+    color: var(--em-700);
+  }
+
+  .cal-appointment-status.rejected {
+    background: rgba(239,68,68,.12);
+    color: #991b1b;
+  }
+
+  .cal-appointment-empty {
+    padding: 1.25rem;
+    text-align: center;
+    color: var(--slate-400);
+    font-size: .9rem;
+    background: var(--slate-50);
+    border: 1px dashed var(--slate-200);
+    border-radius: var(--r-sm);
+  }
+
   .cal-stat {
     background: rgba(255,255,255,.06);
     border: 1px solid rgba(255,255,255,.1);
@@ -663,6 +783,8 @@ export default function CalendarPage() {
   const [submitting, setSubmitting] = useState(false)
   const [toast, setToast] = useState(null)
   const [dayAppointments, setDayAppointments] = useState([])
+  const [userAppointments, setUserAppointments] = useState([])
+  const [selectedAppointment, setSelectedAppointment] = useState(null)
   const [showLoginModal, setShowLoginModal] = useState(false)
 
   useEffect(() => {
@@ -695,6 +817,13 @@ export default function CalendarPage() {
     fetchHomePageSettings()
   }, [])
 
+  useEffect(() => {
+    const userId = currentUser?.id || currentUser?.mu_id
+    if (userId) {
+      fetchUserAppointments(userId)
+    }
+  }, [currentUser])
+
   const fetchHomePageSettings = async () => {
     try {
       const timestamp = new Date().getTime()
@@ -710,6 +839,32 @@ export default function CalendarPage() {
       }
     } catch (error) {
       console.error('Error fetching home page settings:', error)
+    }
+  }
+
+  const fetchUserAppointments = async (userId) => {
+    if (!userId) return
+    try {
+      const token =
+        localStorage.getItem('token') ||
+        localStorage.getItem('userToken') ||
+        localStorage.getItem('adminToken')
+      const response = await fetch(
+        `${import.meta.env.VITE_SERVER_LINK}/api/appointments?mu_id=${encodeURIComponent(
+          userId,
+        )}`,
+        { headers: token ? { Authorization: `Bearer ${token}` } : {} },
+      )
+      if (response.ok) {
+        const result = await response.json()
+        const userAppts = (result.data || []).map((apt) => ({
+          ...apt,
+          date: normalizeAppointmentDate(apt.date),
+        }))
+        setUserAppointments(userAppts)
+      }
+    } catch (error) {
+      console.error('Error fetching user appointments:', error)
     }
   }
 
@@ -854,6 +1009,8 @@ export default function CalendarPage() {
         setSelectedDay(null)
         setShowModal(false)
         fetchAppointments()
+        const userId = currentUser?.id || currentUser?.mu_id
+        if (userId) fetchUserAppointments(userId)
       } else {
         const error = await response.json()
         setToast({
@@ -896,9 +1053,20 @@ export default function CalendarPage() {
         <div style={{ maxWidth: 1600, margin: '0 auto', height: '90vh' }}>
           <style>{`
             @media(min-width:900px){
-              .cal-layout{ grid-template-columns: 280px minmax(0,1fr) !important; }
+              .cal-layout{ grid-template-columns: 280px minmax(0,1fr) 320px !important; }
             }
           `}</style>
+          <style
+            dangerouslySetInnerHTML={{
+              __html: `
+              .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+              .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+              .custom-scrollbar::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
+              .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #059669; }
+              .row-checkbox { width: 15px; height: 15px; accent-color: #10b981; cursor: pointer; }
+            `,
+            }}
+          />
 
           <div
             className="cal-layout"
@@ -1102,6 +1270,70 @@ export default function CalendarPage() {
                     Available
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* ── My appointments ── */}
+            <div className="cal-card">
+              <div className="cal-right-panel">
+                <div className="cal-right-panel-header">
+                  <div>
+                    <div className="cal-right-panel-title">My Appointments</div>
+                    <div className="cal-right-panel-sub">
+                      All your bookings, including pending and rejected requests.
+                    </div>
+                  </div>
+                  <div className="cal-sidebar-badge">
+                    <div className="cal-sidebar-badge-dot" />
+                    <span className="cal-sidebar-badge-text">
+                      {userAppointments.length} item
+                      {userAppointments.length === 1 ? '' : 's'}
+                    </span>
+                  </div>
+                </div>
+
+                {isLoggedIn ? (
+                  <div className="cal-appointment-list custom-scrollbar">
+                    {userAppointments.length === 0 ? (
+                      <div className="cal-appointment-empty">
+                        No appointments found. Pick a date to request a booking.
+                      </div>
+                    ) : (
+                      userAppointments.map((apt) => (
+                        <button
+                          key={apt.id}
+                          type="button"
+                          className="cal-appointment-card"
+                          onClick={() => setSelectedAppointment(apt)}
+                        >
+                          <div className="cal-appointment-card-top">
+                            <div>
+                              <div className="cal-appointment-date">{apt.date}</div>
+                              <div className="cal-appointment-time">
+                                {apt.start_time} — {apt.end_time}
+                              </div>
+                            </div>
+                            <span
+                              className={`cal-appointment-status ${apt.status || 'pending'}`}
+                            >
+                              {apt.status
+                                ? apt.status.charAt(0).toUpperCase() +
+                                  apt.status.slice(1)
+                                : 'Pending'}
+                            </span>
+                          </div>
+                          <div className="cal-appointment-reason">
+                            {apt.reason || 'No reason provided'}
+                          </div>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                ) : (
+                  <div className="cal-appointment-empty">
+                    Sign in to see your appointments and details.
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -1332,6 +1564,80 @@ export default function CalendarPage() {
         )}
       </AnimatePresence>
 
+      {/* Appointment Details Modal */}
+      <AnimatePresence>
+        {selectedAppointment && (
+          <motion.div
+            className="cal-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="cal-modal"
+              initial={{ scale: 0.93, opacity: 0, y: 14 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.93, opacity: 0, y: 14 }}
+              transition={{ type: 'spring', stiffness: 360, damping: 28 }}
+            >
+              <div className="cal-modal-hd">
+                <div>
+                  <div className="cal-modal-hd-title">Appointment Details</div>
+                  <div className="cal-modal-hd-sub">
+                    Review the full booking details and current status.
+                  </div>
+                </div>
+                <button
+                  className="cal-modal-x"
+                  onClick={() => setSelectedAppointment(null)}
+                >
+                  <X size={14} />
+                </button>
+              </div>
+              <div className="cal-modal-body">
+                <div style={{ display: 'grid', gap: '1rem' }}>
+                  <div>
+                    <strong>Date</strong>
+                    <div>{selectedAppointment.date}</div>
+                  </div>
+                  <div>
+                    <strong>Time</strong>
+                    <div>
+                      {selectedAppointment.start_time} —{' '}
+                      {selectedAppointment.end_time}
+                    </div>
+                  </div>
+                  <div>
+                    <strong>Status</strong>
+                    <div>{selectedAppointment.status || 'Pending'}</div>
+                  </div>
+                  <div>
+                    <strong>Reason</strong>
+                    <div>{selectedAppointment.reason || 'No reason provided'}</div>
+                  </div>
+                  <div>
+                    <strong>Notes</strong>
+                    <div>{selectedAppointment.notes || 'No additional notes'}</div>
+                  </div>
+                  <div>
+                    <strong>Requested by</strong>
+                    <div>
+                      {selectedAppointment.mu_fullname ||
+                        selectedAppointment.mu_email ||
+                        'Unknown user'}
+                    </div>
+                  </div>
+                  <div>
+                    <strong>Created</strong>
+                    <div>{selectedAppointment.created_at || 'Unknown'}</div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Toast */}
       <AnimatePresence>
         {toast && (
@@ -1355,10 +1661,11 @@ export default function CalendarPage() {
               <div className="w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Lock size={28} className="text-white" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Sign In Required</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                Sign In Required
+              </h3>
               <p className="text-gray-600 mb-6">
-                Please sign in to book appointments and engage with the
-                community.
+                Please sign in to book appointments and engage with the community.
               </p>
               <div className="space-y-3">
                 <button
