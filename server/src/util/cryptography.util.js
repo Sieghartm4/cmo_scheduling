@@ -1,14 +1,12 @@
 require('dotenv').config()
 const bcrypt = require('bcrypt')
+const crypto = require('crypto')
 const { logger } = require('./logger.util')
 
 /**
  * Encryption Salt
  */
-// const saltRounds = 10
-// const sqlPassword = '#Ebedaf19dd0d'
-// const salt = '$2b$10$nsumtNnZ5fP5s5GHybnCu.' //bcrypt.genSaltSync(saltRounds);
-const crypto = require('crypto')
+const saltRounds = 10
 
 /**
  * Encryption Algorithm
@@ -19,7 +17,7 @@ const Securitykey = Buffer.alloc(32, process.env._ENCRYPTION_KEY)
 
 exports.CreateHashPassword = (password, callback) => {
   try {
-    callback(null, bcrypt.hashSync(password, salt))
+    callback(null, bcrypt.hashSync(password, saltRounds))
   } catch (error) {
     callback(error, null)
   }
@@ -29,7 +27,7 @@ exports.CheckPassword = (inputpassword, hashpassword, callback) => {
   try {
     const md5Hash = crypto.createHash('md5').update(inputpassword).digest('hex')
     const isPasswordValid = md5Hash === hashpassword
-    
+
     callback(null, isPasswordValid)
   } catch (error) {
     callback(error, null)

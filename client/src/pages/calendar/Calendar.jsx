@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import PublicHeader from '../../components/layout/PublicHeader'
+import Footer from '../../components/layout/Footer'
 import DynamicToast from '../../components/DynamicToast'
+import TutorialGuide from '../../components/TutorialGuide'
 import {
   ChevronLeft,
   ChevronRight,
@@ -13,6 +15,7 @@ import {
   Loader2,
   Sparkles,
   Lock,
+  BookOpen,
 } from 'lucide-react'
 
 /* ─── Google Fonts ───────────────────────────────────────────────────────── */
@@ -250,18 +253,18 @@ const css = `
   }
 
   .cal-appointment-status.pending {
-    background: rgba(250,204,21,.15);
+    background: #facc15;
     color: #92400e;
   }
 
   .cal-appointment-status.approved {
-    background: rgba(16,185,129,.15);
-    color: var(--em-700);
+    background: #34d399;
+    color: #065f46;
   }
 
   .cal-appointment-status.rejected {
-    background: rgba(239,68,68,.12);
-    color: #991b1b;
+    background: #dc2626;
+    color: #ffffff;
   }
 
   .cal-appointment-empty {
@@ -786,6 +789,31 @@ export default function CalendarPage() {
   const [userAppointments, setUserAppointments] = useState([])
   const [selectedAppointment, setSelectedAppointment] = useState(null)
   const [showLoginModal, setShowLoginModal] = useState(false)
+  const [showCalendarTutorial, setShowCalendarTutorial] = useState(false)
+
+  const calendarTutorialSteps = [
+    {
+      selector: '#tutorial-calendar-nav',
+      title: 'Navigate months',
+      description:
+        'Use the left and right arrows to move through months and locate the date you want to book.',
+      placement: 'bottom',
+    },
+    {
+      selector: '#tutorial-calendar-grid',
+      title: 'Pick a date',
+      description:
+        'Click any available date to see appointment slots and start booking.',
+      placement: 'right',
+    },
+    {
+      selector: '#tutorial-calendar-appointments',
+      title: 'Review your bookings',
+      description:
+        'Your confirmed or pending appointments appear here for quick access.',
+      placement: 'left',
+    },
+  ]
 
   useEffect(() => {
     if (!document.getElementById('cal-styles')) {
@@ -1048,6 +1076,12 @@ export default function CalendarPage() {
     <div className="cal-root cal-bg">
       <div className="cal-accent-bar" />
       <PublicHeader />
+      <TutorialGuide
+        isOpen={showCalendarTutorial}
+        onClose={() => setShowCalendarTutorial(false)}
+        steps={calendarTutorialSteps}
+        initialStep={0}
+      />
 
       <main style={{ flex: 1, overflowY: 'auto', padding: '2rem 1.25rem' }}>
         <div style={{ maxWidth: 1600, margin: '0 auto', height: '90vh' }}>
@@ -1090,6 +1124,14 @@ export default function CalendarPage() {
                     Pick a date, review available slots, and submit your booking
                     request.
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowCalendarTutorial(true)}
+                    className="mt-4 animate-bounce inline-flex items-center justify-center gap-2 rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-lg transition hover:bg-emerald-700"
+                  >
+                    <BookOpen size={16} className="text-white" />
+                    Start calendar tour
+                  </button>
                 </div>
 
                 <div className="cal-stat">
@@ -1131,7 +1173,7 @@ export default function CalendarPage() {
             <div className="cal-card">
               <div className="cal-main">
                 {/* Month nav */}
-                <div className="cal-nav">
+                <div className="cal-nav" id="tutorial-calendar-nav">
                   <button
                     type="button"
                     className="cal-nav-arrow"
@@ -1189,7 +1231,7 @@ export default function CalendarPage() {
                 </div>
 
                 {/* Grid */}
-                <div className="cal-grid">
+                <div className="cal-grid" id="tutorial-calendar-grid">
                   {calendarDays.map((day, idx) => {
                     if (!day)
                       return <div key={idx} className="cal-cell cal-cell-empty" />
@@ -1274,7 +1316,7 @@ export default function CalendarPage() {
             </div>
 
             {/* ── My appointments ── */}
-            <div className="cal-card">
+            <div className="cal-card" id="tutorial-calendar-appointments">
               <div className="cal-right-panel">
                 <div className="cal-right-panel-header">
                   <div>
@@ -1583,6 +1625,16 @@ export default function CalendarPage() {
               <div className="cal-modal-hd">
                 <div>
                   <div className="cal-modal-hd-title">Appointment Details</div>
+                  <div style={{ marginTop: '0.5rem' }}>
+                    <span
+                      className={`cal-appointment-status ${selectedAppointment.status || 'pending'}`}
+                    >
+                      {selectedAppointment.status
+                        ? selectedAppointment.status.charAt(0).toUpperCase() +
+                          selectedAppointment.status.slice(1)
+                        : 'Pending'}
+                    </span>
+                  </div>
                   <div className="cal-modal-hd-sub">
                     Review the full booking details and current status.
                   </div>
@@ -1595,42 +1647,73 @@ export default function CalendarPage() {
                 </button>
               </div>
               <div className="cal-modal-body">
-                <div style={{ display: 'grid', gap: '1rem' }}>
-                  <div>
-                    <strong>Date</strong>
-                    <div>{selectedAppointment.date}</div>
+                <div style={{ display: 'grid', gap: '1.5rem' }}>
+                  <div className="cal-field">
+                    <label className="cal-label">Date</label>
+                    <div className="cal-date-pill">
+                      <Calendar size={13} />
+                      {selectedAppointment.date
+                        ? new Date(selectedAppointment.date).toLocaleDateString(
+                            'en-US',
+                            {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                              weekday: 'short',
+                            },
+                          )
+                        : 'Unknown'}
+                    </div>
                   </div>
-                  <div>
-                    <strong>Time</strong>
-                    <div>
+                  <div className="cal-field">
+                    <label className="cal-label">Time</label>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        fontSize: '0.875rem',
+                        fontWeight: 500,
+                        color: 'var(--slate-900)',
+                      }}
+                    >
+                      <Clock size={14} style={{ color: 'var(--em-600)' }} />
                       {selectedAppointment.start_time} —{' '}
                       {selectedAppointment.end_time}
                     </div>
                   </div>
-                  <div>
-                    <strong>Status</strong>
-                    <div>{selectedAppointment.status || 'Pending'}</div>
-                  </div>
-                  <div>
-                    <strong>Reason</strong>
-                    <div>{selectedAppointment.reason || 'No reason provided'}</div>
-                  </div>
-                  <div>
-                    <strong>Notes</strong>
-                    <div>{selectedAppointment.notes || 'No additional notes'}</div>
-                  </div>
-                  <div>
-                    <strong>Requested by</strong>
-                    <div>
-                      {selectedAppointment.mu_fullname ||
-                        selectedAppointment.mu_email ||
-                        'Unknown user'}
+                  <div className="cal-field">
+                    <label className="cal-label">Notes</label>
+                    <div
+                      style={{
+                        fontSize: '0.875rem',
+                        color: 'var(--slate-600)',
+                        lineHeight: 1.5,
+                        background: 'var(--slate-50)',
+                        padding: '0.75rem',
+                        borderRadius: 'var(--r-sm)',
+                        border: '1px solid var(--slate-200)',
+                      }}
+                    >
+                      {selectedAppointment.notes || 'No additional notes'}
                     </div>
                   </div>
-                  <div>
-                    <strong>Created</strong>
-                    <div>{selectedAppointment.created_at || 'Unknown'}</div>
-                  </div>
+                  {selectedAppointment.status === 'rejected' && (
+                    <div
+                      style={{
+                        backgroundColor: '#dc2626',
+                        color: 'white',
+                        padding: '1rem',
+                        borderRadius: '8px',
+                        marginTop: '0.5rem',
+                      }}
+                    >
+                      <strong>Rejection Reason</strong>
+                      <div style={{ marginTop: '0.5rem' }}>
+                        {selectedAppointment.reason || 'No reason provided'}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </motion.div>
@@ -1687,108 +1770,7 @@ export default function CalendarPage() {
       </AnimatePresence>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-gray-400 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <div className="flex items-center gap-3 mb-4">
-                {homePageSettings?.website_logo ? (
-                  homePageSettings.website_logo.startsWith('data:') ||
-                  homePageSettings.website_logo.startsWith('http') ? (
-                    <img
-                      src={
-                        homePageSettings.website_logo.startsWith('data:')
-                          ? homePageSettings.website_logo
-                          : `data:image/jpeg;base64,${homePageSettings.website_logo}`
-                      }
-                      alt={homePageSettings.website_title || 'Logo'}
-                      className="w-25 h-25 rounded-xl object-cover"
-                    />
-                  ) : (
-                    <div className="w-25 h-25 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
-                      <Calendar size={24} className="text-white" />
-                    </div>
-                  )
-                ) : (
-                  <div className="w-25 h-25 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
-                    <Calendar size={24} className="text-white" />
-                  </div>
-                )}
-                <span className="text-xl font-bold text-white">
-                  {homePageSettings?.website_title || 'CMO Scheduler'}
-                </span>
-              </div>
-              <p className="text-sm">
-                Your all-in-one platform for scheduling and community engagement.
-              </p>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4">Quick Links</h4>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <button
-                    onClick={() => navigate('/posts')}
-                    className="hover:text-emerald-400 transition-colors cursor-pointer"
-                  >
-                    Posts
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => navigate('/calendar')}
-                    className="hover:text-emerald-400 transition-colors cursor-pointer"
-                  >
-                    Calendar
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => navigate('/dashboard')}
-                    className="hover:text-emerald-400 transition-colors cursor-pointer"
-                  >
-                    Dashboard
-                  </button>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4">Account</h4>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <button
-                    onClick={() => navigate('/login')}
-                    className="hover:text-emerald-400 transition-colors cursor-pointer"
-                  >
-                    Sign In
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => navigate('/dashboard')}
-                    className="hover:text-emerald-400 transition-colors cursor-pointer"
-                  >
-                    My Dashboard
-                  </button>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4">Contact</h4>
-              <ul className="space-y-2 text-sm">
-                <li>support@cmoschedule.com</li>
-                <li>+1 (555) 123-4567</li>
-                <li>San Francisco, CA 94105</li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 pt-8 text-center text-sm">
-            <p>
-              &copy; 2026 {homePageSettings?.website_title || 'CMO Scheduler'}. All
-              rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }

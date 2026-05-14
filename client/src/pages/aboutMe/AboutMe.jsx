@@ -420,7 +420,7 @@ export default function AboutMe() {
               ))}
             </div>
           ) : sections.length > 0 ? (
-            <div className="space-y-6">
+            <div className="space-y-15">
               {sections.map((section, idx) => {
                 const theme = CARD_THEMES[idx % CARD_THEMES.length]
                 const Icon = CARD_ICONS[idx % CARD_ICONS.length]
@@ -540,7 +540,7 @@ export default function AboutMe() {
                 </div>
               </div>
 
-              <div className="h-80 relative">
+              <div className="h-80 relative z-0">
                 {mapLoading ? (
                   <div className="h-full flex items-center justify-center bg-gray-50">
                     <div className="text-center">
@@ -553,7 +553,7 @@ export default function AboutMe() {
                     center={mapCoordinates}
                     zoom={13}
                     style={{ height: '100%', width: '100%' }}
-                    className="rounded-b-2xl"
+                    className="rounded-b-2xl relative z-0"
                   >
                     <TileLayer
                       attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

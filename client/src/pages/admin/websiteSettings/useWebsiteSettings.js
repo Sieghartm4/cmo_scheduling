@@ -11,6 +11,11 @@ export default function useWebsiteSettings() {
   const [toast, setToast] = useState(null)
   const [backgroundInputMode, setBackgroundInputMode] = useState('text') // 'text' or 'file'
 
+  const normalizeDescriptionText = (value) => {
+    if (typeof value !== 'string') return ''
+    return value.replace(/\\r\\n/g, '\n').replace(/\\n/g, '\n')
+  }
+
   // Toast management
   const showToast = (type, message) => {
     setToast({ type, message })
@@ -59,7 +64,9 @@ export default function useWebsiteSettings() {
               website_title: result.data.website_title || '',
               website_logo: result.data.website_logo || null,
               location: result.data.location || '',
-              about_me_description: result.data.about_me_description || '',
+              about_me_description: normalizeDescriptionText(
+                result.data.about_me_description || '',
+              ),
               about_me_image: result.data.about_me_image || null,
               disclaimer: result.data.disclaimer || '',
               status: result.data.status || 'active',

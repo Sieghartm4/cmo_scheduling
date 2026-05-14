@@ -395,7 +395,7 @@ export default function Home() {
               <h2 className="text-4xl font-bold text-gray-900 mb-6">
                 Why Choose{' '}
                 <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-                  CMO Connect?
+                  TheAnxietyNurse?
                 </span>
               </h2>
               <p className="text-lg text-gray-600 mb-8 leading-relaxed">

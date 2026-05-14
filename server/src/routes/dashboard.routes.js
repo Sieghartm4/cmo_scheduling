@@ -1,16 +1,26 @@
-const express = require('express');
-const router = express.Router();
-const { getDashboardStats, getRecentAppointments, getRecentPosts } = require('../controller/dashboard.controller');
-const { authenticateToken, requireAdmin } = require('../middleware/auth.middleware');
+const express = require('express')
+const router = express.Router()
+const {
+  getDashboardStats,
+  getRecentAppointments,
+  getRecentPosts,
+  getRecentComments,
+  getRecentLikes,
+  getDashboardOverview,
+} = require('../controller/dashboard.controller')
+const { authenticateToken, requireUser } = require('../middleware/auth.middleware')
 
-// All dashboard routes require authentication and admin role
-router.use(authenticateToken);
-router.use(requireAdmin);
+// Dashboard routes are available to authenticated users
+router.use(authenticateToken)
+router.use(requireUser)
 
-router.get('/stats', getDashboardStats);
-router.get('/appointments', getRecentAppointments);
-router.get('/posts', getRecentPosts);
+router.get('/overview', getDashboardOverview)
+router.get('/stats', getDashboardStats)
+router.get('/appointments', getRecentAppointments)
+router.get('/posts', getRecentPosts)
+router.get('/comments', getRecentComments)
+router.get('/likes', getRecentLikes)
 
 module.exports = {
-  dashboardRouter: router
-};
+  dashboardRouter: router,
+}

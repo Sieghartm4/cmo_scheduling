@@ -11,10 +11,12 @@ import {
   MapPin,
   Palette,
   Type,
+  Maximize2,
 } from 'lucide-react'
 import RouteProtection from '../../../components/RouteProtection'
 import ProtectedAction from '../../../components/ProtectedAction'
 import DynamicToast from '../../../components/DynamicToast'
+import RightSideModal from '../../../components/RightSideModal'
 import useWebsiteSettings from './useWebsiteSettings'
 
 function WebsiteSettingsContent() {
@@ -37,6 +39,22 @@ function WebsiteSettingsContent() {
     handleInputChange,
     handleSubmit,
   } = useWebsiteSettings()
+
+  const [showDescriptionModal, setShowDescriptionModal] = React.useState(false)
+  const [descriptionModalText, setDescriptionModalText] = React.useState('')
+
+  const openDescriptionModal = () => {
+    setDescriptionModalText(formData.about_me_description || '')
+    setShowDescriptionModal(true)
+  }
+
+  const closeDescriptionModal = () => setShowDescriptionModal(false)
+
+  const saveDescriptionModal = async () => {
+    handleInputChange('about_me_description', descriptionModalText)
+    await handleSubmit()
+    setShowDescriptionModal(false)
+  }
 
   const fadeInUp = {
     hidden: { opacity: 0, y: 16 },
@@ -277,6 +295,19 @@ function WebsiteSettingsContent() {
 
                   <SectionHeader label="About Me Section" />
                   <Field label="About Me Description">
+                    <div className="flex items-center justify-between gap-3 mb-2">
+                      <span className="text-[10px] text-gray-500">
+                        Use Enter for paragraphs and line breaks.
+                      </span>
+                      <button
+                        type="button"
+                        onClick={openDescriptionModal}
+                        className="inline-flex items-center gap-2 rounded-full border border-gray-200 px-3 py-1.5 text-xs font-bold uppercase tracking-[1px] text-emerald-700 hover:bg-emerald-50 transition"
+                      >
+                        <Maximize2 size={14} />
+                        Expand editor
+                      </button>
+                    </div>
                     <textarea
                       value={formData.about_me_description}
                       onChange={(e) =>
@@ -492,6 +523,41 @@ function WebsiteSettingsContent() {
           </div>
         </motion.div>
       </ProtectedAction>
+      <RightSideModal
+        isOpen={showDescriptionModal}
+        onClose={closeDescriptionModal}
+        title="Edit About Me Description"
+        size="lg"
+      >
+        <div className="flex flex-col gap-4">
+          <p className="text-sm text-gray-600">
+            Edit the About Me text with real line breaks. Press Save to keep your
+            paragraph formatting.
+          </p>
+          <textarea
+            value={descriptionModalText}
+            onChange={(e) => setDescriptionModalText(e.target.value)}
+            className="w-full min-h-[500px] resize-none rounded-3xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-900 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50"
+            placeholder="Write or paste your About Me description here..."
+          />
+          <div className="flex justify-end gap-3 pt-2">
+            <button
+              type="button"
+              onClick={closeDescriptionModal}
+              className="rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={saveDescriptionModal}
+              className="rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 transition"
+            >
+              Save changes
+            </button>
+          </div>
+        </div>
+      </RightSideModal>
       {toast && (
         <DynamicToast
           type={toast.type}

@@ -120,7 +120,7 @@ const getAppointmentById = async (req, res, next) => {
         Master.appointment.selectOptionColumns.mu_id,
         Master.master_user.selectOptionColumns.id,
       )
-      .where(Master.appointment.selectOptionColumns.app_id, '=', id)
+      .where(Master.appointment.selectOptionColumns.id, '=', id)
       .build()
 
     const appointment = await Query(
@@ -218,7 +218,7 @@ const updateAppointment = async (req, res, next) => {
     const checkQuery = sql
       .select([{ col: Master.appointment.selectOptionColumns.id, as: 'app_id' }])
       .from(Master.appointment.tablename)
-      .where(Master.appointment.selectOptionColumns.app_id, '=', id)
+      .where(Master.appointment.selectOptionColumns.id, '=', id)
       .build()
     const existing = await Query(checkQuery, [id], [Master.appointment.prefix_])
 
@@ -229,21 +229,59 @@ const updateAppointment = async (req, res, next) => {
       })
     }
 
-    const query = sql
-      .update(Master.appointment.tablename)
-      .set({
-        [Master.appointment.updateOptionColumns.mu_id]: app_mu_id,
-        [Master.appointment.updateOptionColumns.date]: app_date,
-        [Master.appointment.updateOptionColumns.start_time]: app_start_time,
-        [Master.appointment.updateOptionColumns.end_time]: app_end_time,
-        [Master.appointment.updateOptionColumns.reason]: app_reason,
-        [Master.appointment.updateOptionColumns.status]: app_status,
-        [Master.appointment.updateOptionColumns.notes]: app_notes,
-      })
-      .where(Master.appointment.updateOptionColumns.id, '=', id)
-      .build()
+    // Build dynamic update query
+    const updateFields = []
+    const updateValues = []
 
-    await Query(query, [], [Master.appointment.prefix_])
+    if (app_mu_id !== undefined) {
+      updateFields.push(`${Master.appointment.prefix_}mu_id = ?`)
+      updateValues.push(app_mu_id)
+    }
+
+    if (app_date !== undefined) {
+      updateFields.push(`${Master.appointment.prefix_}date = ?`)
+      updateValues.push(app_date)
+    }
+
+    if (app_start_time !== undefined) {
+      updateFields.push(`${Master.appointment.prefix_}start_time = ?`)
+      updateValues.push(app_start_time)
+    }
+
+    if (app_end_time !== undefined) {
+      updateFields.push(`${Master.appointment.prefix_}end_time = ?`)
+      updateValues.push(app_end_time)
+    }
+
+    if (app_reason !== undefined) {
+      updateFields.push(`${Master.appointment.prefix_}reason = ?`)
+      updateValues.push(app_reason)
+    }
+
+    if (app_status !== undefined) {
+      updateFields.push(`${Master.appointment.prefix_}status = ?`)
+      updateValues.push(app_status)
+    }
+
+    if (app_notes !== undefined) {
+      updateFields.push(`${Master.appointment.prefix_}notes = ?`)
+      updateValues.push(app_notes)
+    }
+
+    if (updateFields.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'No fields to update',
+      })
+    }
+
+    updateValues.push(id) // Add id for WHERE clause
+
+    const updateQuery = `UPDATE ${Master.appointment.tablename}
+      SET ${updateFields.join(', ')}
+      WHERE ${Master.appointment.prefix_}id = ?`
+
+    await Query(updateQuery, updateValues)
 
     res.status(200).json({
       success: true,
@@ -269,7 +307,7 @@ const deleteAppointment = async (req, res, next) => {
     const checkQuery = sql
       .select([{ col: Master.appointment.selectOptionColumns.id, as: 'app_id' }])
       .from(Master.appointment.tablename)
-      .where(Master.appointment.selectOptionColumns.app_id, '=', id)
+      .where(Master.appointment.selectOptionColumns.id, '=', id)
       .build()
     const existing = await Query(checkQuery, [id], [Master.appointment.prefix_])
 
@@ -282,7 +320,7 @@ const deleteAppointment = async (req, res, next) => {
 
     const query = sql
       .delete(Master.appointment.tablename)
-      .where(Master.appointment.selectOptionColumns.app_id, '=', id)
+      .where(Master.appointment.selectOptionColumns.id, '=', id)
       .build()
     await Query(query, [], [Master.appointment.prefix_])
 

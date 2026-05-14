@@ -11,13 +11,13 @@ import Layout from './components/layout/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 import StrictRouteGuard from './components/StrictRouteGuard'
 import Dashboard from './pages/dashboard/Dashboard'
-import AdminDashboard from './pages/dashboard/AdminDashboard'
 import Users from './pages/users/Users'
 import Appointments from './pages/admin/appointments/Appointments'
 import UserManagement from './pages/admin/users/UserManagement'
 import Posts from './pages/admin/posts/Posts'
 import Category from './pages/admin/category/Category'
 import WebsiteSettings from './pages/admin/websiteSettings/WebsiteSettings'
+import SocialMedia from './pages/admin/settings/SocialMedia'
 import { preventCaching, forceReloadOnBack } from './utils/cacheControl'
 import { ModalProvider } from './contexts/ModalContext'
 
@@ -81,7 +81,7 @@ function App() {
                 path="admin/dashboard"
                 element={
                   <ProtectedRoute routeName="admin-dashboard">
-                    <AdminDashboard />
+                    <Dashboard />
                   </ProtectedRoute>
                 }
               />
@@ -130,6 +130,14 @@ function App() {
                 element={
                   <ProtectedRoute routeName="admin-dashboard">
                     <WebsiteSettings />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="admin/social-media"
+                element={
+                  <ProtectedRoute routeName="admin-dashboard">
+                    <SocialMedia />
                   </ProtectedRoute>
                 }
               />

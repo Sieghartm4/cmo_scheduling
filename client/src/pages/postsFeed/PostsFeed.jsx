@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import PublicHeader from '../../components/layout/PublicHeader'
+import TutorialGuide from '../../components/TutorialGuide'
 import {
   Heart,
   MessageCircle,
@@ -27,6 +28,7 @@ import {
   Bell,
   BarChart3,
   ArrowUp,
+  BookOpen,
 } from 'lucide-react'
 
 // Recursive Comment Item Component with Reply Support
@@ -824,10 +826,35 @@ export default function PostsFeed() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [currentUser, setCurrentUser] = useState(null)
   const [showLoginPrompt, setShowLoginPrompt] = useState(false)
+  const [showPostsTutorial, setShowPostsTutorial] = useState(false)
   const [activeTab, setActiveTab] = useState('all')
   const [selectedCategory, setSelectedCategory] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [filteredPosts, setFilteredPosts] = useState([])
+
+  const postsTutorialSteps = [
+    {
+      selector: '#tutorial-post-search',
+      title: 'Search posts quickly',
+      description:
+        'Type keywords here to find posts, categories, or authors across the community feed.',
+      placement: 'bottom',
+    },
+    {
+      selector: '#tutorial-post-category',
+      title: 'Filter by category',
+      description:
+        'Choose a category to narrow the feed and see posts that match your interests.',
+      placement: 'bottom',
+    },
+    {
+      selector: '.tutorial-first-post',
+      title: 'Browse posts',
+      description:
+        'This highlights the first post in the feed so you can see the action bar and content clearly.',
+      placement: 'right',
+    },
+  ]
 
   // Check authentication - only updates state if changed
   const checkAuth = () => {
@@ -1236,6 +1263,13 @@ export default function PostsFeed() {
 
       {/* ── 3-column layout ─────────────────────────────────────── */}
       <main className="flex-1 flex flex-col px-4 sm:px-6 py-4 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 lg:overflow-hidden overflow-y-auto">
+        <TutorialGuide
+          isOpen={showPostsTutorial}
+          onClose={() => setShowPostsTutorial(false)}
+          steps={postsTutorialSteps}
+          initialStep={0}
+        />
+
         <div className="grid grid-cols-1 lg:grid-cols-[350px_1fr_350px] gap-10 lg:h-full items-stretch">
           {/* ══ LEFT SIDEBAR — Search & Categories ══════════════ */}
           <aside className="space-y-5 lg:h-full lg:overflow-y-auto pr-2 custom-scrollbar">
@@ -1246,10 +1280,18 @@ export default function PostsFeed() {
                   <Search size={14} className="text-emerald-600" />
                 </div>
                 <span className="text-sm font-bold text-gray-800">Search Posts</span>
+                <button
+                  type="button"
+                  onClick={() => setShowPostsTutorial(true)}
+                  className="animate-bounce inline-flex items-center justify-center gap-2 rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg transition hover:bg-emerald-700 active:scale-95"
+                >
+                  <BookOpen size={16} className="text-white" />
+                  Start tutorial
+                </button>
               </div>
               <div className="p-4">
                 {/* Search input */}
-                <div className="relative mb-3">
+                <div className="relative mb-3" id="tutorial-post-search">
                   <Search
                     className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
                     size={15}
@@ -1282,6 +1324,7 @@ export default function PostsFeed() {
 
                 {/* Category dropdown (original) */}
                 <select
+                  id="tutorial-post-category"
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
                   className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:bg-white transition-all mb-3"
@@ -1441,7 +1484,7 @@ export default function PostsFeed() {
             />
 
             {/* Content wrapper with max-width */}
-            <div className="w-full max-w-[1000px] ">
+            <div className="w-full max-w-[1000px] " id="tutorial-post-feed">
               {/* Feed header */}
               <div className="flex items-center justify-between w-full max-w-[600px]">
                 <div></div>
@@ -1496,6 +1539,7 @@ export default function PostsFeed() {
                       <motion.div
                         key={post.id}
                         id={`post-${post.id}`}
+                        className={index === 0 ? 'tutorial-first-post' : undefined}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}

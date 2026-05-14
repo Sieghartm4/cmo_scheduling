@@ -1,10 +1,51 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Calendar } from 'lucide-react'
+import {
+  Calendar,
+  Facebook,
+  Instagram,
+  Twitter,
+  Youtube,
+  Linkedin,
+  Globe,
+  Github,
+} from 'lucide-react'
 
 export default function Footer() {
   const navigate = useNavigate()
   const [homePageSettings, setHomePageSettings] = useState(null)
+  const [socialMediaLinks, setSocialMediaLinks] = useState([])
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  const socialIconComponents = {
+    facebook: Facebook,
+    instagram: Instagram,
+    twitter: Twitter,
+    youtube: Youtube,
+    linkedin: Linkedin,
+    github: Github,
+    tiktok: Globe,
+    website: Globe,
+    web: Globe,
+  }
+
+  const checkLoginStatus = () => {
+    const token =
+      localStorage.getItem('token') ||
+      localStorage.getItem('userToken') ||
+      localStorage.getItem('adminToken')
+    setIsLoggedIn(!!token)
+  }
+
+  useEffect(() => {
+    checkLoginStatus()
+    window.addEventListener('storage', checkLoginStatus)
+    const interval = setInterval(checkLoginStatus, 1000)
+    return () => {
+      window.removeEventListener('storage', checkLoginStatus)
+      clearInterval(interval)
+    }
+  }, [])
 
   // Fetch home page settings from API
   useEffect(() => {
@@ -29,6 +70,52 @@ export default function Footer() {
     }
 
     fetchHomePageSettings()
+  }, [])
+
+  useEffect(() => {
+    const fetchSocialMediaLinks = async () => {
+      try {
+        const timestamp = new Date().getTime()
+        const response = await fetch(
+          `${import.meta.env.VITE_SERVER_LINK}/api/social-media?t=${timestamp}`,
+          {
+            cache: 'no-cache',
+          },
+        )
+        if (response.ok) {
+          const result = await response.json()
+          if (result.success && Array.isArray(result.data)) {
+            setSocialMediaLinks(
+              result.data
+                .filter((item) =>
+                  item.status ? item.status.toLowerCase() !== 'inactive' : true,
+                )
+                .map((item) => ({
+                  platform:
+                    item.platform ||
+                    item.social_media_platform ||
+                    item.master_social_media_platform ||
+                    '',
+                  url:
+                    item.url ||
+                    item.social_media_url ||
+                    item.master_social_media_url ||
+                    '',
+                  status:
+                    item.status ||
+                    item.social_media_status ||
+                    item.master_social_media_status ||
+                    'active',
+                })),
+            )
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching social media links:', error)
+      }
+    }
+
+    fetchSocialMediaLinks()
   }, [])
 
   return (
@@ -68,6 +155,24 @@ export default function Footer() {
             <p className="text-sm">
               Your all-in-one platform for scheduling and community engagement.
             </p>
+            <div className="flex items-center gap-3 mt-4">
+              {socialMediaLinks.map((item) => {
+                const Icon =
+                  socialIconComponents[item.platform?.toLowerCase()?.trim()] || Globe
+                if (!item.url) return null
+                return (
+                  <a
+                    key={`${item.platform}-${item.url}`}
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
+                    <Icon size={20} />
+                  </a>
+                )
+              })}
+            </div>
           </div>
           <div>
             <h4 className="text-white font-semibold mb-4">Quick Links</h4>
@@ -109,20 +214,22 @@ export default function Footer() {
           <div>
             <h4 className="text-white font-semibold mb-4">Account</h4>
             <ul className="space-y-2 text-sm">
+              {!isLoggedIn && (
+                <li>
+                  <button
+                    onClick={() => navigate('/login')}
+                    className="hover:text-emerald-400 transition-colors"
+                  >
+                    Sign In
+                  </button>
+                </li>
+              )}
               <li>
                 <button
-                  onClick={() => navigate('/login')}
+                  onClick={() => navigate(isLoggedIn ? '/dashboard' : '/login')}
                   className="hover:text-emerald-400 transition-colors"
                 >
-                  Sign In
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => navigate('/dashboard')}
-                  className="hover:text-emerald-400 transition-colors"
-                >
-                  Dashboard
+                  {isLoggedIn ? 'Dashboard' : 'Get Started'}
                 </button>
               </li>
             </ul>
