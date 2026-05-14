@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import PublicHeader from '../../components/layout/PublicHeader'
 import TutorialGuide from '../../components/TutorialGuide'
 import {
@@ -178,7 +178,9 @@ const PostCard = React.memo(function PostCard({
   onReply,
   isLoggedIn,
   currentUser,
+  onShare,
 }) {
+  const navigate = useNavigate()
   const [showComments, setShowComments] = useState(false)
   const [commentText, setCommentText] = useState('')
   const [isLiked, setIsLiked] = useState(post.userLiked || false)
@@ -306,7 +308,8 @@ const PostCard = React.memo(function PostCard({
   // Media Item Component - memoized to prevent re-renders during auth polling
   const MediaItem = React.memo((props) => {
     const { item, onClick, clickable = true } = props
-    const handleClick = () => {
+    const handleClick = (event) => {
+      event?.stopPropagation()
       if (clickable && onClick) onClick(item)
     }
 
@@ -384,6 +387,7 @@ const PostCard = React.memo(function PostCard({
           href={item}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
           className="text-emerald-600 text-sm text-center break-all hover:underline"
         >
           {item.substring(0, 50)}...
@@ -399,34 +403,43 @@ const PostCard = React.memo(function PostCard({
       className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow"
     >
       {/* Post Header */}
-      <div className="p-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full flex items-center justify-center">
-            <span className="text-white font-bold text-lg">
-              {post.title?.charAt(0) || 'C'}
-            </span>
-          </div>
-          <div>
-            <h4 className="font-semibold text-gray-900 text-lg">
-              {post.title || 'CMO Scheduling Team'}
-            </h4>
-            <div className="flex items-center gap-1.5 text-xs text-gray-400">
-              <Clock size={11} />
-              <span>{formatDate(post.created_at)}</span>
-              {post.category_name && (
-                <>
-                  <span className="text-gray-300">·</span>
-                  <span className="text-emerald-600 font-medium">
-                    {post.category_name}
-                  </span>
-                </>
-              )}
+      <div className="p-4">
+        <div className="flex items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={() => navigate(`/posts/${post.id}`)}
+            className="flex-1 flex items-center gap-3 text-left rounded-2xl px-3 py-3 cursor-pointer hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-200"
+          >
+            <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full flex items-center justify-center">
+              <span className="text-white font-bold text-lg">
+                {post.title?.charAt(0) || 'C'}
+              </span>
             </div>
-          </div>
+            <div>
+              <h4 className="font-semibold text-gray-900 text-lg">
+                {post.title || 'CMO Scheduling Team'}
+              </h4>
+              <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                <Clock size={11} />
+                <span>{formatDate(post.created_at)}</span>
+                {post.category_name && (
+                  <>
+                    <span className="text-gray-300">·</span>
+                    <span className="text-emerald-600 font-medium">
+                      {post.category_name}
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+          </button>
+          <button
+            type="button"
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <MoreHorizontal size={20} className="text-gray-500" />
+          </button>
         </div>
-        <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-          <MoreHorizontal size={20} className="text-gray-500" />
-        </button>
       </div>
 
       {/* Post Content */}
@@ -459,8 +472,14 @@ const PostCard = React.memo(function PostCard({
         <div className="mt-3 mx-4 rounded-xl overflow-hidden border border-gray-100">
           {/* Single Media - Full width video ratio */}
           {post.media.length === 1 && (
-            <div className="relative aspect-video overflow-hidden">
-              <MediaItem item={post.media[0]} onClick={() => handleMediaClick(0)} />
+            <div
+              className="relative aspect-video overflow-hidden cursor-pointer"
+              onClick={() => navigate(`/posts/${post.id}`)}
+            >
+              <MediaItem
+                item={post.media[0]}
+                onClick={() => navigate(`/posts/${post.id}`)}
+              />
             </div>
           )}
 
@@ -468,8 +487,15 @@ const PostCard = React.memo(function PostCard({
           {post.media.length === 2 && (
             <div className="grid grid-cols-2 gap-1">
               {post.media.map((item, idx) => (
-                <div key={idx} className="relative aspect-video overflow-hidden">
-                  <MediaItem item={item} onClick={() => handleMediaClick(idx)} />
+                <div
+                  key={idx}
+                  className="relative aspect-video overflow-hidden cursor-pointer"
+                  onClick={() => navigate(`/posts/${post.id}`)}
+                >
+                  <MediaItem
+                    item={item}
+                    onClick={() => navigate(`/posts/${post.id}`)}
+                  />
                 </div>
               ))}
             </div>
@@ -478,22 +504,31 @@ const PostCard = React.memo(function PostCard({
           {/* Three Media - First large on left, two stacked on right */}
           {post.media.length === 3 && (
             <div className="grid grid-cols-2 gap-1">
-              <div className="relative aspect-[4/3] overflow-hidden row-span-2">
+              <div
+                className="relative aspect-[4/3] overflow-hidden row-span-2 cursor-pointer"
+                onClick={() => navigate(`/posts/${post.id}`)}
+              >
                 <MediaItem
                   item={post.media[0]}
-                  onClick={() => handleMediaClick(0)}
+                  onClick={() => navigate(`/posts/${post.id}`)}
                 />
               </div>
-              <div className="relative aspect-video overflow-hidden">
+              <div
+                className="relative aspect-video overflow-hidden cursor-pointer"
+                onClick={() => navigate(`/posts/${post.id}`)}
+              >
                 <MediaItem
                   item={post.media[1]}
-                  onClick={() => handleMediaClick(1)}
+                  onClick={() => navigate(`/posts/${post.id}`)}
                 />
               </div>
-              <div className="relative aspect-video overflow-hidden">
+              <div
+                className="relative aspect-video overflow-hidden cursor-pointer"
+                onClick={() => navigate(`/posts/${post.id}`)}
+              >
                 <MediaItem
                   item={post.media[2]}
-                  onClick={() => handleMediaClick(2)}
+                  onClick={() => navigate(`/posts/${post.id}`)}
                 />
               </div>
             </div>
@@ -503,13 +538,17 @@ const PostCard = React.memo(function PostCard({
           {post.media.length >= 4 && (
             <div className="grid grid-cols-2 gap-1">
               {post.media.slice(0, 4).map((item, idx) => (
-                <div key={idx} className="relative aspect-video overflow-hidden">
-                  <MediaItem item={item} onClick={() => handleMediaClick(idx)} />
+                <div
+                  key={idx}
+                  className="relative aspect-video overflow-hidden cursor-pointer"
+                  onClick={() => navigate(`/posts/${post.id}`)}
+                >
+                  <MediaItem
+                    item={item}
+                    onClick={() => navigate(`/posts/${post.id}`)}
+                  />
                   {idx === 3 && post.media.length > 4 && (
-                    <div
-                      onClick={() => handleMediaClick(idx)}
-                      className="absolute inset-0 bg-black/60 flex items-center justify-center cursor-pointer"
-                    >
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center pointer-events-none">
                       <span className="text-white text-2xl font-bold">
                         +{post.media.length - 4}
                       </span>
@@ -541,25 +580,44 @@ const PostCard = React.memo(function PostCard({
       {/* Action Buttons */}
       <div className="px-2 py-1 flex items-center justify-between">
         <button
-          onClick={handleLike}
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation()
+            handleLike()
+          }}
           className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg transition-all ${isLiked ? 'text-red-500' : 'text-gray-600 hover:bg-gray-100'}`}
         >
           <Heart size={20} className={isLiked ? 'fill-current' : ''} />
           <span className="text-sm font-medium">Like</span>
         </button>
         <button
-          onClick={() => setShowComments(!showComments)}
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation()
+            setShowComments(!showComments)
+          }}
           className="flex-1 flex items-center justify-center gap-2 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-all"
         >
           <MessageCircle size={20} />
           <span className="text-sm font-medium">Comment</span>
         </button>
-        <button className="flex-1 flex items-center justify-center gap-2 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-all">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation()
+            onShare(post.id)
+          }}
+          className="flex-1 flex items-center justify-center gap-2 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-all"
+        >
           <Share2 size={20} />
           <span className="text-sm font-medium">Share</span>
         </button>
         <button
-          onClick={() => setSaved(!saved)}
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation()
+            setSaved(!saved)
+          }}
           className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg transition-all ${saved ? 'text-emerald-600' : 'text-gray-600 hover:bg-gray-100'}`}
         >
           <Bookmark size={20} className={saved ? 'fill-current' : ''} />
@@ -1253,6 +1311,53 @@ export default function PostsFeed() {
     navigate('/login')
   }
 
+  const copyTextToClipboard = async (text) => {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text)
+    }
+
+    const textarea = document.createElement('textarea')
+    textarea.value = text
+    textarea.style.position = 'fixed'
+    textarea.style.left = '-9999px'
+    textarea.style.top = '0'
+    document.body.appendChild(textarea)
+    textarea.focus()
+    textarea.select()
+
+    try {
+      const successful = document.execCommand('copy')
+      if (!successful) {
+        throw new Error('Fallback copy command failed')
+      }
+    } finally {
+      document.body.removeChild(textarea)
+    }
+  }
+
+  const handleShare = async (postId) => {
+    const url = `${window.location.origin}/posts/${postId}`
+    const shareData = {
+      title: 'Check out this post',
+      text: `Read this post: ${url}`,
+      url,
+    }
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData)
+        toast.success('Post shared successfully!')
+        return
+      }
+
+      await copyTextToClipboard(url)
+      toast.success('Post link copied to clipboard!')
+    } catch (error) {
+      console.error('Failed to share or copy link:', error)
+      toast.error('Unable to share link. Please copy it manually.')
+    }
+  }
+
   const totalLikes = posts.reduce((sum, p) => sum + (p.likes || 0), 0)
 
   return (
@@ -1551,6 +1656,7 @@ export default function PostsFeed() {
                           onReply={handleComment}
                           isLoggedIn={isLoggedIn}
                           currentUser={currentUser}
+                          onShare={handleShare}
                         />
                       </motion.div>
                     ))}

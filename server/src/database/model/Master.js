@@ -143,10 +143,9 @@ const Master = {
     tablename: 'master_social_media',
     prefix: 'msm',
     prefix_: 'msm_',
-    insertColumns: ['mu_id', 'platform', 'url', 'status'],
+    insertColumns: ['platform', 'url', 'status'],
     selectColumns: [
       'msm_id',
-      'msm_mu_id',
       'msm_platform',
       'msm_url',
       'msm_status',
@@ -155,7 +154,6 @@ const Master = {
     ],
     selectOptionColumns: {
       id: 'msm_id',
-      mu_id: 'msm_mu_id',
       platform: 'msm_platform',
       url: 'msm_url',
       status: 'msm_status',
@@ -164,7 +162,6 @@ const Master = {
     },
     updateOptionColumns: {
       id: 'id',
-      mu_id: 'mu_id',
       platform: 'platform',
       url: 'url',
       status: 'status',
@@ -176,7 +173,6 @@ const Master = {
     selectMiscColumns: {},
     columnDataTypes: {
       id: 'BIGINT',
-      mu_id: 'BIGINT',
       platform: 'STRING',
       url: 'TEXT',
       status: 'ENUM',

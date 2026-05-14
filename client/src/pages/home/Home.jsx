@@ -581,12 +581,6 @@ export default function Home() {
             >
               View Community Posts
             </button>
-            <button
-              onClick={() => navigate('/login')}
-              className="px-8 py-4 bg-emerald-700 text-white border-2 border-emerald-400 rounded-xl font-semibold hover:bg-emerald-800 transition-all"
-            >
-              Sign In Now
-            </button>
           </div>
         </div>
       </section>

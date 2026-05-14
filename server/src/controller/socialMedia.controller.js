@@ -5,18 +5,8 @@ const socialMediaModel = Master.master_social_media
 
 const getSocialMedia = async (req, res, next) => {
   try {
-    const { mu_id } = req.query
-    let sql = `SELECT ${socialMediaModel.selectColumns.join(', ')} FROM ${socialMediaModel.tablename}`
-    const params = []
-
-    if (mu_id) {
-      sql += ` WHERE ${socialMediaModel.prefix_}mu_id = ?`
-      params.push(mu_id)
-    }
-
-    sql += ` ORDER BY ${socialMediaModel.prefix_}created_at DESC`
-
-    const results = await Query(sql, params, [socialMediaModel.prefix_])
+    const sql = `SELECT ${socialMediaModel.selectColumns.join(', ')} FROM ${socialMediaModel.tablename} ORDER BY ${socialMediaModel.prefix_}created_at DESC`
+    const results = await Query(sql, [], [socialMediaModel.prefix_])
 
     res.json({
       success: true,
@@ -30,23 +20,22 @@ const getSocialMedia = async (req, res, next) => {
 
 const createSocialMedia = async (req, res, next) => {
   try {
-    const { mu_id, platform, url, status } = req.body
+    const { platform, url, status } = req.body
 
-    if (!mu_id || !platform || !url) {
+    if (!platform || !url) {
       return res.status(400).json({
         success: false,
-        message: 'mu_id, platform, and url are required',
+        message: 'platform and url are required',
       })
     }
 
     const insertQuery = `INSERT INTO ${socialMediaModel.tablename} (
-      ${socialMediaModel.prefix_}mu_id,
       ${socialMediaModel.prefix_}platform,
       ${socialMediaModel.prefix_}url,
       ${socialMediaModel.prefix_}status
-    ) VALUES (?, ?, ?, ?)`
+    ) VALUES (?, ?, ?)`
 
-    const insertValues = [mu_id, platform, url, status || 'active']
+    const insertValues = [platform, url, status || 'active']
     const result = await Query(insertQuery, insertValues)
 
     const selectQuery = `SELECT ${socialMediaModel.selectColumns.join(', ')} FROM ${socialMediaModel.tablename} WHERE ${socialMediaModel.prefix_}id = ?`
@@ -74,10 +63,6 @@ const updateSocialMedia = async (req, res, next) => {
     const updateFields = []
     const updateValues = []
 
-    if (mu_id !== undefined) {
-      updateFields.push(`${socialMediaModel.prefix_}mu_id = ?`)
-      updateValues.push(mu_id)
-    }
     if (platform !== undefined) {
       updateFields.push(`${socialMediaModel.prefix_}platform = ?`)
       updateValues.push(platform)

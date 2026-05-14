@@ -357,24 +357,24 @@ class SQLQueryBuilder {
   _formatCondition(cond, isNot = false) {
     // Handle object conditions (from whereIn, whereNot, etc.)
     if (typeof cond === 'object' && cond !== null) {
-      const { column, values, operator, type, subquery } = cond;
-      
+      const { column, values, operator, type, subquery } = cond
+
       // Handle NOT EXISTS subqueries
       if (type === 'NOT EXISTS') {
-        return `NOT EXISTS (${subquery})`;
+        return `NOT EXISTS (${subquery})`
       }
-      
+
       if (operator === 'IN') {
-        const placeholders = values.map(() => '?').join(', ');
-        return `${column} IN (${placeholders})`;
+        const placeholders = values.map(() => '?').join(', ')
+        return `${column} IN (${placeholders})`
       }
-      
+
       // Handle other operators for objects
-      const operators = ['=', '!=', '<>', '<', '>', ' LIKE ', ' IS '];
-      const op = operator || (isNot ? '!=' : '=');
-      return `${column} ${op} ?`;
+      const operators = ['=', '!=', '<>', '<', '>', ' LIKE ', ' IS ']
+      const op = operator || (isNot ? '!=' : '=')
+      return `${column} ${op} ?`
     }
-    
+
     // Handle string conditions (legacy)
     const operators = ['=', '!=', '<>', '<', '>', ' LIKE ', ' IN ', ' IS ']
     const hasOperator = operators.some((op) => cond.includes(op))
@@ -391,15 +391,11 @@ class SQLQueryBuilder {
     if (this.query.columns.length === 0)
       throw new Error('Columns are required for INSERT')
 
-    const prefix = this.query.prefix ? `${this.query.prefix}_` : ''
+    const prefix = this.query.prefix || ''
     const columns = this.query.columns.map((col) => `${prefix}${col}`).join(', ')
 
-    if (this.query.isTransaction) {
-      const placeholders = this.query.columns.map(() => '?').join(', ')
-      return `INSERT INTO ${this.query.table}(${columns}) VALUES (${placeholders})`
-    } else {
-      return `INSERT INTO ${this.query.table}(${columns}) VALUES ?`
-    }
+    const placeholders = this.query.columns.map(() => '?').join(', ')
+    return `INSERT INTO ${this.query.table}(${columns}) VALUES (${placeholders})`
   }
 
   buildUpdate() {
@@ -410,7 +406,7 @@ class SQLQueryBuilder {
       throw new Error('WHERE conditions are required for UPDATE')
     }
 
-    const prefix = this.query.prefix ? `${this.query.prefix}_` : ''
+    const prefix = this.query.prefix || ''
     const setClause = this.query.set.map((col) => `${prefix}${col} = ?`).join(', ')
 
     // Build WHERE conditions for UPDATE

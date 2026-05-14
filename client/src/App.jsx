@@ -4,6 +4,7 @@ import AdminLogin from './pages/login/admin/AdminLogin'
 import UserLogin from './pages/login/user/UserLogin'
 import Home from './pages/home/Home'
 import PostsFeed from './pages/postsFeed/PostsFeed'
+import PostDetail from './pages/postsFeed/PostDetail'
 import Calendar from './pages/calendar/Calendar'
 import AboutMe from './pages/aboutMe/AboutMe'
 import Disclaimer from './pages/disclaimer/Disclaimer'
@@ -63,6 +64,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<UserLogin />} />
             <Route path="/posts" element={<PostsFeed />} />
+            <Route path="/posts/:id" element={<PostDetail />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/about-me" element={<AboutMe />} />
             <Route path="/disclaimer" element={<Disclaimer />} />

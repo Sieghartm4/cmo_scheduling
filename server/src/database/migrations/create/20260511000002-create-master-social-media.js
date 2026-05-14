@@ -11,8 +11,8 @@ module.exports = {
       },
       msm_mu_id: {
         type: Sequelize.BIGINT,
-        allowNull: false,
-        comment: 'Linked user ID',
+        allowNull: true,
+        comment: 'Linked user ID (optional)',
       },
       msm_platform: {
         type: Sequelize.STRING(100),
@@ -43,7 +43,6 @@ module.exports = {
       },
     })
 
-    await queryInterface.addIndex('master_social_media', ['msm_mu_id'])
     await queryInterface.addIndex('master_social_media', ['msm_platform'])
     await queryInterface.addIndex('master_social_media', ['msm_status'])
   },

@@ -1,78 +1,138 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
-import { Lock, Mail, ArrowRight, Loader2, Calendar, Clock, Phone, User, Eye, EyeOff, Star } from 'lucide-react';
-import useUserLogin from './useUserLogin';
+import React, { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
+import {
+  Lock,
+  Mail,
+  ArrowRight,
+  Loader2,
+  Calendar,
+  Clock,
+  Phone,
+  User,
+  Eye,
+  EyeOff,
+  Star,
+} from 'lucide-react'
+import Footer from '../../../components/layout/Footer'
+import useUserLogin from './useUserLogin'
 
 export default function UserLogin() {
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState({ email: '', password: '' });
-  const [showPassword, setShowPassword] = useState(false);
-  const { login, loading, error } = useUserLogin();
+  const navigate = useNavigate()
+  const [formData, setFormData] = useState({ email: '', password: '' })
+  const [showPassword, setShowPassword] = useState(false)
+  const [homePageSettings, setHomePageSettings] = useState(null)
+  const { login, loading, error } = useUserLogin()
+
+  useEffect(() => {
+    const fetchHomePageSettings = async () => {
+      try {
+        const timestamp = new Date().getTime()
+        const response = await fetch(
+          `${import.meta.env.VITE_SERVER_LINK}/api/home-page-settings?t=${timestamp}`,
+          { cache: 'no-cache' },
+        )
+        if (response.ok) {
+          const result = await response.json()
+          if (result.success && result.data) {
+            setHomePageSettings(result.data)
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching home page settings:', error)
+      }
+    }
+
+    fetchHomePageSettings()
+  }, [])
 
   // Check if user is already authenticated
   useEffect(() => {
-    const adminToken = localStorage.getItem('adminToken');
-    const userToken = localStorage.getItem('token');
-    
+    const adminToken = localStorage.getItem('adminToken')
+    const userToken = localStorage.getItem('token')
+
     if (adminToken) {
       // Admin is already logged in, redirect to admin dashboard
-      navigate('/admin/dashboard');
-      return;
+      navigate('/admin/dashboard')
+      return
     }
-    
+
     if (userToken) {
       // Regular user is already logged in, redirect to user dashboard
-      navigate('/dashboard');
-      return;
+      navigate('/dashboard')
+      return
     }
-  }, [navigate]);
+  }, [navigate])
 
   // F1 key navigation to admin login
   useEffect(() => {
     const handleKeyPress = (event) => {
       if (event.key === 'F1') {
-        event.preventDefault();
-        window.location.href = '/admin/login';
+        event.preventDefault()
+        window.location.href = '/admin/login'
       }
-    };
+    }
 
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, []);
+    window.addEventListener('keydown', handleKeyPress)
+    return () => window.removeEventListener('keydown', handleKeyPress)
+  }, [])
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+    setFormData({ ...formData, [e.target.name]: e.target.value })
+  }
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    login(formData);
-  };
+    e.preventDefault()
+    login(formData)
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
       {/* Header Section */}
       <div className="bg-white shadow-sm border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <button 
+          <div className="flex justify-between items-center">
+            <button
               onClick={() => navigate('/')}
               className="flex items-center gap-3 hover:opacity-80 transition-opacity"
             >
-              <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
-                <Calendar size={24} className="text-white" />
-              </div>
+              {homePageSettings?.website_logo ? (
+                homePageSettings.website_logo.startsWith('data:') ||
+                homePageSettings.website_logo.startsWith('http') ? (
+                  <img
+                    src={
+                      homePageSettings.website_logo.startsWith('data:')
+                        ? homePageSettings.website_logo
+                        : `data:image/jpeg;base64,${homePageSettings.website_logo}`
+                    }
+                    alt={homePageSettings.website_title || 'Logo'}
+                    className="w-20 h-20"
+                  />
+                ) : (
+                  <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
+                    <Calendar size={24} className="text-white" />
+                  </div>
+                )
+              ) : (
+                <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
+                  <Calendar size={24} className="text-white" />
+                </div>
+              )}
               <div>
-                <h1 className="text-xl font-bold text-gray-900">CMO Scheduling</h1>
-                <p className="text-xs text-gray-500">Book your appointment easily</p>
+                <h1 className="text-xl font-bold text-gray-900">
+                  {homePageSettings?.website_title || 'CMO Scheduling'}
+                </h1>
+                <p className="text-xs text-gray-500">
+                  {homePageSettings?.website_tagline ||
+                    'Book your appointment easily'}
+                </p>
               </div>
             </button>
-            <button 
+            <button
               onClick={() => navigate('/')}
               className="text-emerald-600 font-medium hover:underline"
             >
-              ← Back to Home
+              ← Back Home
             </button>
           </div>
         </div>
@@ -81,9 +141,8 @@ export default function UserLogin() {
       {/* Main Content */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
-          
           {/* Left Side - Welcome Content */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
@@ -95,8 +154,8 @@ export default function UserLogin() {
                 <span className="block text-emerald-600">Appointment Journey</span>
               </h2>
               <p className="text-lg text-gray-600 mb-8">
-                Book your appointments with ease. No more phone calls, no more waiting. 
-                Just simple, convenient scheduling at your fingertips.
+                Book your appointments with ease. No more phone calls, no more
+                waiting. Just simple, convenient scheduling at your fingertips.
               </p>
             </div>
 
@@ -107,8 +166,12 @@ export default function UserLogin() {
                   <Calendar size={24} className="text-emerald-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-1">Easy Online Booking</h3>
-                  <p className="text-gray-600 text-sm">Browse available time slots and book in just a few clicks</p>
+                  <h3 className="font-semibold text-gray-900 mb-1">
+                    Easy Online Booking
+                  </h3>
+                  <p className="text-gray-600 text-sm">
+                    Browse available time slots and book in just a few clicks
+                  </p>
                 </div>
               </div>
 
@@ -117,8 +180,12 @@ export default function UserLogin() {
                   <Clock size={24} className="text-teal-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-1">Real-time Availability</h3>
-                  <p className="text-gray-600 text-sm">See exactly when appointments are available, updated live</p>
+                  <h3 className="font-semibold text-gray-900 mb-1">
+                    Real-time Availability
+                  </h3>
+                  <p className="text-gray-600 text-sm">
+                    See exactly when appointments are available, updated live
+                  </p>
                 </div>
               </div>
 
@@ -127,8 +194,12 @@ export default function UserLogin() {
                   <Phone size={24} className="text-cyan-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-1">Instant Confirmations</h3>
-                  <p className="text-gray-600 text-sm">Get immediate confirmation and reminders for your appointments</p>
+                  <h3 className="font-semibold text-gray-900 mb-1">
+                    Instant Confirmations
+                  </h3>
+                  <p className="text-gray-600 text-sm">
+                    Get immediate confirmation and reminders for your appointments
+                  </p>
                 </div>
               </div>
             </div>
@@ -137,17 +208,23 @@ export default function UserLogin() {
             <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
               <div className="flex items-center gap-1 mb-3">
                 {[1, 2, 3, 4, 5].map((star) => (
-                  <Star key={star} size={16} className="text-yellow-400 fill-current" />
+                  <Star
+                    key={star}
+                    size={16}
+                    className="text-yellow-400 fill-current"
+                  />
                 ))}
               </div>
               <p className="text-gray-700 italic mb-3">
-                "The easiest appointment booking system I've ever used. 
-                No more waiting on hold, just quick and simple scheduling!"
+                "The easiest appointment booking system I've ever used. No more
+                waiting on hold, just quick and simple scheduling!"
               </p>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
                 <div>
-                  <p className="font-semibold text-gray-900 text-sm">Sarah Johnson</p>
+                  <p className="font-semibold text-gray-900 text-sm">
+                    Sarah Johnson
+                  </p>
                   <p className="text-gray-500 text-xs">Regular Client</p>
                 </div>
               </div>
@@ -155,7 +232,7 @@ export default function UserLogin() {
           </motion.div>
 
           {/* Right Side - Login Form */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
@@ -166,13 +243,17 @@ export default function UserLogin() {
                 <div className="w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <User size={32} className="text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Sign In to Book</h3>
-                <p className="text-gray-600">Access your account to schedule appointments</p>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                  Sign In to Book
+                </h3>
+                <p className="text-gray-600">
+                  Access your account to schedule appointments
+                </p>
               </div>
 
               <AnimatePresence>
                 {error && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
@@ -194,12 +275,12 @@ export default function UserLogin() {
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                         <Mail size={20} />
                       </span>
-                      <input 
+                      <input
                         type="email"
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
-                        className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all duration-200" 
+                        className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all duration-200"
                         placeholder="your.email@example.com"
                         required
                       />
@@ -214,12 +295,12 @@ export default function UserLogin() {
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                         <Lock size={20} />
                       </span>
-                      <input 
-                        type={showPassword ? "text" : "password"}
+                      <input
+                        type={showPassword ? 'text' : 'password'}
                         name="password"
                         value={formData.password}
                         onChange={handleChange}
-                        className="w-full pl-11 pr-12 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all duration-200" 
+                        className="w-full pl-11 pr-12 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all duration-200"
                         placeholder="Enter your password"
                         required
                       />
@@ -236,18 +317,21 @@ export default function UserLogin() {
 
                 <div className="flex items-center justify-between">
                   <label className="flex items-center gap-2 cursor-pointer">
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       className="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500 focus:ring-2"
                     />
                     <span className="text-sm text-gray-600">Remember me</span>
                   </label>
-                  <a href="#" className="text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors">
+                  <a
+                    href="#"
+                    className="text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors"
+                  >
                     Forgot password?
                   </a>
                 </div>
 
-                <motion.button 
+                <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   type="submit"
@@ -271,7 +355,10 @@ export default function UserLogin() {
               <div className="mt-6 text-center">
                 <p className="text-sm text-gray-600">
                   New to our scheduling system?{' '}
-                  <a href="#" className="font-medium text-emerald-600 hover:text-emerald-700 transition-colors">
+                  <a
+                    href="#"
+                    className="font-medium text-emerald-600 hover:text-emerald-700 transition-colors"
+                  >
                     Create an account
                   </a>
                 </p>
@@ -279,17 +366,24 @@ export default function UserLogin() {
 
               <div className="mt-6 pt-6 border-t border-gray-200">
                 <div className="flex items-center justify-center gap-6 text-xs text-gray-500">
-                  <a href="#" className="hover:text-gray-700 transition-colors">Privacy Policy</a>
+                  <a href="#" className="hover:text-gray-700 transition-colors">
+                    Privacy Policy
+                  </a>
                   <span>•</span>
-                  <a href="#" className="hover:text-gray-700 transition-colors">Terms of Service</a>
+                  <a href="#" className="hover:text-gray-700 transition-colors">
+                    Terms of Service
+                  </a>
                   <span>•</span>
-                  <a href="#" className="hover:text-gray-700 transition-colors">Help Center</a>
+                  <a href="#" className="hover:text-gray-700 transition-colors">
+                    Help Center
+                  </a>
                 </div>
               </div>
             </div>
           </motion.div>
         </div>
       </div>
+      <Footer />
     </div>
-  );
+  )
 }

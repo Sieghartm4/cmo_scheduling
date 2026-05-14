@@ -166,7 +166,8 @@ const addComment = async (req, res) => {
       comment.trim(),
       new Date(),
     ])
-    console.log('Comment inserted with ID:', result.insertId)
+    const insertedCommentId = result.insertId || result.id
+    console.log('Comment inserted with ID:', insertedCommentId)
 
     // Fetch the newly created comment with user info
     const fetchQuery = sql
@@ -189,11 +190,11 @@ const addComment = async (req, res) => {
         Master.post_comment.selectOptionColumns.mu_id,
         Master.master_user.selectOptionColumns.id,
       )
-      .where(Master.post_comment.selectOptionColumns.id, '=', result.insertId)
+      .where(Master.post_comment.selectOptionColumns.id, '=', insertedCommentId)
       .build()
     const newComment = await Query(
       fetchQuery,
-      [],
+      [insertedCommentId],
       [Master.post_comment.prefix_, Master.master_user.prefix_],
     )
 
