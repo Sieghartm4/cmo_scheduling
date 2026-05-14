@@ -1084,7 +1084,7 @@ export default function CalendarPage() {
       />
 
       <main style={{ flex: 1, overflowY: 'auto', padding: '2rem 1.25rem' }}>
-        <div style={{ maxWidth: 1600, margin: '0 auto', height: '90vh' }}>
+        <div style={{ maxWidth: 1600, margin: '0 auto', height: '75vh' }}>
           <style>{`
             @media(min-width:900px){
               .cal-layout{ grid-template-columns: 280px minmax(0,1fr) 320px !important; }
@@ -1768,7 +1768,26 @@ export default function CalendarPage() {
           </div>
         )}
       </AnimatePresence>
-
+      {/* CTA Section */}
+      <section className="py-20 bg-gradient-to-r from-emerald-500 to-teal-600">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-4xl font-bold text-white mb-6">
+            Ready to Get Started?
+          </h2>
+          <p className="text-xl text-emerald-100 mb-8">
+            Join our community today and experience the future of scheduling and
+            engagement
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <button
+              onClick={() => navigate('/posts')}
+              className="px-8 py-4 bg-white/10 text-white border-2 border-white rounded-xl font-semibold hover:bg-white/20 transition-all"
+            >
+              View Community Posts
+            </button>
+          </div>
+        </div>
+      </section>
       {/* Footer */}
       <Footer />
     </div>
