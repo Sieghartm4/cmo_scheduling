@@ -1,7 +1,9 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { useEffect } from 'react'
+import { GoogleOAuthProvider } from '@react-oauth/google'
 import AdminLogin from './pages/login/admin/AdminLogin'
 import UserLogin from './pages/login/user/UserLogin'
+import UserRegister from './pages/login/user/UserRegister'
 import Home from './pages/home/Home'
 import PostsFeed from './pages/postsFeed/PostsFeed'
 import PostDetail from './pages/postsFeed/PostDetail'
@@ -57,97 +59,100 @@ function App() {
   }, [])
 
   return (
-    <BrowserRouter>
-      <ModalProvider>
-        <StrictRouteGuard>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<UserLogin />} />
-            <Route path="/posts" element={<PostsFeed />} />
-            <Route path="/posts/:id" element={<PostDetail />} />
-            <Route path="/calendar" element={<Calendar />} />
-            <Route path="/about-me" element={<AboutMe />} />
-            <Route path="/disclaimer" element={<Disclaimer />} />
-            <Route path="/admin" element={<AdminLogin />} />
-            <Route path="/admin/login" element={<AdminLogin />} />
-            <Route element={<Layout />}>
-              <Route
-                path="dashboard"
-                element={
-                  <ProtectedRoute routeName="dashboard">
-                    <Dashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="admin/dashboard"
-                element={
-                  <ProtectedRoute routeName="admin-dashboard">
-                    <Dashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="users"
-                element={
-                  <ProtectedRoute routeName="users">
-                    <Users />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="admin/users"
-                element={
-                  <ProtectedRoute routeName="admin-dashboard">
-                    <UserManagement />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="admin/appointments"
-                element={
-                  <ProtectedRoute routeName="admin-dashboard">
-                    <Appointments />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="admin/posts"
-                element={
-                  <ProtectedRoute routeName="admin-dashboard">
-                    <Posts />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="admin/categories"
-                element={
-                  <ProtectedRoute routeName="admin-dashboard">
-                    <Category />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="admin/website-settings"
-                element={
-                  <ProtectedRoute routeName="admin-dashboard">
-                    <WebsiteSettings />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="admin/social-media"
-                element={
-                  <ProtectedRoute routeName="admin-dashboard">
-                    <SocialMedia />
-                  </ProtectedRoute>
-                }
-              />
-            </Route>
-          </Routes>
-        </StrictRouteGuard>
-      </ModalProvider>
-    </BrowserRouter>
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+      <BrowserRouter>
+        <ModalProvider>
+          <StrictRouteGuard>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<UserLogin />} />
+              <Route path="/register" element={<UserRegister />} />
+              <Route path="/posts" element={<PostsFeed />} />
+              <Route path="/posts/:id" element={<PostDetail />} />
+              <Route path="/calendar" element={<Calendar />} />
+              <Route path="/about-me" element={<AboutMe />} />
+              <Route path="/disclaimer" element={<Disclaimer />} />
+              <Route path="/admin" element={<AdminLogin />} />
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route element={<Layout />}>
+                <Route
+                  path="dashboard"
+                  element={
+                    <ProtectedRoute routeName="dashboard">
+                      <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="admin/dashboard"
+                  element={
+                    <ProtectedRoute routeName="admin-dashboard">
+                      <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="users"
+                  element={
+                    <ProtectedRoute routeName="users">
+                      <Users />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="admin/users"
+                  element={
+                    <ProtectedRoute routeName="admin-dashboard">
+                      <UserManagement />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="admin/appointments"
+                  element={
+                    <ProtectedRoute routeName="admin-dashboard">
+                      <Appointments />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="admin/posts"
+                  element={
+                    <ProtectedRoute routeName="admin-dashboard">
+                      <Posts />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="admin/categories"
+                  element={
+                    <ProtectedRoute routeName="admin-dashboard">
+                      <Category />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="admin/website-settings"
+                  element={
+                    <ProtectedRoute routeName="admin-dashboard">
+                      <WebsiteSettings />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="admin/social-media"
+                  element={
+                    <ProtectedRoute routeName="admin-dashboard">
+                      <SocialMedia />
+                    </ProtectedRoute>
+                  }
+                />
+              </Route>
+            </Routes>
+          </StrictRouteGuard>
+        </ModalProvider>
+      </BrowserRouter>
+    </GoogleOAuthProvider>
   )
 }
 

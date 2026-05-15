@@ -1,7 +1,7 @@
 require('dotenv').config()
 const { DecryptString } = require('../../util/cryptography.util')
 
-console.log('DecryptString', DecryptString('21232f297a57a5a743894a0e4a801fc3'))
+console.log('DecryptString', DecryptString('bb6d234bfea5cb8eb7981bce76e5c9c6'))
 module.exports = {
   development: {
     username: process.env._USER_ADMIN,

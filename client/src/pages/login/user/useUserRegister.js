@@ -1,25 +1,29 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-const useUserLogin = () => {
-  const [loginData, setLoginData] = useState(null)
+const useUserRegister = () => {
+  const [registerData, setRegisterData] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const navigate = useNavigate()
 
-  const login = async (credentials) => {
+  const register = async (formData) => {
     try {
       setLoading(true)
       setError(null)
 
       const response = await fetch(
-        `${import.meta.env.VITE_SERVER_LINK}/auth/user-login`,
+        `${import.meta.env.VITE_SERVER_LINK}/auth/user-register`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(credentials),
+          body: JSON.stringify({
+            mu_fullname: formData.fullname,
+            mu_email: formData.email,
+            mu_password: formData.password,
+          }),
         },
       )
 
@@ -33,13 +37,11 @@ const useUserLogin = () => {
       const result = await response.json()
 
       if (result.success) {
-        setLoginData(result.data)
-        localStorage.setItem('userToken', result.data.token)
-        localStorage.setItem('user', JSON.stringify(result.data.user))
-        // Redirect user to dashboard
-        navigate('/dashboard')
+        setRegisterData(result.data)
+        // Redirect to login page
+        navigate('/login')
       } else {
-        setError(result.message || 'Login failed')
+        setError(result.message || 'Registration failed')
       }
     } catch (err) {
       setError(err.message)
@@ -48,7 +50,7 @@ const useUserLogin = () => {
     }
   }
 
-  return { loginData, loading, error, login }
+  return { registerData, loading, error, register }
 }
 
-export default useUserLogin
+export default useUserRegister

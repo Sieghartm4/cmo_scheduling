@@ -15,6 +15,10 @@ import {
   Linkedin,
   Globe,
   Github,
+  Info,
+  AlertCircle,
+  Newspaper,
+  Clock,
 } from 'lucide-react'
 
 export default function PublicHeader() {
@@ -164,12 +168,12 @@ export default function PublicHeader() {
 
   return (
     <nav className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
-          {/* Logo */}
+      <div className="w-full px-2 sm:px-3 lg:px-4">
+        <div className="flex justify-between items-center h-20 gap-2">
+          {/* Left - Logo (Far Left Edge) */}
           <div
             onClick={handleHomeClick}
-            className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+            className="flex items-center gap-1 cursor-pointer hover:opacity-80 transition-opacity flex-shrink-0"
           >
             {homePageSettings?.website_logo &&
               // If logo exists, display it
@@ -182,81 +186,72 @@ export default function PublicHeader() {
                       : `data:image/jpeg;base64,${homePageSettings.website_logo}`
                   }
                   alt={homePageSettings.website_title || 'Logo'}
-                  className="w-20 h-20 rounded-xl object-cover"
+                  className="w-20 h-20 rounded-full"
                 />
               ) : (
-                <div className="w-20 h-20 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
-                  <Calendar size={40} className="text-white" />
+                <div className="w-20 h-20 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Calendar size={28} className="text-white" />
                 </div>
               ))}
             {homePageSettings?.website_title && (
-              <span className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+              <span className="text-sm sm:text-lg font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent inline">
                 {homePageSettings.website_title}
               </span>
             )}
           </div>
 
-          {/* Nav Links */}
-          <div className="hidden md:flex items-center gap-8">
+          {/* Center - Nav Links & User */}
+          <div className="hidden md:flex items-center gap-8 flex-1 justify-center">
             <button
-              onClick={() => navigate('/')}
-              className="text-gray-600 hover:text-emerald-600 font-medium transition-colors flex items-center gap-2"
+              onClick={handleHomeClick}
+              className="text-gray-600 hover:text-emerald-600 font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap text-base"
             >
               <Home size={16} />
               Home
             </button>
             <button
               onClick={() => navigate('/about-me')}
-              className="text-gray-600 hover:text-emerald-600 font-medium transition-colors"
+              className="text-gray-600 hover:text-emerald-600 font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap text-base"
             >
+              <Info size={16} />
               About Me
             </button>
             <button
               onClick={() => navigate('/disclaimer')}
-              className="text-gray-600 hover:text-emerald-600 font-medium transition-colors"
+              className="text-gray-600 hover:text-emerald-600 font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap text-base"
             >
+              <AlertCircle size={16} />
               Disclaimer
             </button>
             <button
               onClick={() => navigate('/posts')}
-              className="text-gray-600 hover:text-emerald-600 font-medium transition-colors"
+              className="text-gray-600 hover:text-emerald-600 font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap text-base"
             >
+              <Newspaper size={16} />
               Posts
             </button>
             <button
               onClick={() => navigate('/calendar')}
-              className="text-gray-600 hover:text-emerald-600 font-medium transition-colors"
+              className="text-gray-600 hover:text-emerald-600 font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap text-base"
             >
+              <Clock size={16} />
               Schedule
             </button>
-          </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg text-gray-600 bg-white/90 border border-gray-200 hover:text-emerald-600 hover:shadow-md transition-all"
-            aria-label="Toggle menu"
-          >
-            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
-
-          {/* CTA Buttons */}
-          <div className="hidden md:flex items-center gap-4 relative">
             {isLoggedIn ? (
               <div className="flex items-center gap-3">
                 {/* User Name - Clickable for logout */}
                 <div className="relative">
                   <button
                     onClick={() => setShowLogout(!showLogout)}
-                    className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg font-medium hover:shadow-md transition-all"
+                    className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg font-medium hover:shadow-md transition-all whitespace-nowrap text-sm"
                   >
-                    <User size={18} />
-                    <span className="hidden sm:inline">
+                    <User size={16} />
+                    <span className="hidden sm:inline text-sm">
                       {user?.fullname || user?.mu_fullname || user?.email || 'User'}
                     </span>
                     <ChevronDown
-                      size={16}
+                      size={14}
                       className={`transition-transform ${showLogout ? 'rotate-180' : ''}`}
                     />
                   </button>
@@ -293,7 +288,7 @@ export default function PublicHeader() {
                     navigate('/login')
                     setMobileMenuOpen(false)
                   }}
-                  className="text-gray-600 hover:text-emerald-600 font-medium transition-colors"
+                  className="text-gray-600 hover:text-emerald-600 font-medium transition-colors whitespace-nowrap text-base"
                 >
                   Sign In
                 </button>
@@ -302,30 +297,42 @@ export default function PublicHeader() {
                     navigate('/login')
                     setMobileMenuOpen(false)
                   }}
-                  className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg font-medium hover:shadow-lg transition-all"
+                  className="px-3 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg font-medium hover:shadow-lg transition-all whitespace-nowrap text-sm"
                 >
                   Get Started
                 </button>
               </>
             )}
-            <div className="flex items-center gap-3 ml-3">
-              {socialMediaLinks.map((item) => {
-                const Icon =
-                  socialIconComponents[item.platform?.toLowerCase()?.trim()] || Globe
-                if (!item.url) return null
-                return (
-                  <a
-                    key={`${item.platform}-${item.url}`}
-                    href={item.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-gray-600 hover:text-emerald-600 transition-colors"
-                  >
-                    <Icon size={18} />
-                  </a>
-                )
-              })}
-            </div>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 rounded-lg text-gray-600 bg-white/90 border border-gray-200 hover:text-emerald-600 hover:shadow-md transition-all"
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+
+          {/* Right - Social Media (Far Right Edge) */}
+          <div className="hidden md:flex items-center gap-3 flex-shrink-0">
+            {socialMediaLinks.map((item) => {
+              const Icon =
+                socialIconComponents[item.platform?.toLowerCase()?.trim()] || Globe
+              if (!item.url) return null
+              return (
+                <a
+                  key={`${item.platform}-${item.url}`}
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-600 hover:text-emerald-600 transition-colors"
+                >
+                  <Icon size={20} />
+                </a>
+              )
+            })}
           </div>
         </div>
       </div>
@@ -335,7 +342,7 @@ export default function PublicHeader() {
           <div className="px-4 py-5 space-y-4">
             <button
               onClick={() => {
-                navigate('/')
+                handleHomeClick()
                 setMobileMenuOpen(false)
               }}
               className="flex items-center gap-2 w-full text-left text-gray-700 hover:text-emerald-600 font-medium"
@@ -348,8 +355,9 @@ export default function PublicHeader() {
                 navigate('/about-me')
                 setMobileMenuOpen(false)
               }}
-              className="w-full text-left text-gray-700 hover:text-emerald-600 font-medium"
+              className="w-full text-left text-gray-700 hover:text-emerald-600 font-medium flex items-center gap-2"
             >
+              <Info size={16} />
               About Me
             </button>
             <button
@@ -357,8 +365,9 @@ export default function PublicHeader() {
                 navigate('/disclaimer')
                 setMobileMenuOpen(false)
               }}
-              className="w-full text-left text-gray-700 hover:text-emerald-600 font-medium"
+              className="w-full text-left text-gray-700 hover:text-emerald-600 font-medium flex items-center gap-2"
             >
+              <AlertCircle size={16} />
               Disclaimer
             </button>
             <button
@@ -366,8 +375,9 @@ export default function PublicHeader() {
                 navigate('/posts')
                 setMobileMenuOpen(false)
               }}
-              className="w-full text-left text-gray-700 hover:text-emerald-600 font-medium"
+              className="w-full text-left text-gray-700 hover:text-emerald-600 font-medium flex items-center gap-2"
             >
+              <Newspaper size={16} />
               Posts
             </button>
             <button
@@ -375,8 +385,9 @@ export default function PublicHeader() {
                 navigate('/calendar')
                 setMobileMenuOpen(false)
               }}
-              className="w-full text-left text-gray-700 hover:text-emerald-600 font-medium"
+              className="w-full text-left text-gray-700 hover:text-emerald-600 font-medium flex items-center gap-2"
             >
+              <Clock size={16} />
               Schedule
             </button>
             <div className="flex flex-wrap gap-3 pt-4">

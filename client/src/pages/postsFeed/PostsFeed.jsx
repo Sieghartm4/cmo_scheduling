@@ -416,10 +416,10 @@ const PostCard = React.memo(function PostCard({
               </span>
             </div>
             <div>
-              <h4 className="font-semibold text-gray-900 text-lg">
+              <h4 className="font-semibold text-gray-900 text-xl">
                 {post.title || 'CMO Scheduling Team'}
               </h4>
-              <div className="flex items-center gap-1.5 text-xs text-gray-400">
+              <div className="flex items-center gap-1.5 text-sm text-gray-400">
                 <Clock size={11} />
                 <span>{formatDate(post.created_at)}</span>
                 {post.category_name && (
@@ -447,20 +447,20 @@ const PostCard = React.memo(function PostCard({
         {/* Category Badge */}
         {post.category_name && (
           <div className="mb-2">
-            <span className="inline-block px-2 py-1 bg-emerald-100 text-emerald-700 text-xs rounded-full font-medium">
+            <span className="inline-block px-2 py-1 bg-emerald-100 text-emerald-700 text-sm rounded-full font-medium">
               {post.category_name}
             </span>
           </div>
         )}
         <p
-          className={`text-gray-700 text-sm leading-relaxed ${!isExpanded && 'line-clamp-3'}`}
+          className={`text-gray-700 text-base leading-relaxed ${!isExpanded && 'line-clamp-3'}`}
         >
           {post.content}
         </p>
         {post.content?.length > 200 && (
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="text-emerald-600 text-sm font-medium mt-1 hover:underline"
+            className="text-emerald-600 text-base font-medium mt-1 hover:underline"
           >
             {isExpanded ? 'Show less' : 'Read more'}
           </button>
@@ -1589,7 +1589,7 @@ export default function PostsFeed() {
             />
 
             {/* Content wrapper with max-width */}
-            <div className="w-full max-w-[1000px] " id="tutorial-post-feed">
+            <div className="w-full max-w-[1500px] " id="tutorial-post-feed">
               {/* Feed header */}
               <div className="flex items-center justify-between w-full max-w-[600px]">
                 <div></div>

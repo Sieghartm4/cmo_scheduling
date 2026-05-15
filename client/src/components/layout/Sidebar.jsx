@@ -18,6 +18,7 @@ export default function Sidebar({ isCollapsed }) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const location = useLocation()
   const [user, setUser] = useState(null)
+  const [homePageSettings, setHomePageSettings] = useState(null)
 
   useEffect(() => {
     try {
@@ -32,6 +33,27 @@ export default function Sidebar({ isCollapsed }) {
     } catch (error) {
       console.error('Error loading user data:', error)
     }
+  }, [])
+
+  // Fetch home page settings from API
+  useEffect(() => {
+    const fetchHomePageSettings = async () => {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_SERVER_LINK}/api/home-page-settings`,
+        )
+        if (response.ok) {
+          const result = await response.json()
+          if (result.success && result.data) {
+            setHomePageSettings(result.data)
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching home page settings:', error)
+      }
+    }
+
+    fetchHomePageSettings()
   }, [])
 
   useEffect(() => {
@@ -118,16 +140,32 @@ export default function Sidebar({ isCollapsed }) {
 
       <div className="flex items-center h-16 px-6 border-b border-emerald-700">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center text-white font-bold text-lg shadow-emerald-500/20">
-            <Calendar size={16} />
-          </div>
+          {homePageSettings?.website_logo ? (
+            homePageSettings.website_logo.startsWith('data:') ||
+            homePageSettings.website_logo.startsWith('http') ? (
+              <img
+                src={
+                  homePageSettings.website_logo.startsWith('data:')
+                    ? homePageSettings.website_logo
+                    : `data:image/jpeg;base64,${homePageSettings.website_logo}`
+                }
+                alt={homePageSettings.website_title || 'Logo'}
+                className="w-15 h-15 rounded-full"
+              />
+            ) : (
+              <div className="w-15 h-15 bg-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-emerald-500/20">
+                <Calendar size={16} />
+              </div>
+            )
+          ) : (
+            <div className="w-15 h-15 bg-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-emerald-500/20">
+              <Calendar size={16} />
+            </div>
+          )}
           {!isCollapsed && (
             <div className="overflow-hidden whitespace-nowrap">
               <span className="font-bold tracking-tight text-white block">
-                Schedule
-              </span>
-              <span className="text-emerald-300 font-bold tracking-[0.2em] -mt-1 block">
-                PRO
+                {homePageSettings?.website_title || 'Schedule'}
               </span>
             </div>
           )}
