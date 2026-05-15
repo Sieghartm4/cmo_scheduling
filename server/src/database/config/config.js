@@ -1,5 +1,5 @@
 require('dotenv').config()
-const { DecryptString } = require('../../util/cryptography.util')
+const { DecryptString, EncryptString } = require('../../util/cryptography.util')
 
 console.log('DecryptString', DecryptString('bb6d234bfea5cb8eb7981bce76e5c9c6'))
 module.exports = {

@@ -1084,7 +1084,7 @@ export default function CalendarPage() {
       />
 
       <main style={{ flex: 1, overflowY: 'auto', padding: '2rem 1.25rem' }}>
-        <div style={{ maxWidth: 1600, margin: '0 auto', height: '75vh' }}>
+        <div style={{ maxWidth: 1600, margin: '0 auto', height: '80vh' }}>
           <style>{`
             @media(min-width:900px){
               .cal-layout{ grid-template-columns: 280px minmax(0,1fr) 320px !important; }

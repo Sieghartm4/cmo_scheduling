@@ -2,11 +2,7 @@ const jwt = require('jsonwebtoken')
 const { Query, Insert } = require('../database/util/queries.util')
 const { Master } = require('../database/model/Master')
 const { SQLQueryBuilder } = require('../util/helper.util')
-const {
-  CheckPassword,
-  DecryptString,
-  CreateHashPassword,
-} = require('../util/cryptography.util')
+const { DecryptString, EncryptString } = require('../util/cryptography.util')
 const sql = new SQLQueryBuilder()
 
 require('dotenv').config()
@@ -270,13 +266,8 @@ const userRegister = async (req, res, next) => {
       })
     }
 
-    // Hash password
-    const hashedPassword = await new Promise((resolve, reject) => {
-      CreateHashPassword(mu_password, (err, hash) => {
-        if (err) reject(err)
-        resolve(hash)
-      })
-    })
+    // Encrypt password
+    const encryptedPassword = EncryptString(mu_password)
 
     const insertQuery = `INSERT INTO ${Master.master_user.tablename}(
       ${Master.master_user.selectOptionColumns.fullname},
@@ -289,7 +280,7 @@ const userRegister = async (req, res, next) => {
     const result = await Query(insertQuery, [
       mu_fullname,
       mu_email,
-      hashedPassword,
+      encryptedPassword,
       'user',
       'active',
     ])
@@ -347,12 +338,7 @@ const googleAuth = async (req, res, next) => {
       // Create new user from Google data
       const defaultPassword = 'GOOGLE_AUTH_' + googleId.substring(0, 12)
 
-      const hashedPassword = await new Promise((resolve, reject) => {
-        CreateHashPassword(defaultPassword, (err, hash) => {
-          if (err) reject(err)
-          resolve(hash)
-        })
-      })
+      const encryptedPassword = EncryptString(defaultPassword)
 
       const insertQuery = `INSERT INTO ${Master.master_user.tablename}(
         ${Master.master_user.selectOptionColumns.fullname},
@@ -366,7 +352,7 @@ const googleAuth = async (req, res, next) => {
       const result = await Query(insertQuery, [
         name || email.split('@')[0],
         email,
-        hashedPassword,
+        encryptedPassword,
         'user',
         picture || null,
         'active',

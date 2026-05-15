@@ -2,9 +2,74 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" id="favicon" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TheAnxietyNurse</title>
+    <script type="module">
+      // Fetch and set dynamic website title and icon
+      async function loadHomePageSettings() {
+        try {
+          console.log('Fetching home page settings...')
+
+          // Determine the API base URL
+          let apiUrl = '/api/home-page-settings'
+
+          // If on localhost dev port, use environment variable
+          if (
+            window.location.hostname === 'localhost' &&
+            window.location.port === '3001'
+          ) {
+            apiUrl = `${import.meta.env.VITE_SERVER_LINK}/api/home-page-settings`
+            // console.log('Running in development mode, using API URL:', apiUrl)
+          }
+
+          console.log('API URL:', apiUrl)
+
+          const response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          })
+
+          if (response.ok) {
+            const result = await response.json()
+            console.log('Settings result:', result)
+
+            if (result.success && result.data) {
+              const data = result.data
+
+              // Set website title
+              if (data.website_title) {
+                console.log('Setting title to:', data.website_title)
+                document.title = data.website_title
+              }
+
+              // Set favicon
+              if (data.website_logo) {
+                console.log('Setting favicon...')
+                const faviconElement = document.getElementById('favicon')
+                if (
+                  data.website_logo.startsWith('data:') ||
+                  data.website_logo.startsWith('http')
+                ) {
+                  faviconElement.href = data.website_logo
+                } else {
+                  faviconElement.href = `data:image/jpeg;base64,${data.website_logo}`
+                }
+              }
+            }
+          } else {
+            console.warn('Settings API returned:', response.status)
+          }
+        } catch (error) {
+          console.error('Error loading home page settings:', error)
+        }
+      }
+
+      // Wait a bit for the API to be ready, then load
+      setTimeout(loadHomePageSettings, 500)
+    </script>
   </head>
   <body>
     <div id="root"></div>
