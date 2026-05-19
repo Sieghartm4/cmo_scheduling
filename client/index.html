@@ -21,6 +21,10 @@
           ) {
             apiUrl = `${import.meta.env.VITE_SERVER_LINK}/api/home-page-settings`
             console.log('Running in development mode, using API URL:', apiUrl)
+          } else if (window.location.hostname === 'theanxietynurse.com') {
+            // Production: use the API subdomain
+            apiUrl = 'https://api.theanxietynurse.com/api/home-page-settings'
+            console.log('Running in production mode, using API URL:', apiUrl)
           }
 
           console.log('API URL:', apiUrl)
