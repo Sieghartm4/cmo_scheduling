@@ -4,6 +4,8 @@ const corsOptions = {
     `http://${process.env._CLIENT_URL}:${process.env._CLIENT_PORT}`,
     `http://${process.env._SERVER_URL}:${process.env._SERVER_PORT}`,
     `http://localhost:${process.env._SERVER_PORT}`,
+    'https://theanxietynurse.com',
+    'https://api.theanxietynurse.com',
   ],
   credentials: true,
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
