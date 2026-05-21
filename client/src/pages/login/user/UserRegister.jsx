@@ -7,7 +7,7 @@ import {
   Mail,
   ArrowRight,
   Loader2,
-  Calendar,
+  Newspaper,
   Clock,
   Phone,
   User,
@@ -138,12 +138,12 @@ export default function UserRegister() {
                   />
                 ) : (
                   <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
-                    <Calendar size={24} className="text-white" />
+                    <Newspaper size={24} className="text-white" />
                   </div>
                 )
               ) : (
                 <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
-                  <Calendar size={24} className="text-white" />
+                  <Newspaper size={24} className="text-white" />
                 </div>
               )}
               <div>
@@ -152,7 +152,7 @@ export default function UserRegister() {
                 </h1>
                 <p className="text-xs text-gray-500">
                   {homePageSettings?.website_tagline ||
-                    'Book your appointment easily'}
+                    "Explore TheAnxietyNurse's journey"}
                 </p>
               </div>
             </button>
@@ -182,8 +182,9 @@ export default function UserRegister() {
                 <span className="block text-emerald-600">Community</span>
               </h2>
               <p className="text-lg text-gray-600 mb-8">
-                Create your account and start booking appointments in seconds.
-                Simple, fast, and secure registration.
+                Create your account to explore TheAnxietyNurse's blog story. You can
+                view, like, comment on, and share his posts — post creation is
+                reserved for admins.
               </p>
             </div>
 
@@ -253,13 +254,14 @@ export default function UserRegister() {
             <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
               <div className="text-center mb-8">
                 <div className="w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <User size={32} className="text-white" />
+                  <Newspaper size={32} className="text-white" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                  Create Account
+                  Join TheAnxietyNurse Blog
                 </h3>
                 <p className="text-gray-600">
-                  Join us and start booking appointments
+                  Join us to explore TheAnxietyNurse's blog, view his journey, and
+                  engage with posts by liking, commenting, and sharing.
                 </p>
               </div>
 

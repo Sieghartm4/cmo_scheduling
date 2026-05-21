@@ -7,13 +7,14 @@ import {
   Mail,
   ArrowRight,
   Loader2,
-  Calendar,
-  Clock,
+  MessageCircle,
+  Newspaper,
   Phone,
   User,
   Eye,
   EyeOff,
   Star,
+  Bell,
 } from 'lucide-react'
 import Footer from '../../../components/layout/Footer'
 import useUserLogin from './useUserLogin'
@@ -25,7 +26,12 @@ export default function UserLogin() {
   const [showPassword, setShowPassword] = useState(false)
   const [homePageSettings, setHomePageSettings] = useState(null)
   const { login, loading, error } = useUserLogin()
-  const { handleGoogleAuth, handleGoogleError, loading: googleLoading, error: googleError } = useGoogleAuth()
+  const {
+    handleGoogleAuth,
+    handleGoogleError,
+    loading: googleLoading,
+    error: googleError,
+  } = useGoogleAuth()
 
   useEffect(() => {
     const fetchHomePageSettings = async () => {
@@ -109,12 +115,12 @@ export default function UserLogin() {
                   />
                 ) : (
                   <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
-                    <Calendar size={24} className="text-white" />
+                    <Newspaper size={24} className="text-white" />
                   </div>
                 )
               ) : (
                 <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
-                  <Calendar size={24} className="text-white" />
+                  <Newspaper size={24} className="text-white" />
                 </div>
               )}
               <div>
@@ -122,7 +128,8 @@ export default function UserLogin() {
                   {homePageSettings?.website_title || 'CMO Scheduling'}
                 </h1>
                 <p className="text-xs text-gray-500">
-                  {homePageSettings?.website_tagline || 'Book your appointment easily'}
+                  {homePageSettings?.website_tagline ||
+                    "Explore TheAnxietyNurse's journey"}
                 </p>
               </div>
             </button>
@@ -148,49 +155,57 @@ export default function UserLogin() {
           >
             <div>
               <h2 className="text-4xl font-bold text-gray-900 mb-4">
-                Welcome to Your
-                <span className="block text-emerald-600">Appointment Journey</span>
+                Welcome to the
+                <span className="block text-emerald-600">TheAnxietyNurse Blog</span>
               </h2>
               <p className="text-lg text-gray-600 mb-8">
-                Book your appointments with ease. No more phone calls, no more
-                waiting. Just simple, convenient scheduling at your fingertips.
+                Explore TheAnxietyNurse's story through his blog posts about anxiety,
+                recovery, and life as a nurse in Japan. You can view, like, comment
+                on, and share posts — only admins can publish new articles.
               </p>
             </div>
 
             {/* Features */}
             <div className="space-y-6">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <Calendar size={24} className="text-emerald-600" />
+                <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center shrink-0">
+                  <MessageCircle size={24} className="text-emerald-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-1">Easy Online Booking</h3>
+                  <h3 className="font-semibold text-gray-900 mb-1">
+                    TheAnxietyNurse Story
+                  </h3>
                   <p className="text-gray-600 text-sm">
-                    Browse available time slots and book in just a few clicks
+                    Follow TheAnxietyNurse's journey from anxiety to recovery. View
+                    his posts, like them, comment, and share your support.
                   </p>
                 </div>
               </div>
 
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <Clock size={24} className="text-teal-600" />
+                <div className="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center shrink-0">
+                  <User size={24} className="text-teal-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-1">Real-time Availability</h3>
+                  <h3 className="font-semibold text-gray-900 mb-1">
+                    Connect with Members
+                  </h3>
                   <p className="text-gray-600 text-sm">
-                    See exactly when appointments are available, updated live
+                    Engage with posts, comment, and build connections with others
                   </p>
                 </div>
               </div>
 
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-cyan-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <Phone size={24} className="text-cyan-600" />
+                <div className="w-12 h-12 bg-cyan-100 rounded-xl flex items-center justify-center shrink-0">
+                  <Bell size={24} className="text-cyan-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-1">Instant Confirmations</h3>
+                  <h3 className="font-semibold text-gray-900 mb-1">
+                    Instant Notifications
+                  </h3>
                   <p className="text-gray-600 text-sm">
-                    Get immediate confirmation and reminders for your appointments
+                    Get notified about replies, mentions, and trending posts
                   </p>
                 </div>
               </div>
@@ -200,18 +215,24 @@ export default function UserLogin() {
             <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
               <div className="flex items-center gap-1 mb-3">
                 {[1, 2, 3, 4, 5].map((star) => (
-                  <Star key={star} size={16} className="text-yellow-400 fill-current" />
+                  <Star
+                    key={star}
+                    size={16}
+                    className="text-yellow-400 fill-current"
+                  />
                 ))}
               </div>
               <p className="text-gray-700 italic mb-3">
-                "The easiest appointment booking system I've ever used. No more
-                waiting on hold, just quick and simple scheduling!"
+                "The community feed is fantastic — easy to discover and engage with
+                posts. I always find useful conversations here!"
               </p>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
                 <div>
-                  <p className="font-semibold text-gray-900 text-sm">Sarah Johnson</p>
-                  <p className="text-gray-500 text-xs">Regular Client</p>
+                  <p className="font-semibold text-gray-900 text-sm">
+                    Sarah Johnson
+                  </p>
+                  <p className="text-gray-500 text-xs">Community Member</p>
                 </div>
               </div>
             </div>
@@ -227,10 +248,14 @@ export default function UserLogin() {
             <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
               <div className="text-center mb-8">
                 <div className="w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <User size={32} className="text-white" />
+                  <Newspaper size={32} className="text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Sign In to Book</h3>
-                <p className="text-gray-600">Access your account to schedule appointments</p>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                  Sign In to Explore TheAnxietyNurse Blog
+                </h3>
+                <p className="text-gray-600">
+                  Access your account to view, share, and interact with posts
+                </p>
               </div>
 
               <AnimatePresence>
@@ -327,7 +352,7 @@ export default function UserLogin() {
                     </>
                   ) : (
                     <>
-                      Sign In & Book Appointment
+                      Sign In & Explore TheAnxietyNurse
                       <ArrowRight size={20} />
                     </>
                   )}
@@ -353,7 +378,7 @@ export default function UserLogin() {
 
               <div className="mt-6 text-center">
                 <p className="text-sm text-gray-600">
-                  New to our scheduling system?{' '}
+                  New here?{' '}
                   <button
                     onClick={() => navigate('/register')}
                     className="font-medium text-emerald-600 hover:text-emerald-700 transition-colors"
