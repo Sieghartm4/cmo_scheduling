@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import PublicHeader from '../../components/layout/PublicHeader'
 import Footer from '../../components/layout/Footer'
+import LoadingOverlay from '../../components/LoadingOverlay'
 import { Shield, FileText } from 'lucide-react'
 
 export default function Disclaimer() {
@@ -55,6 +56,7 @@ export default function Disclaimer() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50">
       <PublicHeader />
+      {loading && <LoadingOverlay message="Loading disclaimer content…" />}
 
       {/* Hero Section */}
       <section className="relative overflow-hidden min-h-[50vh] flex items-center">

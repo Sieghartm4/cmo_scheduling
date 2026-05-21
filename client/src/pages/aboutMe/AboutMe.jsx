@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import PublicHeader from '../../components/layout/PublicHeader'
 import Footer from '../../components/layout/Footer'
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import LoadingOverlay from '../../components/LoadingOverlay'
 import {
   User,
   MapPin,
@@ -226,6 +227,7 @@ export default function AboutMe() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
       <PublicHeader />
+      {loading && <LoadingOverlay message="Loading profile content…" />}
 
       {/* ── Hero ─────────────────────────────────────────── */}
       <section className="relative overflow-hidden min-h-[15vh] flex items-center">

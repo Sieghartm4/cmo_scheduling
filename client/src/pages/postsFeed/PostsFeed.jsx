@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate, Link } from 'react-router-dom'
 import PublicHeader from '../../components/layout/PublicHeader'
 import TutorialGuide from '../../components/TutorialGuide'
+import LoadingOverlay from '../../components/LoadingOverlay'
 import {
   Heart,
   MessageCircle,
@@ -1363,6 +1364,7 @@ export default function PostsFeed() {
   return (
     <div className="h-screen bg-[#f0f2f5] flex flex-col">
       {/* Top accent stripe */}
+      {loading && <LoadingOverlay message="Loading community posts…" />}
       <div className="h-1 bg-gradient-to-r from-emerald-400 via-teal-500 to-emerald-600 flex-shrink-0 " />
       <PublicHeader />
 

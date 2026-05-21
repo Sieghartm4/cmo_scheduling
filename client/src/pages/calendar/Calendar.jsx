@@ -5,6 +5,7 @@ import PublicHeader from '../../components/layout/PublicHeader'
 import Footer from '../../components/layout/Footer'
 import DynamicToast from '../../components/DynamicToast'
 import TutorialGuide from '../../components/TutorialGuide'
+import LoadingOverlay from '../../components/LoadingOverlay'
 import {
   ChevronLeft,
   ChevronRight,
@@ -1076,6 +1077,7 @@ export default function CalendarPage() {
     <div className="cal-root cal-bg">
       <div className="cal-accent-bar" />
       <PublicHeader />
+      {loading && <LoadingOverlay message="Loading schedule data…" />}
       <TutorialGuide
         isOpen={showCalendarTutorial}
         onClose={() => setShowCalendarTutorial(false)}

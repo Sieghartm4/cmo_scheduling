@@ -45,10 +45,8 @@ export default function PublicHeader() {
 
   const handleHomeClick = () => {
     if (location.pathname === '/') {
-      // Already on home page, scroll to top
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } else {
-      // Not on home page, navigate to home
       navigate('/')
     }
   }
@@ -72,22 +70,18 @@ export default function PublicHeader() {
   }
 
   const handleLogout = () => {
-    // Clear all auth tokens
     localStorage.removeItem('token')
     localStorage.removeItem('userToken')
     localStorage.removeItem('adminToken')
     localStorage.removeItem('user')
 
-    // Update state
     setIsLoggedIn(false)
     setUser(null)
     setShowLogout(false)
 
-    // Navigate to home
     navigate('/')
   }
 
-  // Fetch home page settings from API
   useEffect(() => {
     const fetchHomePageSettings = async () => {
       try {
@@ -108,7 +102,6 @@ export default function PublicHeader() {
     fetchHomePageSettings()
   }, [])
 
-  // Fetch social media links from API
   useEffect(() => {
     const fetchSocialMediaLinks = async () => {
       try {
@@ -153,11 +146,7 @@ export default function PublicHeader() {
 
   useEffect(() => {
     checkLoginStatus()
-
-    // Listen for storage changes (login/logout in other tabs)
     window.addEventListener('storage', checkLoginStatus)
-
-    // Check every second for changes (for same-tab updates)
     const interval = setInterval(checkLoginStatus, 1000)
 
     return () => {
@@ -170,13 +159,12 @@ export default function PublicHeader() {
     <nav className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
       <div className="w-full px-2 sm:px-3 lg:px-4">
         <div className="flex justify-between items-center h-20 gap-2">
-          {/* Left - Logo (Far Left Edge) */}
+          {/* Left - Logo */}
           <div
             onClick={handleHomeClick}
             className="flex items-center gap-1 cursor-pointer hover:opacity-80 transition-opacity flex-shrink-0"
           >
             {homePageSettings?.website_logo &&
-              // If logo exists, display it
               (homePageSettings.website_logo.startsWith('data:') ||
               homePageSettings.website_logo.startsWith('http') ? (
                 <img
@@ -201,13 +189,32 @@ export default function PublicHeader() {
           </div>
 
           {/* Center - Nav Links & User */}
-          <div className="hidden md:flex items-center gap-8 flex-1 justify-center">
+          <div className="hidden md:flex items-center gap-6 flex-1 justify-center">
             <button
               onClick={handleHomeClick}
               className="text-gray-600 hover:text-emerald-600 font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap text-base"
             >
               <Home size={16} />
               Home
+            </button>
+            {/* --- HIGHLIGHTED POSTS BUTTON --- */}
+            <button
+              onClick={() => navigate('/posts')}
+              className="relative text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border-2 border-emerald-500/30 hover:border-emerald-500 font-bold px-2 py-2 rounded-xl transition-all flex items-center gap-2 whitespace-nowrap text-lg shadow-sm transform hover:scale-105"
+            >
+              <Newspaper size={20} className="text-emerald-600" />
+              <span>Posts</span>
+              <span className="absolute -top-1.5 -right-1.5 flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+              </span>
+            </button>
+            <button
+              onClick={() => navigate('/calendar')}
+              className="text-gray-600 hover:text-emerald-600 font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap text-base"
+            >
+              <Clock size={16} />
+              Schedule
             </button>
             <button
               onClick={() => navigate('/about-me')}
@@ -223,24 +230,9 @@ export default function PublicHeader() {
               <AlertCircle size={16} />
               Disclaimer
             </button>
-            <button
-              onClick={() => navigate('/posts')}
-              className="text-gray-600 hover:text-emerald-600 font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap text-base"
-            >
-              <Newspaper size={16} />
-              Posts
-            </button>
-            <button
-              onClick={() => navigate('/calendar')}
-              className="text-gray-600 hover:text-emerald-600 font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap text-base"
-            >
-              <Clock size={16} />
-              Schedule
-            </button>
 
             {isLoggedIn ? (
               <div className="flex items-center gap-3">
-                {/* User Name - Clickable for logout */}
                 <div className="relative">
                   <button
                     onClick={() => setShowLogout(!showLogout)}
@@ -256,7 +248,6 @@ export default function PublicHeader() {
                     />
                   </button>
 
-                  {/* Logout Dropdown */}
                   {showLogout && (
                     <div className="absolute top-full right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
                       <div className="px-4 py-3 border-b border-gray-100">
@@ -315,7 +306,7 @@ export default function PublicHeader() {
             {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
 
-          {/* Right - Social Media (Far Right Edge) */}
+          {/* Right - Social Media */}
           <div className="hidden md:flex items-center gap-3 flex-shrink-0">
             {socialMediaLinks.map((item) => {
               const Icon =
@@ -337,6 +328,7 @@ export default function PublicHeader() {
         </div>
       </div>
 
+      {/* Mobile Sidebar/Menu */}
       {mobileMenuOpen && (
         <div className="md:hidden absolute inset-x-0 top-full bg-white border-b border-gray-100 shadow-lg z-40">
           <div className="px-4 py-5 space-y-4">
@@ -349,6 +341,27 @@ export default function PublicHeader() {
             >
               <Home size={16} />
               Home
+            </button>
+            <button
+              onClick={() => {
+                navigate('/posts')
+                setMobileMenuOpen(false)
+              }}
+              className="w-full text-left text-emerald-700 bg-emerald-50 border border-emerald-300 font-bold px-4 py-3 rounded-xl flex items-center gap-2 text-lg shadow-xs"
+            >
+              <Newspaper size={20} className="text-emerald-600" />
+              Posts
+              <span className="ml-auto h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            </button>
+            <button
+              onClick={() => {
+                navigate('/calendar')
+                setMobileMenuOpen(false)
+              }}
+              className="w-full text-left text-gray-700 hover:text-emerald-600 font-medium flex items-center gap-2"
+            >
+              <Clock size={16} />
+              Schedule
             </button>
             <button
               onClick={() => {
@@ -369,26 +382,6 @@ export default function PublicHeader() {
             >
               <AlertCircle size={16} />
               Disclaimer
-            </button>
-            <button
-              onClick={() => {
-                navigate('/posts')
-                setMobileMenuOpen(false)
-              }}
-              className="w-full text-left text-gray-700 hover:text-emerald-600 font-medium flex items-center gap-2"
-            >
-              <Newspaper size={16} />
-              Posts
-            </button>
-            <button
-              onClick={() => {
-                navigate('/calendar')
-                setMobileMenuOpen(false)
-              }}
-              className="w-full text-left text-gray-700 hover:text-emerald-600 font-medium flex items-center gap-2"
-            >
-              <Clock size={16} />
-              Schedule
             </button>
             <div className="flex flex-wrap gap-3 pt-4">
               {socialMediaLinks.map((item) => {

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import PublicHeader from '../../components/layout/PublicHeader'
 import Footer from '../../components/layout/Footer'
+import LoadingOverlay from '../../components/LoadingOverlay'
 import {
   Calendar,
   Clock,
@@ -72,16 +73,16 @@ export default function Home() {
 
   const features = [
     {
-      icon: <Calendar className="w-6 h-6" />,
-      title: 'Easy Scheduling',
-      description:
-        'Book appointments seamlessly with our intuitive calendar interface',
-    },
-    {
       icon: <MessageCircle className="w-6 h-6" />,
       title: 'Community Posts',
       description:
-        'Stay updated with announcements, news, and community discussions',
+        'Discover real stories, announcements, and helpful updates from members',
+    },
+    {
+      icon: <Calendar className="w-6 h-6" />,
+      title: 'Smart Scheduling',
+      description:
+        'Keep your appointments in sync while staying connected to the community',
     },
     {
       icon: <Clock className="w-6 h-6" />,
@@ -97,7 +98,7 @@ export default function Home() {
 
   const stats = [
     { number: '10K+', label: 'Active Users' },
-    { number: '50K+', label: 'Appointments' },
+    { number: '50K+', label: 'Posts Shared' },
     { number: '1K+', label: 'Community Posts' },
     { number: '99%', label: 'Satisfaction' },
   ]
@@ -156,6 +157,7 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       <PublicHeader />
+      {loading && <LoadingOverlay message="Loading home content…" />}
 
       {/* Hero Section */}
       <section
@@ -174,9 +176,8 @@ export default function Home() {
               <motion.div variants={fadeInUp}>
                 <span className="inline-block px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-full text-sm font-semibold mb-6">
                   {loading
-                    ? 'Welcome to the Future of Scheduling'
-                    : homePageSettings?.welcome_badge ||
-                      'Welcome to the Future of Scheduling'}
+                    ? 'Community posts first'
+                    : homePageSettings?.welcome_badge || 'Community posts first'}
                 </span>
               </motion.div>
 
@@ -185,16 +186,16 @@ export default function Home() {
                 className="text-5xl lg:text-7xl font-bold text-white leading-tight"
               >
                 {loading
-                  ? 'Connect, Schedule, and'
+                  ? 'Share your story, connect with'
                   : homePageSettings?.hero_title
                       ?.split(' ')
                       .slice(0, -1)
-                      .join(' ') || 'Connect, Schedule, and'}{' '}
+                      .join(' ') || 'Share your story, connect with'}{' '}
                 <span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
                   {loading
-                    ? 'Stay Informed'
+                    ? 'the community'
                     : homePageSettings?.hero_title?.split(' ').slice(-1)[0] ||
-                      'Stay Informed'}
+                      'the community'}
                 </span>
               </motion.h1>
 
@@ -203,24 +204,24 @@ export default function Home() {
                 className="text-xl text-gray-100 leading-relaxed drop-shadow-md"
               >
                 {loading
-                  ? 'Your all-in-one platform for appointment scheduling and community engagement. Book appointments effortlessly and stay connected with your vibrant community.'
+                  ? 'Explore real community posts, share updates, and stay informed with the latest announcements from our members.'
                   : homePageSettings?.hero_description ||
-                    'Your all-in-one platform for appointment scheduling and community engagement. Book appointments effortlessly and stay connected with your vibrant community.'}
+                    'Explore real community posts, share updates, and stay informed with the latest announcements from our members.'}
               </motion.p>
 
               <motion.div variants={fadeInUp} className="flex flex-wrap gap-4">
                 <button
-                  onClick={() => navigate('/calendar')}
+                  onClick={() => navigate('/posts')}
                   className="px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
                 >
-                  <Calendar size={20} />
-                  Schedule Now
+                  <MessageCircle size={20} />
+                  Explore Posts
                 </button>
                 <button
                   onClick={() => navigate('/posts')}
                   className="px-8 py-4 bg-white/10 backdrop-blur-md text-white border border-white/20 rounded-xl font-semibold hover:bg-white/30 transition-all"
                 >
-                  View Community
+                  Join the Conversation
                 </button>
               </motion.div>
 
@@ -288,8 +289,8 @@ export default function Home() {
                   className="absolute -top-4 -right-4 bg-white rounded-xl shadow-lg p-4 border border-gray-100"
                 >
                   <div className="flex items-center gap-2 text-emerald-600">
-                    <Calendar size={20} />
-                    <span className="font-semibold text-sm">Easy Booking</span>
+                    <MessageCircle size={20} />
+                    <span className="font-semibold text-sm">Trending Posts</span>
                   </div>
                 </motion.div>
 
@@ -399,9 +400,9 @@ export default function Home() {
                 </span>
               </h2>
               <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-                We're more than just a scheduling platform. We're a community-driven
-                ecosystem that connects people, simplifies appointments, and keeps
-                everyone informed with the latest updates and announcements.
+                We're more than just a community platform. We're a content-driven
+                ecosystem that connects people, shares stories, and keeps everyone
+                informed with the latest posts and announcements.
               </p>
 
               <div className="space-y-6">
@@ -447,7 +448,7 @@ export default function Home() {
                 <h3 className="text-2xl font-bold mb-4">Join Our Community Today</h3>
                 <p className="mb-6 text-emerald-100">
                   Be part of a growing community of users who trust CMO Connect for
-                  their scheduling and communication needs.
+                  sharing stories, discovering posts, and staying connected.
                 </p>
                 <div className="flex items-center gap-4 mb-6">
                   <div className="flex -space-x-3">
@@ -505,21 +506,21 @@ export default function Home() {
                 name: 'Sarah Johnson',
                 role: 'Regular Client',
                 content:
-                  "The easiest appointment booking system I've ever used. The community posts keep me informed about everything!",
+                  'The easiest way to stay updated with community posts. The feed keeps me informed about everything!',
                 rating: 5,
               },
               {
                 name: 'Michael Chen',
                 role: 'Business Owner',
                 content:
-                  'CMO Connect has streamlined our scheduling process. Our clients love the community engagement features.',
+                  'CMO Connect has boosted our community awareness. Our members love the engagement features.',
                 rating: 5,
               },
               {
                 name: 'Emily Davis',
                 role: 'Healthcare Professional',
                 content:
-                  'Fantastic platform! The combination of scheduling and community features is exactly what we needed.',
+                  'Fantastic platform! The combination of community posts and collaboration features is exactly what we needed.',
                 rating: 5,
               },
             ].map((testimonial, index) => (
@@ -561,25 +562,25 @@ export default function Home() {
       <section className="py-20 bg-gradient-to-r from-emerald-500 to-teal-600">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl font-bold text-white mb-6">
-            Ready to Get Started?
+            Ready to Join the Conversation?
           </h2>
           <p className="text-xl text-emerald-100 mb-8">
-            Join our community today and experience the future of scheduling and
-            engagement
+            Jump into the feed, share what matters, and discover new posts from our
+            community every day.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <button
-              onClick={() => navigate('/calendar')}
+              onClick={() => navigate('/posts')}
               className="px-8 py-4 bg-white text-emerald-600 rounded-xl font-semibold hover:bg-emerald-50 transition-all shadow-lg flex items-center gap-2"
             >
-              <Calendar size={20} />
-              Book an Appointment
+              <MessageCircle size={20} />
+              Explore Posts
             </button>
             <button
               onClick={() => navigate('/posts')}
               className="px-8 py-4 bg-white/10 text-white border-2 border-white rounded-xl font-semibold hover:bg-white/20 transition-all"
             >
-              View Community Posts
+              Start Sharing
             </button>
           </div>
         </div>
