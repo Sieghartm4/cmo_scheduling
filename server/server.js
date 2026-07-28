@@ -58,9 +58,13 @@ const serverStart = async () => {
     logger.info('Serving static files')
     initStaticFiles(app)
 
+    const serverUrl = process.env._SERVER_FULL_URL && process.env._SERVER_FULL_URL.startsWith('http')
+      ? process.env._SERVER_FULL_URL
+      : `http://${process.env._SERVER_URL}:${process.env._SERVER_PORT}`
+    
     const server = app.listen(process.env._SERVER_PORT, () => {
       logger.info(
-        `Server listening on port http://${process.env._SERVER_URL}:${process.env._SERVER_PORT}`,
+        `Server listening on ${serverUrl}`,
       )
     })
 console.log("DESCRYPTER:" , DecryptString("0956c4cb6f6ab654ae29193c9bb25262"))

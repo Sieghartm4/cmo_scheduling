@@ -10,7 +10,9 @@ const initDocs = async (app) => {
 
     const bundledSpecs = await SwaggerParser.bundle(mainYamlPath)
 
-    const serverUrl = process.env._SERVER_URL || ''
+    const serverUrl = process.env._SERVER_FULL_URL && process.env._SERVER_FULL_URL.startsWith('http')
+      ? process.env._SERVER_FULL_URL
+      : (process.env._SERVER_URL || '')
     const serverPort = process.env._SERVER_PORT || ''
     bundledSpecs.servers = [
       {
