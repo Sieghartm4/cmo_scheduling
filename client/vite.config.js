@@ -9,12 +9,12 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react(), tailwindcss()],
     server: {
-      port: parseInt(env.PORT) || 80,
+      port: parseInt(env._CLIENT_PORT) || 3001,
       host: true,
       allowedHosts: true,
     },
     preview: {
-      port: parseInt(env.PORT) || 8080,
+      port: parseInt(env._CLIENT_PORT) || 3001,
       host: true,
       allowedHosts: true,
     },

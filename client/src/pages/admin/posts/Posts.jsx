@@ -10,7 +10,8 @@ import {
   Plus, 
   Edit2,
   MessageSquare,
-  Eye
+  Eye,
+  Calendar
 } from 'lucide-react';
 import DynamicTable from '../../../components/DynamicTable';
 import DynamicToast from '../../../components/DynamicToast';
@@ -310,32 +311,33 @@ function PostsContent() {
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         title={editingPost ? 'Edit Post' : 'Create New Post'}
-        size="2xl"
+        size="4xl"
       >
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Title and Category in same row */}
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-700 mb-2">
-                Post Title <span className="text-red-600">*</span>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-2">
+                Title <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
-                placeholder="Enter post title..."
+                className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg text-sm font-semibold focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                placeholder="Post title..."
                 required
               />
             </div>
 
             <div>
-              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-700 mb-2">
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-2">
                 Category
               </label>
               <select
                 value={formData.category_id}
                 onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+                className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg text-sm font-semibold focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all"
               >
                 <option value="">Select category...</option>
                 {categories.map(cat => (
@@ -345,146 +347,133 @@ function PostsContent() {
                 ))}
               </select>
             </div>
+          </div>
 
-            <div>
-              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-700 mb-2">
-                Content <span className="text-red-600">*</span>
-              </label>
-              <textarea
-                value={formData.content}
-                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                rows="8"
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
-                placeholder="Write your post content..."
-                required
-              />
-            </div>
+          {/* Content */}
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-2">
+              Content <span className="text-red-500">*</span>
+            </label>
+            <textarea
+              value={formData.content}
+              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+              rows="6"
+              className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all resize-none"
+              placeholder="Write your post content..."
+              required
+            />
+          </div>
 
-            {/* Media Section */}
-            <div>
-              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-700 mb-2">
-                Media ({formData.media.length} items)
-              </label>
+          {/* Media Section */}
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-2">
+              Media ({formData.media.length} items)
+            </label>
 
-              {/* Media List with Delete Buttons */}
-              {formData.media.length > 0 && (
-                <div className="space-y-2 mb-4">
-                  {formData.media.filter(item => item && typeof item === 'string').map((item, index) => (
-                    <div key={index} className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg border border-gray-200">
-                      <div className="flex-1 min-w-0">
-                        {item.startsWith('data:') ? (
-                          <div className="flex items-center gap-2">
-                            <img src={item} alt={`Preview ${index + 1}`} className="w-8 h-8 object-cover rounded" />
-                            <span className="text-xs text-gray-600">Image {index + 1}</span>
-                          </div>
-                        ) : (
-                          <input
-                            type="text"
-                            value={item}
-                            onChange={(e) => {
-                              const newMedia = [...formData.media];
-                              newMedia[index] = e.target.value;
-                              setFormData({ ...formData, media: newMedia });
-                            }}
-                            className="w-full px-2 py-1 bg-white border border-gray-200 rounded text-xs focus:outline-none focus:border-emerald-500"
-                            placeholder="Enter media URL..."
-                          />
-                        )}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const newMedia = formData.media.filter((_, i) => i !== index);
-                          setFormData({ ...formData, media: newMedia });
-                        }}
-                        className="p-1 text-red-500 hover:text-red-700 transition-colors"
-                        title="Remove"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
+            {/* Media List with Delete Buttons */}
+            {formData.media.length > 0 && (
+              <div className="space-y-2 mb-3">
+                {formData.media.filter(item => item && typeof item === 'string').map((item, index) => (
+                  <div key={index} className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg border border-gray-200">
+                    <div className="flex-1 min-w-0">
+                      {item.startsWith('data:') ? (
+                        <div className="flex items-center gap-2">
+                          <img src={item} alt={`Preview ${index + 1}`} className="w-8 h-8 object-cover rounded" />
+                          <span className="text-xs text-gray-600">Image {index + 1}</span>
+                        </div>
+                      ) : (
+                        <input
+                          type="text"
+                          value={item}
+                          onChange={(e) => {
+                            const newMedia = [...formData.media];
+                            newMedia[index] = e.target.value;
+                            setFormData({ ...formData, media: newMedia });
+                          }}
+                          className="w-full px-2 py-1 bg-white border border-gray-200 rounded text-xs focus:outline-none focus:border-emerald-500"
+                          placeholder="Enter media URL..."
+                        />
+                      )}
                     </div>
-                  ))}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newMedia = formData.media.filter((_, i) => i !== index);
+                        setFormData({ ...formData, media: newMedia });
+                      }}
+                      className="p-1 text-red-500 hover:text-red-700 transition-colors"
+                      title="Remove"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
                 </div>
               )}
 
-              {/* Add Media Inputs - Below Content */}
-              <div className="space-y-2">
-                {/* Add Link Input */}
-                <div className="flex gap-2">
+              {/* Add Media Inputs */}
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={formData.newLink || ''}
+                  onChange={(e) => setFormData({ ...formData, newLink: e.target.value })}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' && formData.newLink?.trim()) {
+                      e.preventDefault();
+                      setFormData({
+                        ...formData,
+                        media: [...formData.media, formData.newLink.trim()],
+                        newLink: ''
+                      });
+                    }
+                  }}
+                  className="flex-1 px-3 py-2 bg-white border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-emerald-500"
+                  placeholder="Paste media URL..."
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (formData.newLink?.trim()) {
+                      setFormData({
+                        ...formData,
+                        media: [...formData.media, formData.newLink.trim()],
+                        newLink: ''
+                      });
+                    }
+                  }}
+                  disabled={!formData.newLink?.trim()}
+                  className="px-3 py-2 bg-emerald-500 text-white text-xs font-bold rounded-lg hover:bg-emerald-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Add
+                </button>
+                <label className="px-3 py-2 bg-gray-100 text-gray-700 text-xs font-bold rounded-lg hover:bg-gray-200 transition-all cursor-pointer flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  Upload
                   <input
-                    type="text"
-                    value={formData.newLink || ''}
-                    onChange={(e) => setFormData({ ...formData, newLink: e.target.value })}
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter' && formData.newLink?.trim()) {
-                        e.preventDefault();
-                        setFormData({
-                          ...formData,
-                          media: [...formData.media, formData.newLink.trim()],
-                          newLink: ''
-                        });
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setFormData({
+                            ...formData,
+                            media: [...formData.media, reader.result]
+                          });
+                        };
+                        reader.readAsDataURL(file);
                       }
                     }}
-                    className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-emerald-500"
-                    placeholder="Enter media URL and press Enter..."
                   />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (formData.newLink?.trim()) {
-                        setFormData({
-                          ...formData,
-                          media: [...formData.media, formData.newLink.trim()],
-                          newLink: ''
-                        });
-                      }
-                    }}
-                    disabled={!formData.newLink?.trim()}
-                    className="px-3 py-2 bg-gray-100 text-gray-700 text-xs font-bold rounded-lg hover:bg-gray-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                    Add
-                  </button>
-                </div>
-
-                {/* Add Image Input */}
-                <div className="flex gap-2">
-                  <label className="flex-1 flex items-center gap-2 px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-lg cursor-pointer hover:bg-emerald-100 transition-all">
-                    <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <span className="text-xs text-emerald-700 font-medium">Click to upload image</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onloadend = () => {
-                            setFormData({
-                              ...formData,
-                              media: [...formData.media, reader.result]
-                            });
-                          };
-                          reader.readAsDataURL(file);
-                        }
-                      }}
-                    />
-                  </label>
-                </div>
+                </label>
               </div>
-
-              <p className="text-xs text-gray-500 mt-2">
-                Add image URLs above or upload images. Each media item can be edited or deleted.
-              </p>
             </div>
-          </div>
 
           <div className="flex gap-3 pt-4">
             <button
@@ -510,81 +499,93 @@ function PostsContent() {
         isOpen={isViewModalOpen}
         onClose={handleViewModalClose}
         title="View Post Details"
-        size="2xl"
+        size="4xl"
+        footer={
+          <div className="flex gap-3">
+            <button
+              onClick={handleEditFromView}
+              className="flex-1 px-4 py-3 bg-black text-white text-xs font-black rounded-xl hover:bg-emerald-600 transition-all uppercase tracking-widest flex items-center justify-center gap-2"
+            >
+              <Edit2 size={14} />
+              Edit Post
+            </button>
+            <button
+              onClick={handleViewModalClose}
+              className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 text-xs font-black rounded-xl hover:bg-gray-200 transition-all uppercase tracking-widest"
+            >
+              Close
+            </button>
+          </div>
+        }
       >
         {viewingPost && (
-          <div className="space-y-4">
-            {/* Header Section */}
-            <div className="border-b border-gray-200 pb-4">
-              <h3 className="text-lg font-black text-black uppercase tracking-tight mb-2">Post Details</h3>
-              <div className="flex items-center gap-3">
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${
-                  viewingPost.status === 1 || viewingPost.status === 'PUBLISHED' 
-                    ? 'bg-green-100 text-green-800 border-green-200'
-                    : viewingPost.status === 'DRAFT'
-                    ? 'bg-yellow-100 text-yellow-800 border-yellow-200'
-                    : 'bg-red-100 text-red-800 border-red-200'
-                }`}>
-                  {viewingPost.status === 1 ? 'PUBLISHED' : (viewingPost.status || 'UNKNOWN')}
-                </span>
-                <span className="text-xs text-gray-500">
-                  ID: #{viewingPost.id}
-                </span>
+          <div className="space-y-5">
+            {/* Compact Header with Title, Status, ID, Date, Category */}
+            <div className="bg-gradient-to-br from-gray-50 to-white p-5 rounded-2xl border border-gray-200 shadow-sm">
+              <div className="flex items-start justify-between mb-3">
+                <h3 className="text-xl font-black text-gray-900 leading-tight flex-1 mr-4">
+                  {viewingPost.title || 'Untitled Post'}
+                </h3>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold border ${
+                    viewingPost.status === 1 || viewingPost.status === 'PUBLISHED' 
+                      ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
+                      : viewingPost.status === 'DRAFT'
+                      ? 'bg-amber-100 text-amber-700 border-amber-200'
+                      : 'bg-red-100 text-red-700 border-red-200'
+                  }`}>
+                    {viewingPost.status === 1 ? 'PUBLISHED' : (viewingPost.status || 'UNKNOWN')}
+                  </span>
+                  <span className="text-[10px] text-gray-400 font-mono">
+                    #{viewingPost.id}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-4 text-xs">
+                <div className="flex items-center gap-1.5 text-gray-500">
+                  <Calendar size={12} />
+                  <span>
+                    {viewingPost.created_at ? 
+                      new Date(viewingPost.created_at).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      }) : 
+                      'Unknown'
+                    }
+                  </span>
+                </div>
+                {viewingPost.category_name && (
+                  <>
+                    <span className="text-gray-300">•</span>
+                    <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-md font-medium">
+                      {viewingPost.category_name}
+                    </span>
+                  </>
+                )}
               </div>
             </div>
 
-            {/* Title Section */}
-            <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Title</label>
-              <h4 className="text-base font-bold text-black leading-tight">
-                {viewingPost.title || 'Untitled Post'}
-              </h4>
-            </div>
-
             {/* Content Section */}
-            <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Content</label>
-              <div className="bg-white p-4 rounded-lg border border-gray-200 min-h-[120px]">
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-2">Content</label>
+              <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
                 <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
                   {viewingPost.content || 'No content available'}
                 </p>
               </div>
             </div>
 
-            {/* Created Date Section */}
-            <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Created Date</label>
-              <p className="text-sm text-gray-600">
-                {viewingPost.created_at ? 
-                  new Date(viewingPost.created_at).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  }) : 
-                  'Unknown'
-                }
-              </p>
-            </div>
-
-            {/* Category Section */}
-            <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Category</label>
-              <p className="text-sm text-gray-700">
-                {viewingPost.category_name || 'No category assigned'}
-              </p>
-            </div>
-
             {/* Media Section */}
-            <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">
-                Media {viewingPost.media && viewingPost.media.length > 0 &&
-                  <span className="text-gray-400">({viewingPost.media.length} items)</span>
-                }
-              </label>
-              {viewingPost.media && viewingPost.media.length > 0 ? (
-                <div className="space-y-4">
+            {viewingPost.media && viewingPost.media.length > 0 && (
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-2">
+                  Media ({viewingPost.media.length} items)
+                </label>
+                <div className="grid grid-cols-2 gap-3">
                   {viewingPost.media.filter(item => item && typeof item === 'string').map((mediaItem, index) => {
                     // Check if it's a base64 image
                     const isBase64Image = mediaItem.startsWith('data:image');
@@ -598,38 +599,18 @@ function PostsContent() {
                     const isImage = isBase64Image || mediaItem.includes('.jpg') || mediaItem.includes('.jpeg') || mediaItem.includes('.png') || mediaItem.includes('.gif') || mediaItem.includes('.webp') || mediaItem.includes('facebook.com/photo') || mediaItem.includes('facebook.com/permalink') || mediaItem.includes('instagram.com/p') || mediaItem.includes('instagram.com/reel') || mediaItem.includes('twitter.com') || mediaItem.includes('x.com') || mediaItem.includes('imgur.com') || isGoogleDrive;
 
                     return (
-                      <div key={index} className="bg-white p-3 rounded-lg border border-gray-200">
-                        <div className="flex items-start gap-2 mb-2">
-                          <span className="text-xs text-gray-400 mt-0.5">#{index + 1}</span>
-                          <div className="flex-1">
-                            {isBase64Image ? (
-                              <span className="text-xs text-emerald-600 break-all">
-                                Base64 Image {index + 1}
-                              </span>
-                            ) : (
-                              <a
-                                href={mediaItem}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-xs text-emerald-600 hover:text-emerald-800 underline break-all hover:bg-emerald-50 p-1 rounded transition-colors"
-                              >
-                                {mediaItem}
-                              </a>
-                            )}
-                          </div>
-                        </div>
-                        
+                      <div key={index} className="bg-white p-2 rounded-lg border border-gray-200">
                         {/* Display media content */}
-                        <div className="mt-3">
+                        <div className="relative">
                           {isVideo ? (
-                            <div className="aspect-w-16 aspect-h-9">
+                            <div className="aspect-video">
                               {mediaItem.includes('youtube.com') || mediaItem.includes('youtu.be') ? (
                                 <iframe
                                   src={mediaItem.includes('youtu.be')
                                     ? `https://www.youtube.com/embed/${mediaItem.split('youtu.be/')[1]?.split('?')[0]}`
                                     : `https://www.youtube.com/embed/${mediaItem.split('v=')[1]?.split('&')[0]}`
                                   }
-                                  className="w-full h-64 rounded-lg border border-gray-200"
+                                  className="w-full h-full rounded-lg border border-gray-200"
                                   allowFullScreen
                                   title={`Video ${index + 1}`}
                                 />
@@ -677,7 +658,7 @@ function PostsContent() {
                               ) : (
                                 <video
                                   controls
-                                  className="w-full h-64 rounded-lg border border-gray-200"
+                                  className="w-full h-full rounded-lg border border-gray-200"
                                   title={`Video ${index + 1}`}
                                 >
                                   <source src={mediaItem} type="video/mp4" />
@@ -819,29 +800,9 @@ function PostsContent() {
                     );
                   })}
                 </div>
-              ) : (
-                <div className="bg-gray-100 p-4 rounded-lg border border-gray-200 text-center">
-                  <p className="text-xs text-gray-600">No media attached to this post</p>
-                </div>
-              )}
-            </div>
+              </div>
+            )}
 
-            {/* Action Buttons */}
-            <div className="flex gap-3 pt-4">
-              <button
-                onClick={handleEditFromView}
-                className="flex-1 px-4 py-3 bg-black text-white text-xs font-black rounded-xl hover:bg-emerald-600 transition-all uppercase tracking-widest flex items-center justify-center gap-2"
-              >
-                <Edit2 size={14} />
-                Edit Post
-              </button>
-              <button
-                onClick={handleViewModalClose}
-                className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 text-xs font-black rounded-xl hover:bg-gray-200 transition-all uppercase tracking-widest"
-              >
-                Close
-              </button>
-            </div>
           </div>
         )}
       </RightSideModal>

@@ -18,10 +18,12 @@ const corsOptions = {
         'https://api.theanxietynurse.com',
       ],
   credentials: process.env._CORS_CREDENTIALS === 'true' ? true : true,
-  methods: process.env._CORS_METHODS || 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  methods: process.env._CORS_METHODS || 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
   allowedHeaders: process.env._CORS_ALLOWED_HEADERS 
     ? process.env._CORS_ALLOWED_HEADERS.split(',') 
     : ['Content-Type', 'Authorization', 'x-api-key', 'x-requested-with'],
+  optionsSuccessStatus: 200,
+  preflightContinue: false,
 }
 
 module.exports = {

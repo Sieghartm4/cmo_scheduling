@@ -454,7 +454,7 @@ const PostCard = React.memo(function PostCard({
           </div>
         )}
         <p
-          className={`text-gray-700 text-base leading-relaxed ${!isExpanded && 'line-clamp-3'}`}
+          className={`text-gray-700 text-base leading-relaxed whitespace-pre-wrap ${!isExpanded && 'line-clamp-3'}`}
         >
           {post.content}
         </p>
@@ -1079,7 +1079,7 @@ export default function PostsFeed() {
       if (!response.ok) throw new Error('Failed to fetch posts')
 
       const result = await response.json()
-      console.log('Posts fetched:', result.data?.length || 0, 'posts')
+      
 
       if (result.success) {
         // Fetch like status for each post if user is logged in
@@ -1087,7 +1087,7 @@ export default function PostsFeed() {
           localStorage.getItem('token') ||
           localStorage.getItem('userToken') ||
           localStorage.getItem('adminToken')
-        console.log('Fetch posts - token exists:', !!token)
+        
 
         const postsWithDetails = await Promise.all(
           result.data.map(async (post) => {
@@ -1105,10 +1105,10 @@ export default function PostsFeed() {
               comments = commentsResult.data || []
               totalCommentCount =
                 commentsResult.count ?? countCommentsIncludingReplies(comments)
-              console.log(`Post ${post.id} - Comments received:`, comments)
-              console.log(`Post ${post.id} - Comments count:`, comments.length)
+              
+              
               if (comments.length > 0) {
-                console.log(`Post ${post.id} - First comment:`, comments[0])
+                
                 console.log(
                   `Post ${post.id} - First comment replies:`,
                   comments[0].replies,
@@ -1210,7 +1210,7 @@ export default function PostsFeed() {
       localStorage.getItem('userToken') ||
       localStorage.getItem('adminToken')
 
-    console.log('Like clicked - token:', token ? 'exists' : 'missing')
+    
 
     if (!token) {
       setShowLoginPrompt(true)
@@ -1218,7 +1218,7 @@ export default function PostsFeed() {
     }
 
     try {
-      console.log('Sending like request for post:', postId)
+      
       const response = await fetch(
         `${import.meta.env.VITE_SERVER_LINK}/api/likes/post/${postId}`,
         {
@@ -1230,11 +1230,11 @@ export default function PostsFeed() {
         },
       )
 
-      console.log('Like response status:', response.status)
+      
 
       if (response.ok) {
         const result = await response.json()
-        console.log('Like result:', result)
+        
         // Update post in state
         setPosts(
           posts.map((post) =>
@@ -1262,7 +1262,7 @@ export default function PostsFeed() {
       localStorage.getItem('userToken') ||
       localStorage.getItem('adminToken')
 
-    console.log('Comment clicked - token:', token ? 'exists' : 'missing')
+    
 
     if (!token) {
       setShowLoginPrompt(true)
@@ -1692,7 +1692,7 @@ export default function PostsFeed() {
 
               if (isMobileView) {
                 // Mobile: scroll to entire page with all methods
-                console.log('Scrolling entire page to top')
+                
 
                 // Try all possible scroll methods
                 window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })
@@ -1706,10 +1706,10 @@ export default function PostsFeed() {
                   '.min-w-0.lg\\:h-full.lg\\:overflow-y-auto.pr-2.pb-5.custom-scrollbar',
                 )
                 if (scrollableContainer) {
-                  console.log('Scrolling posts feed to top')
+                  
                   scrollableContainer.scrollTo({ top: 0, behavior: 'smooth' })
                 } else {
-                  console.log('No scrollable container found')
+                  
                 }
               }
             }}
@@ -1799,7 +1799,7 @@ export default function PostsFeed() {
                       <h4 className="text-sm font-medium text-gray-900 line-clamp-2 mb-1">
                         {post.title || 'Untitled Post'}
                       </h4>
-                      <p className="text-xs text-gray-600 line-clamp-2 mb-2">
+                      <p className="text-xs text-gray-600 line-clamp-2 mb-2 whitespace-pre-wrap">
                         {post.content}
                       </p>
                       <div className="flex items-center justify-between text-xs text-gray-500">

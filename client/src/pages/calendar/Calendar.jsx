@@ -101,6 +101,12 @@ const css = `
     height: 100%;
     min-height: 480px;
   }
+  @media (max-width: 899px) {
+    .cal-sidebar {
+      min-height: auto;
+      height: auto;
+    }
+  }
   .cal-sidebar::before {
     content: '';
     position: absolute;
@@ -165,6 +171,12 @@ const css = `
     padding: 1.75rem;
     min-height: 480px;
   }
+  @media (max-width: 899px) {
+    .cal-right-panel {
+      min-height: auto;
+      height: auto;
+    }
+  }
 
   .cal-right-panel-header {
     display: flex;
@@ -196,6 +208,12 @@ const css = `
     min-height: 0;
     max-height: calc(100vh - 420px);
     padding-right: .2rem;
+  }
+  @media (max-width: 899px) {
+    .cal-appointment-list {
+      max-height: none;
+      overflow-y: visible;
+    }
   }
 
   .cal-appointment-card {
@@ -1085,8 +1103,8 @@ export default function CalendarPage() {
         initialStep={0}
       />
 
-      <main style={{ flex: 1, overflowY: 'auto', padding: '2rem 1.25rem' }}>
-        <div style={{ maxWidth: 1600, margin: '0 auto', height: '80vh' }}>
+      <main style={{ flex: 1, padding: '2rem 1.25rem' }} className="sm:overflow-y-auto">
+        <div style={{ maxWidth: 1600, margin: '0 auto' }} className="sm:h-[80vh] h-auto">
           <style>{`
             @media(min-width:900px){
               .cal-layout{ grid-template-columns: 280px minmax(0,1fr) 320px !important; }

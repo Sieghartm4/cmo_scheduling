@@ -1,6 +1,6 @@
 import React from 'react';
 
-function RightSideModal({ isOpen, onClose, title, children, size = 'md' }) {
+function RightSideModal({ isOpen, onClose, title, children, size = 'md', footer }) {
   if (!isOpen) return null;
 
   const sizeClasses = {
@@ -63,9 +63,15 @@ function RightSideModal({ isOpen, onClose, title, children, size = 'md' }) {
         </div>
 
         {/* Optional Footer Bar - to keep it consistent with the table theme */}
-        <div className="flex-shrink-0 bg-gray-50 border-t border-gray-100 p-4 text-center">
-            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest italic">Confidential Accounting Record</p>
-        </div>
+        {footer ? (
+          <div className="flex-shrink-0 bg-gray-50 border-t border-gray-100 p-4">
+            {footer}
+          </div>
+        ) : (
+          <div className="flex-shrink-0 bg-gray-50 border-t border-gray-100 p-4 text-center">
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest italic">Confidential Accounting Record</p>
+          </div>
+        )}
       </div>
     </>
   );

@@ -37,6 +37,11 @@
           })
 
           if (response.ok) {
+            const contentType = response.headers.get('content-type')
+            if (!contentType || !contentType.includes('application/json')) {
+              console.warn('Unexpected content type:', contentType)
+              return
+            }
             const result = await response.json()
             console.log('Settings result:', result)
 

@@ -35,11 +35,6 @@ const CommentItem = React.memo(function CommentItem({
   const [showReplies, setShowReplies] = useState(true)
   const maxDepth = 10
 
-  console.log(
-    `CommentItem - depth:${depth}, id:${comment?.id}, text:"${comment?.text}", replies:`,
-    comment?.replies,
-  )
-
   const handleReplySubmit = (e) => {
     e.preventDefault()
     if (!replyText.trim()) return
@@ -594,8 +589,9 @@ ${post.content.slice(0, 120)}...`
     <div className="min-h-screen bg-gray-50">
       <PublicHeader />
 
-      <div className="w-full max-w-[80vw] mx-auto p-4">
-        <div className="mb-4">
+      <div className="w-full max-w-4xl mx-auto p-0 sm:p-4">
+        {/* Desktop Back Button */}
+        <div className="hidden sm:block mb-4">
           <button
             onClick={handleBack}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold text-gray-700 bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors"
@@ -609,56 +605,53 @@ ${post.content.slice(0, 120)}...`
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="w-full bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
+          className="w-full bg-white sm:rounded-2xl shadow-sm border-x sm:border border-gray-100 overflow-hidden"
         >
           {/* Post Header */}
-          <div className="p-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full flex items-center justify-center text-lg sm:text-xl">
-                <span className="text-white font-bold text-xl">
-                  {post.title?.charAt(0) || 'C'}
-                </span>
-              </div>
-              <div>
-                <h4 className="font-semibold text-gray-900 text-2xl md:text-3xl">
-                  {post.title || 'CMO Scheduling Team'}
-                </h4>
-                <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
-                  <Clock size={14} />
-                  <span>{formatDate(post.created_at)}</span>
-                  {post.category_name && (
-                    <>
-                      <span className="text-gray-300">·</span>
-                      <span className="text-emerald-600 font-medium">
-                        {post.category_name}
-                      </span>
-                    </>
-                  )}
-                </div>
+          <div className="p-4 sm:p-6 flex items-center gap-3 sm:gap-4">
+            <button
+              onClick={handleBack}
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors sm:hidden"
+            >
+              <ArrowLeft size={20} className="text-gray-700" />
+            </button>
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="text-white font-bold text-lg sm:text-xl">
+                {post.title?.charAt(0) || 'C'}
+              </span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <h4 className="font-semibold text-gray-900 text-lg sm:text-2xl md:text-3xl truncate">
+                {post.title || 'CMO Scheduling Team'}
+              </h4>
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <Clock size={14} />
+                <span>{formatDate(post.created_at)}</span>
+                {post.category_name && (
+                  <>
+                    <span className="text-gray-300">·</span>
+                    <span className="text-emerald-600 font-medium">
+                      {post.category_name}
+                    </span>
+                  </>
+                )}
               </div>
             </div>
-            <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+            <button className="p-2 hover:bg-gray-100 rounded-full transition-colors hidden sm:block">
               <MoreHorizontal size={20} className="text-gray-500" />
             </button>
           </div>
 
           {/* Post Content */}
-          <div className="px-6 pb-5">
-            {post.category_name && (
-              <div className="mb-3">
-                <span className="inline-block px-3 py-1.5 bg-emerald-100 text-emerald-700 text-sm rounded-full font-medium">
-                  {post.category_name}
-                </span>
-              </div>
-            )}
-            <p className="text-gray-700 text-base md:text-lg leading-8">
+          <div className="px-4 sm:px-6 pb-4 sm:pb-5">
+            <p className="text-gray-700 text-base sm:text-lg leading-6 sm:leading-8 whitespace-pre-wrap">
               {post.content}
             </p>
           </div>
 
           {/* Media */}
           {post.media && post.media.length > 0 && (
-            <div className="mt-3 mx-4 rounded-xl overflow-hidden border border-gray-100">
+            <div className="mt-3 mx-0 sm:mx-4 rounded-none sm:rounded-xl overflow-hidden border-x sm:border border-gray-100">
               {post.media.length === 1 && (
                 <div className="relative aspect-video overflow-hidden">
                   <MediaItem
@@ -724,57 +717,55 @@ ${post.content.slice(0, 120)}...`
           )}
 
           {/* Engagement Stats */}
-          <div className="px-6 py-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-gray-100 mt-3">
-            <div className="flex flex-wrap items-center gap-3 text-sm md:text-base text-gray-500">
-              <div className="flex items-center -space-x-1">
-                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-                  <ThumbsUp size={12} className="text-white" />
-                </div>
+          <div className="px-4 sm:px-6 py-3 sm:py-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-gray-100">
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <div className="w-5 h-5 sm:w-6 sm:h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                <ThumbsUp size={10} sm:size={12} className="text-white" />
               </div>
-              <span className="ml-1">{likeCount} likes</span>
+              <span>{likeCount} likes</span>
             </div>
-            <div className="flex items-center gap-4 text-sm text-gray-500">
+            <div className="flex items-center gap-3 text-sm text-gray-500">
               <span>{post.commentCount || 0} comments</span>
               <span>{post.shares || 0} shares</span>
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="px-4 py-3 grid gap-3 sm:grid-cols-4">
+          <div className="px-2 sm:px-4 py-2 sm:py-3 grid grid-cols-3 sm:grid-cols-4 gap-1 sm:gap-3 border-b border-gray-100">
             <button
               onClick={handleLike}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all text-base font-medium ${
+              className={`flex-1 flex items-center justify-center gap-1 sm:gap-2 py-2 sm:py-3 rounded-lg sm:rounded-xl transition-all text-sm sm:text-base font-medium ${
                 isLiked
                   ? 'text-red-500 bg-red-50'
                   : 'text-gray-700 hover:bg-gray-100'
               }`}
             >
-              <Heart size={20} className={isLiked ? 'fill-current' : ''} />
-              <span className="text-base font-semibold">Like</span>
+              <Heart size={16} sm:size={20} className={isLiked ? 'fill-current' : ''} />
+              <span className="text-xs sm:text-base font-semibold hidden sm:inline">Like</span>
             </button>
             <button
               onClick={() => document.getElementById('comment-input')?.focus()}
-              className="flex-1 flex items-center justify-center gap-2 py-3 text-gray-700 hover:bg-gray-100 rounded-xl transition-all"
+              className="flex-1 flex items-center justify-center gap-1 sm:gap-2 py-2 sm:py-3 text-gray-700 hover:bg-gray-100 rounded-lg sm:rounded-xl transition-all"
             >
-              <MessageCircle size={20} />
-              <span className="text-base font-semibold">Comment</span>
+              <MessageCircle size={16} sm:size={20} />
+              <span className="text-xs sm:text-base font-semibold hidden sm:inline">Comment</span>
             </button>
             <button
               onClick={handleShare}
-              className="flex-1 flex items-center justify-center gap-2 py-3 text-gray-700 hover:bg-gray-100 rounded-xl transition-all"
+              className="flex-1 flex items-center justify-center gap-1 sm:gap-2 py-2 sm:py-3 text-gray-700 hover:bg-gray-100 rounded-lg sm:rounded-xl transition-all"
             >
-              <Share2 size={20} />
-              <span className="text-base font-semibold">Share</span>
+              <Share2 size={16} sm:size={20} />
+              <span className="text-xs sm:text-base font-semibold hidden sm:inline">Share</span>
             </button>
             <button
               onClick={() => setSaved(!saved)}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all ${
+              className={`flex-1 flex items-center justify-center gap-1 sm:gap-2 py-2 sm:py-3 rounded-lg sm:rounded-xl transition-all ${
                 saved
                   ? 'text-emerald-600 bg-emerald-50'
                   : 'text-gray-700 hover:bg-gray-100'
               }`}
             >
-              <Bookmark size={20} className={saved ? 'fill-current' : ''} />
+              <Bookmark size={16} sm:size={20} className={saved ? 'fill-current' : ''} />
             </button>
           </div>
 

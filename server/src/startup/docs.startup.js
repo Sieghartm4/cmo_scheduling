@@ -33,8 +33,11 @@ const initDocs = async (app) => {
       }),
     )
 
+    const docsUrl = serverUrl.startsWith('http') 
+      ? `${serverUrl}/api-docs` 
+      : `http://${serverUrl}:${serverPort}/api-docs`
     logger.info(
-      `✅ Swagger docs bundled and serving at: http://${serverUrl}:${serverPort}/api-docs`,
+      `✅ Swagger docs bundled and serving at: ${docsUrl}`,
     )
   } catch (err) {
     logger.error('❌ Swagger bundling error:', err)
