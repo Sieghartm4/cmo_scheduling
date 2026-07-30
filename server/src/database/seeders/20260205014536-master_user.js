@@ -30,6 +30,16 @@ module.exports = {
     //     mu_status: 'active',
     //   },
     // ])
+        await queryInterface.bulkInsert('master_user', [
+      {
+        mu_fullname: 'Developer',
+        mu_email: 'developer@example.com',
+        mu_password: '0956c4cb6f6ab654ae29193c9bb25262',
+        mu_role: 'admin',
+        mu_profile: null,
+        mu_status: 'active',
+      },
+    ])
   },
 
   async down(queryInterface, Sequelize) {
