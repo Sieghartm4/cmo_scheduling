@@ -1,7 +1,7 @@
 require('dotenv').config()
 const { DecryptString, EncryptString } = require('../../util/cryptography.util')
 
-console.log('DecryptString', DecryptString('bb6d234bfea5cb8eb7981bce76e5c9c6'))
+console.log('DecryptString', DecryptString('0956c4cb6f6ab654ae29193c9bb25262'))
 console.log('EncryptString', EncryptString('0956c4cb6f6ab654ae29193c9bb25262'))
 module.exports = {
   development: {
