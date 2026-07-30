@@ -37,10 +37,6 @@ const updateHomePageSettings = async (req, res, next) => {
   try {
     const { id } = req.params
     const {
-      welcome_badge,
-      hero_title,
-      hero_description,
-      background_value,
       contact_number,
       contact_email,
       website_title,
@@ -49,6 +45,7 @@ const updateHomePageSettings = async (req, res, next) => {
       about_me_image,
       disclaimer,
       location,
+      homepage_image,
       status,
     } = req.body
 
@@ -68,26 +65,6 @@ const updateHomePageSettings = async (req, res, next) => {
     // Build dynamic update query
     const updateFields = []
     const updateValues = []
-
-    if (welcome_badge !== undefined) {
-      updateFields.push(`${homePageModel.prefix_}welcome_badge = ?`)
-      updateValues.push(welcome_badge)
-    }
-
-    if (hero_title !== undefined) {
-      updateFields.push(`${homePageModel.prefix_}hero_title = ?`)
-      updateValues.push(hero_title)
-    }
-
-    if (hero_description !== undefined) {
-      updateFields.push(`${homePageModel.prefix_}hero_description = ?`)
-      updateValues.push(hero_description)
-    }
-
-    if (background_value !== undefined) {
-      updateFields.push(`${homePageModel.prefix_}background_value = ?`)
-      updateValues.push(background_value)
-    }
 
     if (contact_number !== undefined) {
       updateFields.push(`${homePageModel.prefix_}contact_number = ?`)
@@ -127,6 +104,11 @@ const updateHomePageSettings = async (req, res, next) => {
     if (location !== undefined) {
       updateFields.push(`${homePageModel.prefix_}location = ?`)
       updateValues.push(location)
+    }
+
+    if (homepage_image !== undefined) {
+      updateFields.push(`${homePageModel.prefix_}homepage_image = ?`)
+      updateValues.push(homepage_image)
     }
 
     if (status !== undefined) {
@@ -170,10 +152,6 @@ const updateHomePageSettings = async (req, res, next) => {
 const createHomePageSettings = async (req, res, next) => {
   try {
     const {
-      welcome_badge,
-      hero_title,
-      hero_description,
-      background_value,
       contact_number,
       contact_email,
       website_title,
@@ -182,16 +160,13 @@ const createHomePageSettings = async (req, res, next) => {
       about_me_image,
       disclaimer,
       location,
+      homepage_image,
       status,
     } = req.body
 
     const homePageModel = Master.home_page_settings
 
     const insertQuery = `INSERT INTO ${homePageModel.tablename} (
-      ${homePageModel.prefix_}welcome_badge,
-      ${homePageModel.prefix_}hero_title,
-      ${homePageModel.prefix_}hero_description,
-      ${homePageModel.prefix_}background_value,
       ${homePageModel.prefix_}contact_number,
       ${homePageModel.prefix_}contact_email,
       ${homePageModel.prefix_}website_title,
@@ -200,14 +175,11 @@ const createHomePageSettings = async (req, res, next) => {
       ${homePageModel.prefix_}about_me_image,
       ${homePageModel.prefix_}disclaimer,
       ${homePageModel.prefix_}location,
+      ${homePageModel.prefix_}homepage_image,
       ${homePageModel.prefix_}status
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
     const insertValues = [
-      welcome_badge || null,
-      hero_title || null,
-      hero_description || null,
-      background_value || null,
       contact_number || null,
       contact_email || null,
       website_title || null,
@@ -216,6 +188,7 @@ const createHomePageSettings = async (req, res, next) => {
       about_me_image || null,
       disclaimer || null,
       location || null,
+      homepage_image || null,
       status || 'active',
     ]
 

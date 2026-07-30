@@ -5,11 +5,10 @@ export default function useWebsiteSettings() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [logoPreview, setLogoPreview] = useState(null)
-  const [backgroundPreview, setBackgroundPreview] = useState(null)
   const [aboutMeImagePreview, setAboutMeImagePreview] = useState(null)
+  const [homepageImagePreview, setHomepageImagePreview] = useState(null)
   const [status, setStatus] = useState('active')
   const [toast, setToast] = useState(null)
-  const [backgroundInputMode, setBackgroundInputMode] = useState('text') // 'text' or 'file'
 
   const normalizeDescriptionText = (value) => {
     if (typeof value !== 'string') return ''
@@ -27,10 +26,6 @@ export default function useWebsiteSettings() {
 
   // Form data state
   const [formData, setFormData] = useState({
-    welcome_badge: '',
-    hero_title: '',
-    hero_description: '',
-    background_value: '',
     contact_number: '',
     contact_email: '',
     website_title: '',
@@ -39,6 +34,7 @@ export default function useWebsiteSettings() {
     about_me_description: '',
     about_me_image: null,
     disclaimer: '',
+    homepage_image: null,
     status: 'active',
   })
 
@@ -55,10 +51,6 @@ export default function useWebsiteSettings() {
           if (result.success && result.data) {
             setSettings(result.data)
             setFormData({
-              welcome_badge: result.data.welcome_badge || '',
-              hero_title: result.data.hero_title || '',
-              hero_description: result.data.hero_description || '',
-              background_value: result.data.background_value || '',
               contact_number: result.data.contact_number || '',
               contact_email: result.data.contact_email || '',
               website_title: result.data.website_title || '',
@@ -69,6 +61,7 @@ export default function useWebsiteSettings() {
               ),
               about_me_image: result.data.about_me_image || null,
               disclaimer: result.data.disclaimer || '',
+              homepage_image: result.data.homepage_image || null,
               status: result.data.status || 'active',
             })
             setStatus(result.data.status || 'active')
@@ -97,16 +90,16 @@ export default function useWebsiteSettings() {
               }
             }
 
-            // Set background preview if exists and is an image
-            if (result.data.background_value) {
-              if (result.data.background_value.startsWith('data:image/')) {
-                setBackgroundPreview(result.data.background_value)
-                setBackgroundInputMode('file')
-              } else if (result.data.background_value.startsWith('http')) {
-                setBackgroundPreview(result.data.background_value)
-                setBackgroundInputMode('file')
-              } else {
-                setBackgroundInputMode('text')
+            // Set homepage image preview if exists
+            if (result.data.homepage_image) {
+              if (result.data.homepage_image.startsWith('data:')) {
+                setHomepageImagePreview(result.data.homepage_image)
+              } else if (result.data.homepage_image.startsWith('/')) {
+                setHomepageImagePreview(
+                  `data:image/jpeg;base64,${result.data.homepage_image}`,
+                )
+              } else if (result.data.homepage_image.startsWith('http')) {
+                setHomepageImagePreview(result.data.homepage_image)
               }
             }
           }
@@ -155,26 +148,6 @@ export default function useWebsiteSettings() {
     }
   }
 
-  // Handle background file change
-  const handleBackgroundChange = (event) => {
-    const file = event.target.files[0]
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        showToast('warning', 'Background file size must be less than 5MB')
-        return
-      }
-
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        const base64Data = e.target.result
-        setBackgroundPreview(base64Data)
-        handleInputChange('background_value', base64Data)
-        showToast('success', 'Background uploaded successfully')
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-
   // Handle about me image change
   const handleAboutMeImageChange = (event) => {
     const file = event.target.files[0]
@@ -190,6 +163,26 @@ export default function useWebsiteSettings() {
         setAboutMeImagePreview(base64Data)
         handleInputChange('about_me_image', base64Data)
         showToast('success', 'About me image uploaded successfully')
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  // Handle homepage image change
+  const handleHomepageImageChange = (event) => {
+    const file = event.target.files[0]
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        showToast('warning', 'Homepage image size must be less than 2MB')
+        return
+      }
+
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const base64Data = e.target.result
+        setHomepageImagePreview(base64Data)
+        handleInputChange('homepage_image', base64Data)
+        showToast('success', 'Homepage image uploaded successfully')
       }
       reader.readAsDataURL(file)
     }
@@ -264,18 +257,16 @@ export default function useWebsiteSettings() {
     loading,
     error,
     logoPreview,
-    backgroundPreview,
     aboutMeImagePreview,
+    homepageImagePreview,
     status,
     formData,
     toast,
     showToast,
     hideToast,
-    backgroundInputMode,
-    setBackgroundInputMode,
     handleLogoChange,
-    handleBackgroundChange,
     handleAboutMeImageChange,
+    handleHomepageImageChange,
     handleInputChange,
     handleSubmit,
   }

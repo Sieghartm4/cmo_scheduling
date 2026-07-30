@@ -49,8 +49,13 @@ const TutorialGuide = ({ isOpen, onClose, steps = [], initialStep = 0 }) => {
   useEffect(() => {
     if (!isOpen) return
 
+    // Execute step action when step changes
+    const step = steps[currentStep]
+    if (step?.action) {
+      step.action()
+    }
+
     const updateRect = (scrollToTarget = false) => {
-      const step = steps[currentStep]
       if (!step || !step.selector) {
         setTargetRect(null)
         return
@@ -73,12 +78,12 @@ const TutorialGuide = ({ isOpen, onClose, steps = [], initialStep = 0 }) => {
     const onScroll = () => window.requestAnimationFrame(() => updateRect(false))
     const onResize = () => window.requestAnimationFrame(() => updateRect(false))
 
-    updateRect(true)
+    // Delay updateRect to allow action to complete and DOM to update
+    setTimeout(() => updateRect(true), 100)
     window.addEventListener('scroll', onScroll, true)
     window.addEventListener('resize', onResize)
 
     let observer
-    const step = steps[currentStep]
     const element = step?.selector && document.querySelector(step.selector)
     if (window.ResizeObserver && element) {
       observer = new ResizeObserver(onResize)

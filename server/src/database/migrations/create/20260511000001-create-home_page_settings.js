@@ -9,23 +9,6 @@ module.exports = {
         primaryKey: true,
         autoIncrement: true,
       },
-      hps_welcome_badge: {
-        type: Sequelize.STRING(255),
-        allowNull: true,
-      },
-      hps_hero_title: {
-        type: Sequelize.TEXT('long'),
-        allowNull: true,
-      },
-      hps_hero_description: {
-        type: Sequelize.TEXT('long'),
-        allowNull: true,
-      },
-      hps_background_value: {
-        type: Sequelize.TEXT('long'),
-        allowNull: true,
-        comment: 'CSS gradient/color, base64 image data, or image URL',
-      },
       hps_contact_number: {
         type: Sequelize.STRING(50),
         allowNull: true,
@@ -45,6 +28,11 @@ module.exports = {
         type: Sequelize.TEXT('long'),
         allowNull: true,
         comment: 'Website logo (base64 or URL)',
+      },
+      hps_homepage_image: {
+        type: Sequelize.TEXT('long'),
+        allowNull: true,
+        comment: 'Homepage background image (base64 or URL)',
       },
       hps_about_me_description: {
         type: Sequelize.TEXT('long'),

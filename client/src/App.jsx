@@ -20,6 +20,7 @@ import UserManagement from './pages/admin/users/UserManagement'
 import Posts from './pages/admin/posts/Posts'
 import Category from './pages/admin/category/Category'
 import WebsiteSettings from './pages/admin/websiteSettings/WebsiteSettings'
+import HomePageSections from './pages/admin/homePageSections/HomePageSections'
 import SocialMedia from './pages/admin/settings/SocialMedia'
 import { preventCaching, forceReloadOnBack } from './utils/cacheControl'
 import { ModalProvider } from './contexts/ModalContext'
@@ -136,6 +137,14 @@ function App() {
                   element={
                     <ProtectedRoute routeName="admin-dashboard">
                       <WebsiteSettings />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="admin/home-page-sections"
+                  element={
+                    <ProtectedRoute routeName="admin-dashboard">
+                      <HomePageSections />
                     </ProtectedRoute>
                   }
                 />

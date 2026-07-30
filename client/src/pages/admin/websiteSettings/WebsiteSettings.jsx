@@ -7,10 +7,7 @@ import {
   CheckCircle,
   Image,
   Mail,
-  Hash,
   MapPin,
-  Palette,
-  Type,
   Maximize2,
 } from 'lucide-react'
 import RouteProtection from '../../../components/RouteProtection'
@@ -25,17 +22,15 @@ function WebsiteSettingsContent() {
     loading,
     error,
     logoPreview,
-    backgroundPreview,
     aboutMeImagePreview,
+    homepageImagePreview,
     status,
     formData,
     toast,
     hideToast,
-    backgroundInputMode,
-    setBackgroundInputMode,
     handleLogoChange,
-    handleBackgroundChange,
     handleAboutMeImageChange,
+    handleHomepageImageChange,
     handleInputChange,
     handleSubmit,
   } = useWebsiteSettings()
@@ -247,52 +242,8 @@ function WebsiteSettingsContent() {
                   </Field>
                 </div>
 
-                {/* CENTER COLUMN: Hero Section Content & About Me */}
+                {/* CENTER COLUMN: About Me */}
                 <div className="col-span-4 flex flex-col gap-6">
-                  <SectionHeader label="Hero Section Content" />
-
-                  <Field label="Welcome Badge">
-                    <div className="relative">
-                      <Type
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                        size={16}
-                      />
-                      <input
-                        type="text"
-                        value={formData.welcome_badge}
-                        onChange={(e) =>
-                          handleInputChange('welcome_badge', e.target.value)
-                        }
-                        placeholder="e.g. 🚀 Welcome to the Future"
-                        className={inputCls}
-                      />
-                    </div>
-                  </Field>
-
-                  <Field label="Hero Title">
-                    <input
-                      type="text"
-                      value={formData.hero_title}
-                      onChange={(e) =>
-                        handleInputChange('hero_title', e.target.value)
-                      }
-                      placeholder="e.g. Connect, Schedule, and Stay Informed"
-                      className={inputCls}
-                    />
-                  </Field>
-
-                  <Field label="Hero Description">
-                    <textarea
-                      value={formData.hero_description}
-                      onChange={(e) =>
-                        handleInputChange('hero_description', e.target.value)
-                      }
-                      rows={3}
-                      className={inputCls + ' resize-none'}
-                      placeholder="Describe your platform and its benefits..."
-                    />
-                  </Field>
-
                   <SectionHeader label="About Me Section" />
                   <Field label="About Me Description">
                     <div className="flex items-center justify-between gap-3 mb-2">
@@ -411,92 +362,40 @@ function WebsiteSettingsContent() {
                     </div>
                   </Field>
 
-                  <SectionHeader label="Background Settings" />
-
-                  {/* Background Input Mode Toggle */}
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setBackgroundInputMode('text')}
-                      className={`flex-1 py-2 px-3 rounded-lg border-2 text-xs font-bold uppercase tracking-widest transition-all ${
-                        backgroundInputMode === 'text'
-                          ? 'bg-emerald-50 border-emerald-500 text-emerald-700'
-                          : 'bg-white border-gray-200 text-gray-400 hover:border-gray-300'
-                      }`}
-                    >
-                      <Type size={14} className="inline mr-2" />
-                      CSS
-                    </button>
-                    <button
-                      onClick={() => setBackgroundInputMode('file')}
-                      className={`flex-1 py-2 px-3 rounded-lg border-2 text-xs font-bold uppercase tracking-widest transition-all ${
-                        backgroundInputMode === 'file'
-                          ? 'bg-emerald-50 border-emerald-500 text-emerald-700'
-                          : 'bg-white border-gray-200 text-gray-400 hover:border-gray-300'
-                      }`}
-                    >
-                      <Image size={14} className="inline mr-2" />
-                      Image
-                    </button>
-                  </div>
-
-                  {/* Text Input Mode */}
-                  {backgroundInputMode === 'text' && (
-                    <Field label="CSS Gradient">
-                      <div className="relative">
-                        <Palette
-                          className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                          size={16}
-                        />
-                        <textarea
-                          value={formData.background_value}
-                          onChange={(e) =>
-                            handleInputChange('background_value', e.target.value)
-                          }
-                          rows={3}
-                          className={inputCls + ' pl-10 pt-3 resize-none'}
-                          placeholder="from-emerald-50 via-teal-50 to-cyan-50"
-                        />
-                      </div>
-                    </Field>
-                  )}
-
-                  {/* File Upload Mode */}
-                  {backgroundInputMode === 'file' && (
-                    <Field label="Background Image">
-                      <div className="p-4 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center gap-4">
-                        <div className="w-full h-36 bg-white rounded-xl border border-gray-100 shadow-inner flex items-center justify-center overflow-hidden relative group">
-                          {backgroundPreview ? (
-                            <img
-                              src={backgroundPreview}
-                              alt="Background"
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="flex flex-col items-center gap-2 text-gray-300">
-                              <Image size={48} strokeWidth={1} />
-                              <span className="text-[10px] uppercase font-bold tracking-widest">
-                                No Background
-                              </span>
-                            </div>
-                          )}
-                          <label className="absolute inset-0 bg-emerald-600/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
-                            <input
-                              type="file"
-                              className="hidden"
-                              onChange={handleBackgroundChange}
-                              accept="image/*"
-                            />
-                            <span className="text-white text-xs font-bold uppercase tracking-tighter">
-                              Replace
+                  <Field label="Homepage Background Image">
+                    <div className="p-4 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center gap-4">
+                      <div className="w-full h-36 bg-white rounded-xl border border-gray-100 shadow-inner flex items-center justify-center overflow-hidden relative group">
+                        {homepageImagePreview ? (
+                          <img
+                            src={homepageImagePreview}
+                            alt="Homepage Background"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex flex-col items-center gap-2 text-gray-300">
+                            <Image size={48} strokeWidth={1} />
+                            <span className="text-[10px] uppercase font-bold tracking-widest">
+                              No Image
                             </span>
-                          </label>
-                        </div>
-                        <p className="text-[9px] text-gray-400 text-center leading-relaxed px-4">
-                          JPG, PNG, or GIF (Max 5MB)
-                        </p>
+                          </div>
+                        )}
+                        <label className="absolute inset-0 bg-emerald-600/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
+                          <input
+                            type="file"
+                            className="hidden"
+                            onChange={handleHomepageImageChange}
+                            accept="image/*"
+                          />
+                          <span className="text-white text-xs font-bold uppercase tracking-tighter">
+                            Replace Image
+                          </span>
+                        </label>
                       </div>
-                    </Field>
-                  )}
+                      <p className="text-[9px] text-gray-400 text-center leading-relaxed px-4">
+                        JPG, PNG, or GIF (Max 2MB)
+                      </p>
+                    </div>
+                  </Field>
                 </div>
               </div>
             </div>

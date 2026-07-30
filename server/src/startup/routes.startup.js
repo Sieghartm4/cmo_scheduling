@@ -13,6 +13,7 @@ const postCommentRouter = require('../routes/postComment.routes')
 const postLikeRouter = require('../routes/postLike.routes')
 const { homePageSettingsRouter } = require('../routes/homePageSettings.routes')
 const { socialMediaRouter } = require('../routes/socialMedia.routes')
+const { homePageSectionsRouter } = require('../routes/homePageSections.routes')
 
 const initRoutes = (app) => {
   app.use('/credentials', credentialsRouter)
@@ -29,6 +30,7 @@ const initRoutes = (app) => {
   app.use('/api/comments', postCommentRouter)
   app.use('/api/likes', postLikeRouter)
   app.use('/api/home-page-settings', homePageSettingsRouter)
+  app.use('/api/home-page-sections', homePageSectionsRouter)
   app.use('/api/social-media', socialMediaRouter)
 }
 

@@ -10,6 +10,7 @@ import {
   MessageSquare,
   Tag,
   Globe,
+  Layout,
 } from 'lucide-react'
 
 export default function Sidebar({ isCollapsed }) {
@@ -73,7 +74,8 @@ export default function Sidebar({ isCollapsed }) {
       currentPath.includes('/settings/general') ||
       currentPath.includes('/settings/system') ||
       currentPath.includes('/settings/notifications') ||
-      currentPath.includes('/admin/social-media')
+      currentPath.includes('/admin/social-media') ||
+      currentPath.includes('/admin/home-page-sections')
 
     if (isDashboardPath) {
       setIsDashboardOpen(true)
@@ -150,15 +152,15 @@ export default function Sidebar({ isCollapsed }) {
                     : `data:image/jpeg;base64,${homePageSettings.website_logo}`
                 }
                 alt={homePageSettings.website_title || 'Logo'}
-                className="w-15 h-15 rounded-full"
+                className="w-12 h-12 rounded-full object-contain"
               />
             ) : (
-              <div className="w-15 h-15 bg-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-emerald-500/20">
+              <div className="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-emerald-500/20">
                 <Calendar size={16} />
               </div>
             )
           ) : (
-            <div className="w-15 h-15 bg-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-emerald-500/20">
+            <div className="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-emerald-500/20">
               <Calendar size={16} />
             </div>
           )}
@@ -247,6 +249,9 @@ export default function Sidebar({ isCollapsed }) {
             <div className="mt-2 ml-4 space-y-1 border-l border-emerald-700 pl-4">
               <NavLink to="/admin/website-settings" icon={Globe}>
                 Website Settings
+              </NavLink>
+              <NavLink to="/admin/home-page-sections" icon={Layout}>
+                Home Page Sections
               </NavLink>
               <NavLink to="/admin/social-media" icon={Globe}>
                 Social Media
